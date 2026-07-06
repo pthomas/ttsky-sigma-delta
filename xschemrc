@@ -1,0 +1,13 @@
+#### Project xschemrc for CT Sigma-Delta ADC
+#### xschem picks this up when launched from the project root:
+####   cd /home/nvme/sigma-delta && xschem xschem/tier1_sdm.sch
+
+set XSCHEM_SHAREDIR /usr/share/xschem
+
+set XSCHEM_LIBRARY_PATH {}
+append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library
+append XSCHEM_LIBRARY_PATH :[file normalize [file dirname [info script]]/xschem]
+
+set netlist_type spice
+set local_netlist_dir 0
+set netlist_dir [file normalize [file dirname [info script]]/spice]

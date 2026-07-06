@@ -1,0 +1,5 @@
+backup/
+spice/
+__pycache__/
+*.raw
+*.log
