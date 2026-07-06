@@ -81,6 +81,22 @@ ngspice, standard sky130/TT flow, LVS path to magic). KiCad and LTspice were
 tried in past sessions and rejected. lcapy/schemdraw only for documentation
 figures.
 
+xschem authoring notes (learned 2026-07-05, tier-1 build):
+- Literal braces in attribute strings (spice params like `{RIN}`) must be
+  escaped `\{RIN\}` — unescaped they silently truncate the attribute.
+- `vsource_arith.sym` netlists `VOL='expr'` E-source syntax → instance names
+  must start with `E`, not `B`.
+- In symbol `format=` strings, `@@PIN` references need surrounding spaces
+  (`v( @@PLUS )`), otherwise substitution truncates the card.
+- Custom symbols whose .subckt lives in a code block need `type=primitive`
+  (not `subcircuit`, which makes xschem descend looking for a .sch).
+- Headless: `xschem --netlist --spice -q -x`, PNG via `--png --plotfile`
+  (needs a DISPLAY); project `xschemrc` in cwd supplies library paths.
+- Behavioral convergence: keep hard `u()` steps out of feedback paths that
+  drive switch controls — use steep `tanh` instead; give the comparator very
+  high gain (soft comparator output + smoothed DFF = analog-valued feedback
+  pulses, which quietly cost ~25 dB of in-band SNDR).
+
 ## Open items
 
 1. **Verify TT I/O limits**: max clock through the TT mux and max output pad

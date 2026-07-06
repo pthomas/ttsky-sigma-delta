@@ -6,7 +6,7 @@ all: snr
 spice/params.spice: params.py
 	python3 params.py
 
-$(NET): $(SCH) spice/params.spice
+$(NET): $(SCH) $(wildcard xschem/*.sym) spice/params.spice
 	xschem --netlist --spice -q -x $(SCH)
 
 # headless run: strip interactive plot lines so no windows pop up
