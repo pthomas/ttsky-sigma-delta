@@ -47,17 +47,17 @@ C {devices/lab_pin.sym} -300 -560 1 0 {name=p10 lab=vrefp}
 C {devices/switch_ngspice.sym} -300 -500 0 0 {name=S_TOP model=SW}
 N -400 -500 -340 -500 {lab=q}
 C {devices/lab_pin.sym} -400 -500 0 0 {name=p11 lab=q}
-N -400 -480 -340 -480 {lab=clk}
-C {devices/lab_pin.sym} -400 -480 0 0 {name=p12 lab=clk}
+N -460 -480 -340 -480 {lab=clk}
+C {devices/lab_pin.sym} -460 -480 0 0 {name=p12 lab=clk}
 N -300 -470 -300 -430 {lab=dac}
 C {devices/switch_ngspice.sym} -300 -400 0 0 {name=S_BOT model=SW}
 N -400 -400 -340 -400 {lab=qb}
 C {devices/lab_pin.sym} -400 -400 0 0 {name=p13 lab=qb}
-N -400 -380 -340 -380 {lab=clk}
-C {devices/lab_pin.sym} -400 -380 0 0 {name=p14 lab=clk}
+N -460 -380 -340 -380 {lab=clk}
+C {devices/lab_pin.sym} -460 -380 0 0 {name=p14 lab=clk}
 N -300 -370 -300 -340 {lab=vrefn}
 C {devices/lab_pin.sym} -300 -340 1 1 {name=p15 lab=vrefn}
-N -460 -450 -300 -450 {lab=dac}
+N -530 -450 -300 -450 {lab=dac}
 C {devices/lab_pin.sym} -380 -450 0 0 {name=p16 lab=dac}
 N -300 -450 -190 -450 {lab=dac}
 C {devices/switch_ngspice.sym} -160 -450 1 0 {name=S_MID model=SW}
@@ -65,30 +65,31 @@ N -130 -450 -100 -450 {lab=vcm}
 C {devices/lab_pin.sym} -100 -450 0 1 {name=p17 lab=vcm}
 N -160 -520 -160 -490 {lab=clk}
 C {devices/lab_pin.sym} -160 -520 1 0 {name=p18 lab=clk}
-C {devices/gnd.sym} -180 -490 0 0 {name=g1 lab=GND}
-C {devices/res.sym} -490 -450 1 0 {name=R_DAC value=\{RDAC\}}
-N -1450 -450 -520 -450 {lab=sum}
-T {sources} -1700 -140 0 0 0.35 0.35 {}
-C {devices/vsource.sym} -1650 -40 0 0 {name=VCLK value="PULSE(0 3.3 0 \{TR\} \{TR\} \{PWH\} \{TS\})"}
-N -1650 -100 -1650 -70 {lab=clk}
-C {devices/lab_pin.sym} -1650 -100 1 0 {name=p19 lab=clk}
-C {devices/gnd.sym} -1650 -10 0 0 {name=g2 lab=GND}
-C {devices/vsource.sym} -1450 -40 0 0 {name=VIN value="SIN(\{VCM\} \{AMP\} \{FIN\})"}
-N -1450 -100 -1450 -70 {lab=vin}
-C {devices/lab_pin.sym} -1450 -100 1 0 {name=p20 lab=vin}
-C {devices/gnd.sym} -1450 -10 0 0 {name=g3 lab=GND}
-C {devices/vsource.sym} -1250 -40 0 0 {name=VCM_S value=\{VCM\}}
-N -1250 -100 -1250 -70 {lab=vcm}
-C {devices/lab_pin.sym} -1250 -100 1 0 {name=p21 lab=vcm}
-C {devices/gnd.sym} -1250 -10 0 0 {name=g4 lab=GND}
-C {devices/vsource.sym} -1050 -40 0 0 {name=VREFP_S value=\{VREFP\}}
-N -1050 -100 -1050 -70 {lab=vrefp}
-C {devices/lab_pin.sym} -1050 -100 1 0 {name=p22 lab=vrefp}
-C {devices/gnd.sym} -1050 -10 0 0 {name=g5 lab=GND}
-C {devices/vsource.sym} -850 -40 0 0 {name=VREFN_S value=\{VREFN\}}
-N -850 -100 -850 -70 {lab=vrefn}
-C {devices/lab_pin.sym} -850 -100 1 0 {name=p23 lab=vrefn}
-C {devices/gnd.sym} -850 -10 0 0 {name=g6 lab=GND}
+N -240 -490 -180 -490 {lab=GND}
+C {devices/gnd.sym} -240 -490 0 0 {name=g1 lab=GND}
+C {devices/res.sym} -560 -450 1 0 {name=R_DAC value=\{RDAC\}}
+N -1450 -450 -590 -450 {lab=sum}
+T {sources} -1780 100 0 0 0.35 0.35 {}
+C {devices/vsource.sym} -1650 100 0 0 {name=VCLK value="PULSE(0 3.3 0 \{TR\} \{TR\} \{PWH\} \{TS\})"}
+N -1650 40 -1650 70 {lab=clk}
+C {devices/lab_pin.sym} -1650 40 1 0 {name=p19 lab=clk}
+C {devices/gnd.sym} -1650 130 0 0 {name=g2 lab=GND}
+C {devices/vsource.sym} -1450 100 0 0 {name=VIN value="SIN(\{VCM\} \{AMP\} \{FIN\})"}
+N -1450 40 -1450 70 {lab=vin}
+C {devices/lab_pin.sym} -1450 40 1 0 {name=p20 lab=vin}
+C {devices/gnd.sym} -1450 130 0 0 {name=g3 lab=GND}
+C {devices/vsource.sym} -1250 100 0 0 {name=VCM_S value=\{VCM\}}
+N -1250 40 -1250 70 {lab=vcm}
+C {devices/lab_pin.sym} -1250 40 1 0 {name=p21 lab=vcm}
+C {devices/gnd.sym} -1250 130 0 0 {name=g4 lab=GND}
+C {devices/vsource.sym} -1050 100 0 0 {name=VREFP_S value=\{VREFP\}}
+N -1050 40 -1050 70 {lab=vrefp}
+C {devices/lab_pin.sym} -1050 40 1 0 {name=p22 lab=vrefp}
+C {devices/gnd.sym} -1050 130 0 0 {name=g5 lab=GND}
+C {devices/vsource.sym} -850 100 0 0 {name=VREFN_S value=\{VREFN\}}
+N -850 40 -850 70 {lab=vrefn}
+C {devices/lab_pin.sym} -850 40 1 0 {name=p23 lab=vrefn}
+C {devices/gnd.sym} -850 130 0 0 {name=g6 lab=GND}
 C {devices/code_shown.sym} 40 -560 0 0 {name=CONTROL only_toplevel=false value=".include params.spice
 .model SW sw vt=1.65 vh=0.1 ron=100 roff=1e9
 * behavioral DFF: master/slave sample-and-hold of D at rising CLK edge
