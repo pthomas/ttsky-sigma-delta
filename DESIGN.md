@@ -103,10 +103,31 @@ xschem authoring notes (learned 2026-07-05, tier-1 build):
   high gain (soft comparator output + smoothed DFF = analog-valued feedback
   pulses, which quietly cost ~25 dB of in-band SNDR).
 
+## Target shuttle (2026-07-18)
+
+**TTSKY26c** (sky130A, via ChipFoundry), submission deadline **2026-09-07**.
+Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
+(tinytapeout.com/specs/, single-die measurements):
+- Clock/inputs: max **66 MHz** in; ~10 ns pad→project insertion delay;
+  demo board RP2040 generates 1 Hz–66.5 MHz (we'll drive clk externally).
+- Outputs: max **33 MHz** toggle — a 50 Mbit/s bitstream needs two-phase
+  demux (open item 1b). Mux round-trip latency ~20 ns, pin-to-pin skew <2 ns.
+- Digital I/O domain is **VDPWR = 1.8 V** → on-chip 1.8→3.3 level shifter
+  needed for clk; bitstream output driven back at 1.8 V.
+- Analog: 6 `ua` pins (use in order), path <500 Ω / <5 pF / 4 mA;
+  40 €/pin (first two), 100 €/pin after; VAPWR 3.3 V available with the
+  analog template; analog projects min 2 tiles high (1x2 = 160×225 µm, 140 €).
+- Input path check: 500 Ω / 5 pF against RIN = 40 kΩ → 1.25 % gain error,
+  64 MHz pole — fine for both bandwidth targets.
+
 ## Open items
 
-1. **Verify TT I/O limits**: max clock through the TT mux and max output pad
-   toggle rate. Sets fs; everything above assumes ~50 MHz.
+1. ~~Verify TT I/O limits~~ — **resolved 2026-07-18**, numbers above.
+   Successor: **1b — output strategy**: keep fs = 50 MHz and demux the
+   bitstream onto two output pins at 25 MHz each (recommended; PolarFire
+   re-interleaves; complementary pairs would use 4 of the 8 outputs), vs.
+   drop fs to ~33 MHz single-pin (costs ~0.5–1 ENOB at 1 MHz BW). Also new:
+   clk level shifter (1.8→3.3 V) joins the block list.
 2. ~~NRZ vs RZ DAC~~ — **resolved 2026-07-11**, RZ confirmed (see decision
    log); remaining sub-item: quantify RZ's jitter penalty once a realistic
    clock-jitter number for the PolarFire→TT path exists.
