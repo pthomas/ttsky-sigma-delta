@@ -1,18 +1,41 @@
-# Runs on the shell-executor LXD runner defined in ci/lxd/.
-# Numbers assertion note: precision-path SNDR scatters +-1 dB run-to-run
-# (chaotic loop, see DESIGN.md) -- any future pass/fail thresholds must
-# carry that tolerance.
+# Shell-executor LXD runner (ci/lxd/): xschem/ngspice/python toolchain,
+# sky130 PDK at $PDK_ROOT (from /etc/profile.d/pdk.sh).
+#
+# Assertion policy (DESIGN.md): precision-path SNDR scatters +-1 dB
+# run-to-run (chaotic modulator) -- only loose floors, never exact values.
 
 stages:
-  - sim
+  - smoke
+  - reports
 
-report:
-  stage: sim
+snr:
+  stage: smoke
   script:
     - make clean
-    - make snr
+    - make snr | tee snr.log
+    # loose floor only: fast path is stable, 35 dB is far below nominal ~39
+    - awk '/fast/ { if ($5 < 35) { print "FAIL fast-path SNDR " $5; exit 1 } }' snr.log
+
+fet-char:
+  stage: smoke
+  script:
+    - make char
+  artifacts:
+    paths: [reports/fet_char.html]
+    expire_in: 30 days
+
+dac-report:
+  stage: reports
+  script:
     - make report
   artifacts:
-    paths:
-      - reports/dac_compare.html
+    paths: [reports/dac_compare.html]
+    expire_in: 30 days
+
+ota-specs:
+  stage: reports
+  script:
+    - make specs
+  artifacts:
+    paths: [reports/ota_specs.html]
     expire_in: 30 days

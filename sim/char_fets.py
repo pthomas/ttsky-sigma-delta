@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sim.compare_dac import style_axes, fig_to_b64, C_SURF, C_TEXT, C_TEXT2
 
-PDK_LIB = "/home/nvme/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice"
+PDK_ROOT = os.environ.get("PDK_ROOT", "/home/nvme/pdk")
+PDK_LIB = f"{PDK_ROOT}/sky130A/libs.tech/ngspice/sky130.lib.spice"
 W = 10.0          # um, all characterization devices
 LS = [0.5, 1.0, 2.0]
 VDD = 3.3
