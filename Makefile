@@ -25,6 +25,10 @@ report: spice/tier1_headless.spice
 char:
 	python3 sim/char_fets.py
 
+# OTA requirements sweep (gain / GBW / slew vs SNDR)
+specs: spice/tier1_headless.spice
+	python3 sim/spec_sweep.py
+
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 

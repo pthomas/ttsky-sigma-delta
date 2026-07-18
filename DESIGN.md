@@ -64,6 +64,36 @@ from the top of the usual list):
 5. Clock jitter (retired by PolarFire clock; returns ×2 if RZ is chosen —
    budget exists).
 
+## Block requirements (measured, tier-1 sweeps 2026-07-18)
+
+From `make specs` (reports/ota_specs.html): one OTA parameter swept at a
+time, knees read against the plateau (precision values carry ±1–2 dB
+pattern-noise scatter).
+
+| OTA parameter | measured knee | spec (margin) | design target |
+|---|---|---|---|
+| DC gain AOL | degraded at 30, recovered by 100–300 | ≥ 300 (50 dB) | 1000 (60 dB) |
+| GBW | **no knee down to 25 MHz** (see note) | ≥ 50 MHz | 150–200 MHz |
+| Slew rate | broken at 12.5, marginal at 50 V/µs | ≥ 100 V/µs | 200 V/µs |
+
+GBW note: the loop is insensitive to single-pole bandwidth because finite-GBW
+settling errors are *linear* — the same every cycle per bit value — so they
+appear as gain error, not noise/distortion, and delayed-RZ leaves a half
+period for residual settling. Caveat: a real multi-pole OTA adds phase (ELD)
+the single-pole model doesn't capture, hence the 150–200 MHz target rather
+than 50. Slew errors are the nonlinear ones, and the SR knee (~2× the naive
+pulse-edge estimate) is the binding constraint.
+
+Other blocks (from earlier findings): comparator+DFF must fully regenerate
+within the 10 ns half-period (soft decisions leak through the DAC as
+unshaped noise, ~25 dB penalty observed); DAC switches per open item 6
+(ron flat 229–441 Ω at W=10 µm across the low window); VCM buffer must
+absorb ~25 µA RZ return pulses at 50 MHz.
+
+First-cut OTA feasibility against the gm/Id data: gm ≈ 1.9 mA/V into ~1.5 pF
+gives 200 MHz; at gm/Id ≈ 15 that's ~250 µA tail → folded cascode at
+~1.7 mW, slew ~170 V/µs — all targets reachable with room.
+
 ## Toolflow
 
 Four tiers, all generated from `params.py` so they cannot drift apart:

@@ -18,7 +18,7 @@ N -1450 -200 -1400 -200 {lab=sum}
 N -1450 -320 -1450 -200 {lab=sum}
 N -1450 -450 -1450 -320 {lab=sum}
 C {devices/lab_pin.sym} -1500 -200 0 0 {name=p2 lab=sum}
-C {opamp_beh.sym} -1320 -180 0 0 {name=E_OTA gain=\{AOL\}}
+C {opamp_beh.sym} -1320 -180 0 0 {name=X_OTA AOL=\{AOL\} GBW=\{GBW\} SR=\{SR\}}
 N -1440 -160 -1400 -160 {lab=vcm}
 C {devices/lab_pin.sym} -1440 -160 0 0 {name=p3 lab=vcm}
 N -1450 -320 -1360 -320 {lab=sum}
@@ -92,6 +92,17 @@ C {devices/lab_pin.sym} -850 40 1 0 {name=p23 lab=vrefn}
 C {devices/gnd.sym} -850 130 0 0 {name=g6 lab=GND}
 C {devices/code_shown.sym} 40 -560 0 0 {name=CONTROL only_toplevel=false value=".include params.spice
 .model SW sw vt=1.65 vh=0.1 ron=100 roff=1e9
+* behavioral OTA: single-pole, slew-limited (AOL, GBW [Hz], SR [V/s])
+.subckt ota_beh PLUS MINUS OUT AOL=10000 GBW=200e6 SR=2e8
+.param CI=100f
+.param GMI=\{6.2831853*GBW*CI\}
+.param ILIM=\{SR*CI\}
+.param RO=\{AOL/GMI\}
+B_GM 0 x I=\{ILIM\}*tanh(\{GMI\}*(v(PLUS)-v(MINUS))/\{ILIM\})
+R_O x 0 \{RO\}
+C_O x 0 \{CI\}
+E_BUF OUT 0 x 0 1
+.ends
 * behavioral DFF: master/slave sample-and-hold of D at rising CLK edge
 .subckt dff_beh D CLK Q QB
 V_L vddl 0 3.3

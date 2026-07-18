@@ -23,7 +23,13 @@ To create VM::
 Cloud-init keeps working for several minutes after first boot (the PDK
 download alone is ~2 GB). To watch::
 
-    lxc exec eda-runner -- tail -f /var/log/cloud-init-output.log
+    lxc exec eda-runner -- /bin/bash
+    tail -f /var/log/syslog
+
+or for gitlab-runner::
+
+    lxc exec eda-runner -- su --shell /bin/bash --login gitlab-runner
+
 
 To register the runner on gitlab (project runner token from
 Settings -> CI/CD -> Runners on gitlab.com/pthomas1/sigma-delta)::
