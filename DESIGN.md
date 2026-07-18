@@ -137,13 +137,17 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
 5. Prior transistor-level 1st-order blocks live in `backup/` (excluded from
    git); pull individual files in as needed.
 6. **Choose the exact reference window** (follows from the 2026-07-18
-   all-NMOS DAC decision). Lowering VREFN/VCM/VREFP to roughly
-   0.4/0.9/1.4 V couples into: DAC switch overdrive (the driver for the
-   change), S_MID passing VCM, OTA input common-mode range and topology
-   (NMOS vs PMOS input pair — interacts with open item 7 on 1/f), comparator
-   common mode, vref/VCM buffer headroom, and the mapping of the external
-   input signal onto the new full scale. Decide at tier-2 entry; params.py
-   still carries the old 1.65 V-centered values until then.
+   all-NMOS DAC decision). **Measured 2026-07-18** (sim/char_fets.py,
+   reports/fet_char.html, tt corner): nfet_g5v0d10v5 Vth(cc) = 0.86 V,
+   pfet 1.10 V; NMOS pass-switch ron (W=10 µm, gate 3.3 V) =
+   229/290/441 Ω at 0.4/0.9/1.4 V — flat — vs **35 kΩ at the old
+   VREFP = 2.15 V** (80× cliff starting ~1.8 V). 0.4/0.9/1.4 V adopted
+   provisionally; remaining sub-questions before locking params.py: OTA
+   input CM at 0.9 V (PMOS pair headroom fine, verify swing), comparator CM,
+   buffer headroom, input mapping. Also confirmed: 1.8 V gate drive is
+   useless even for the low window (1.8 − 0.86 < 1.4) — the clk level
+   shifter is mandatory, not optional. gm/Id sizing curves in the same
+   report (weak-inversion plateau ≈19/V nfet, ≈21/V pfet, |Vds|=1.65 V).
 7. **OTA 1/f noise in the precision band** — sky130 flicker corners can reach
    the 100 kHz band. First response: PMOS input pair, generous device area.
    If tier-2 noise sims show 1/f still dominating the 10–12 ENOB budget,

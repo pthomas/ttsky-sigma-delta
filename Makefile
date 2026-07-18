@@ -21,6 +21,10 @@ netlist: $(NET)
 report: spice/tier1_headless.spice
 	python3 sim/compare_dac.py
 
+# sky130 device characterization (needs PDK at /home/nvme/pdk)
+char:
+	python3 sim/char_fets.py
+
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 

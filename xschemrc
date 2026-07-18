@@ -19,3 +19,7 @@ set sim(spice,1,name) {Ngspice batch}
 set sim(spice,1,fg) 0
 set sim(spice,1,st) 1
 set sim(spice,default) 1
+
+# sky130A PDK (tier 2): device symbols; models at $PDK_ROOT/sky130A/libs.tech/ngspice
+set PDK_ROOT /home/nvme/pdk
+append XSCHEM_LIBRARY_PATH :$PDK_ROOT/sky130A/libs.tech/xschem
