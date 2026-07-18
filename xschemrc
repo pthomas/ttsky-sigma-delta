@@ -11,3 +11,11 @@ append XSCHEM_LIBRARY_PATH :[file normalize [file dirname [info script]]/xschem]
 set netlist_type spice
 set local_netlist_dir 0
 set netlist_dir [file normalize [file dirname [info script]]/spice]
+
+# Simulate button: xterm is not installed, so run ngspice batch directly
+# (self-contained entry: defined fully here so startup order doesn't matter)
+set sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
+set sim(spice,1,name) {Ngspice batch}
+set sim(spice,1,fg) 0
+set sim(spice,1,st) 1
+set sim(spice,default) 1

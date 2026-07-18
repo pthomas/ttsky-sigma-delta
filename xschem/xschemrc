@@ -1,0 +1,2 @@
+# launched from xschem/ subdir: defer to the project rc
+source /home/nvme/sigma-delta/xschemrc

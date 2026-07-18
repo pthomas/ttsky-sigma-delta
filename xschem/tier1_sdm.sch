@@ -106,8 +106,55 @@ E_QB QB 0 VOL='3.3-v(Q)'
 .tran \{TSTEP\} \{TSTOP\} uic
 .control
 run
+write tier1_sdm.raw
 wrdata tier1_out.csv v(q) v(clk) v(vin) v(int)
-plot v(vin) v(int)
-plot v(q) v(clk) v(dac) xlimit 0 2u
 .endc
 "}
+B 2 -1780 260 -380 660 {flags=graph
+y1=0.8
+y2=2.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=2e-6
+divx=5
+subdivx=1
+node="vin
+int"
+color="4 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+}
+B 2 -1780 700 -380 1100 {flags=graph
+y1=-0.2
+y2=3.5
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=2e-6
+divx=5
+subdivx=1
+node="clk
+q
+dac"
+color="4 15 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+}
+T {waveforms: click Netlist, then Simulate (silent, ~10 s), then Ctrl-click LOAD WAVES below.} -1780 200 0 0 0.3 0.3 {}
+T {f = zoom full, right-drag = zoom box, a/b = measurement cursors} -1780 230 0 0 0.3 0.3 {}
+C {devices/launcher.sym} -600 220 0 0 {name=h5
+descr="LOAD WAVES (Ctrl-click)"
+tclcommand="xschem raw_read $netlist_dir/[file tail [file rootname [xschem get current_name]]].raw tran"
+}
+T {to add a trace: double-click a graph (dialog opens), then click a net in the schematic and press k - it drops into the node list} -1780 1120 0 0 0.3 0.3 {}

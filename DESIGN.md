@@ -42,10 +42,16 @@ Companion system provides a clean low-jitter clock and receives the bitstream
 
 Ideal 1-bit SQNR: 6.02 + 1.76 − 10·log10(π²/3) + 30·log10(OSR) dB.
 
-| Bandwidth | OSR | Ideal SQNR | Expected (circuit-limited) |
+| Bandwidth | OSR | Ideal SQNR | Expected (measured, tiers 0+1) |
 |---|---|---|---|
-| 1 MHz | 25 | 44.6 dB | ~6 ENOB |
-| 100 kHz | 250 | 74.5 dB | ~10 ENOB |
+| 1 MHz | 25 | 44.6 dB | ~6 ENOB (confirmed: 38–39 dB SNDR) |
+| 100 kHz | 250 | 74.5 dB | ~10 ENOB long-run; ±1 ENOB per-window scatter |
+
+The linear-model formula is ~8 dB optimistic on the precision path: 1st-order
+in-band noise is pattern tones, not white shaped noise (tier-0 long-run
+converges to ~66 dB SNDR at −4.4 dBFS; 16k-bit windows scatter 54–67 dB with
+dither seed). This is the strongest quantitative argument yet for the
+2nd-order upgrade if the 12-bit target is firm.
 
 Non-idealities ranked by expected impact (clean external clock retires jitter
 from the top of the usual list):
@@ -101,14 +107,23 @@ xschem authoring notes (learned 2026-07-05, tier-1 build):
 
 1. **Verify TT I/O limits**: max clock through the TT mux and max output pad
    toggle rate. Sets fs; everything above assumes ~50 MHz.
-2. **NRZ vs RZ DAC** — decide from tier-0 ISI/jitter sweeps plus tier-2
-   measured edge asymmetry.
+2. ~~NRZ vs RZ DAC~~ — **resolved 2026-07-11**, RZ confirmed (see decision
+   log); remaining sub-item: quantify RZ's jitter penalty once a realistic
+   clock-jitter number for the PolarFire→TT path exists.
 3. Install sky130 PDK (ciel/volare) + xschem sky130 symbol library for tier 2.
 4. Criteria for revisiting differential: if tier-2 shows ISI or supply/substrate
    coupling capping the precision path below ~10 ENOB despite RZ.
 5. Prior transistor-level 1st-order blocks live in `backup/` (excluded from
    git); pull individual files in as needed.
-6. **OTA 1/f noise in the precision band** — sky130 flicker corners can reach
+6. **Choose the exact reference window** (follows from the 2026-07-18
+   all-NMOS DAC decision). Lowering VREFN/VCM/VREFP to roughly
+   0.4/0.9/1.4 V couples into: DAC switch overdrive (the driver for the
+   change), S_MID passing VCM, OTA input common-mode range and topology
+   (NMOS vs PMOS input pair — interacts with open item 7 on 1/f), comparator
+   common mode, vref/VCM buffer headroom, and the mapping of the external
+   input signal onto the new full scale. Decide at tier-2 entry; params.py
+   still carries the old 1.65 V-centered values until then.
+7. **OTA 1/f noise in the precision band** — sky130 flicker corners can reach
    the 100 kHz band. First response: PMOS input pair, generous device area.
    If tier-2 noise sims show 1/f still dominating the 10–12 ENOB budget,
    consider chopping the OTA (distinct from the differential-topology
@@ -149,6 +164,43 @@ xschem authoring notes (learned 2026-07-05, tier-1 build):
   must confirm before silicon. Reopen if: OTA slew/GBW cost of the 2× DAC
   pulse amplitude proves expensive in tier 2, or sims show NRZ ISI is benign
   at our edge-asymmetry levels.
+- **2026-07-07 — RZ rationale, ranked (clarifies the RZ entry above).**
+  (1) ISI elimination — the original and primary reason. (2) Excess-loop-delay
+  tolerance — delayed-RZ (decide at rising edge, fire during clk-low) makes
+  total feedback charge per period exact for any decision/settling delay up to
+  Ts/2, instead of splitting charge across periods as NRZ does. This reason is
+  minor for 1st order (a single-integrator loop absorbs even a full-period
+  delay gracefully) but becomes stability-critical for the 2nd-order upgrade,
+  where uncompensated ELD erodes phase margin and degrades/destabilizes the
+  loop. RZ thus pre-solves a 2nd-order problem the NRZ design would need an
+  extra compensation DAC path for.
+- **2026-07-11 — RZ confirmed as DAC default, from tier-1 data**
+  (sim/compare_dac.py, reports/dac_compare.html). Paired comparison, equal
+  feedback charge, ~190 ps injected edge asymmetry (ron 100/2000 Ω against
+  100 fF): NRZ precision path drops 57.9 → 48.4 dB SNDR (in-band harmonics +
+  raised floor); RZ moves 61.4 → 58.0 dB, within pattern-noise scatter. Even
+  symmetric NRZ trails RZ — its error scales with data-dependent transition
+  count. Cost side (OTA slew, jitter ×2) still owed a tier-2 check.
+- **2026-07-11 — 1st-order pattern noise dominates the precision path.**
+  In-band "noise" is limit-cycle tones: flat in-band plateau, extremely
+  sensitive to DC operating point; SNDR of any single 16k-bit window is a
+  ±7 dB lottery, and the white-noise SQNR formula is ~8 dB optimistic
+  long-run. Consequences: (a) testbenches must dither the input (0.5 mV
+  TRNOISE, pinned rndseed for paired A/B runs); (b) quiet near-DC inputs in
+  silicon will tone in-band — real risk for the precision path; (c) 2nd order
+  largely decorrelates these tones — added to its justification. Tier-0 model
+  (sim/tier0.py) cross-checks tier-1 within the scatter band.
+- **2026-07-18 — DAC switches: all-NMOS with a lowered reference window**
+  (option 2 of the high-side-drive discussion). NMOS switch strength depends
+  on the passed potential; with the 3.3 V-centered refs the high-side NMOS
+  has only ~0.45 V overdrive. Lowering the window (≈0.4/0.9/1.4 V, exact
+  values = open item 6) gives both switches ≥1.9 V overdrive — symmetric and
+  low-impedance by construction — and fixes S_MID's marginal VCM drive too.
+  Fallback: oversized weak high-side NMOS at the old refs. Stretch:
+  bootstrapped gate drive (SAR-style, all on-chip in sky130). T-gates
+  rejected as default (RZ tolerates their asymmetry, but option 2 is cleaner).
+  Reopen if: low-VCM OTA input stage proves awkward in sky130, or the input
+  range mapping doesn't suit the application.
 - **2026-07-05 — Terminology note (differential vs chopping).** "Differential"
   in open item 4 means a fully differential signal path (differential-output
   OTA + CMFB, mirrored passives, cross-coupled DAC) — a static topology choice
