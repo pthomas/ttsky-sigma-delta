@@ -1,0 +1,10 @@
+* NGSPICE file created from rin.ext - technology: sky130A
+
+.subckt sky130_fd_pr__res_high_po_1p41_UKFM5C B R1 R2
+X0 R2 R1 B sky130_fd_pr__res_high_po_1p41 l=176.85001
+.ends
+
+.subckt rin
+XX0 VSUBS X0/R1 X0/R2 sky130_fd_pr__res_high_po_1p41_UKFM5C
+.ends
+

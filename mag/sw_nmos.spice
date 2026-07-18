@@ -1,0 +1,10 @@
+* NGSPICE file created from sw_nmos.ext - technology: sky130A
+
+.subckt sky130_fd_pr__nfet_g5v0d10v5_ERKEVX B D S G
+X0 S G D B sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=20.58 as=2.9 ps=20.58 w=10 l=0.5
+.ends
+
+.subckt sw_nmos
+XX0 VSUBS X0/D X0/S X0/G sky130_fd_pr__nfet_g5v0d10v5_ERKEVX
+.ends
+

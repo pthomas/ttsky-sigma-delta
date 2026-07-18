@@ -29,6 +29,10 @@ char:
 specs: spice/tier1_headless.spice
 	python3 sim/spec_sweep.py
 
+# generate + verify layout cells in magic (needs magic >= 8.3.411)
+layout:
+	python3 tools/gen_layout_cells.py
+
 # regenerate OTA schematic from sizes and verify equivalence
 xcheck:
 	python3 tools/gen_ota_sch.py
@@ -44,4 +48,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char xcheck snr view clean
+.PHONY: all netlist report specs char layout xcheck snr view clean

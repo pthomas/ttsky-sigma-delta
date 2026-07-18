@@ -1,0 +1,11 @@
+magic
+tech sky130A
+magscale 1 2
+timestamp 1784397988
+<< checkpaint >>
+rect -7358 -1260 6692 5340
+use sky130_fd_pr__cap_mim_m3_1_7BWDBD  X0
+timestamp 0
+transform 1 0 -333 0 1 2040
+box -5765 -2040 5765 2040
+<< end >>

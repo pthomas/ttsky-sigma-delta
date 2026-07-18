@@ -1,0 +1,13 @@
+* NGSPICE file created from cint.ext - technology: sky130A
+
+.subckt sky130_fd_pr__cap_mim_m3_1_7BWDBD C2_0 C1_0 C2_1 C1_1
+X0 C1_1 C2_1 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X1 C1_0 C2_0 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+.ends
+
+
+* Top level circuit cint
+
+XX0 X0/C2_0 X0/C1_0 X0/C2_1 X0/C1_1 sky130_fd_pr__cap_mim_m3_1_7BWDBD
+.end
+
