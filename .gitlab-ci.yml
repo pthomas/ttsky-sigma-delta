@@ -4,6 +4,10 @@
 # Assertion policy (DESIGN.md): precision-path SNDR scatters +-1 dB
 # run-to-run (chaotic modulator) -- only loose floors, never exact values.
 
+# shell executor may not source /etc/profile.d -- set PDK_ROOT explicitly
+variables:
+  PDK_ROOT: /opt/pdk
+
 stages:
   - smoke
   - reports

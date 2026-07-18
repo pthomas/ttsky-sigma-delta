@@ -21,5 +21,9 @@ set sim(spice,1,st) 1
 set sim(spice,default) 1
 
 # sky130A PDK (tier 2): device symbols; models at $PDK_ROOT/sky130A/libs.tech/ngspice
-set PDK_ROOT /home/nvme/pdk
+if { [info exists ::env(PDK_ROOT)] } {
+    set PDK_ROOT $::env(PDK_ROOT)
+} else {
+    set PDK_ROOT /home/nvme/pdk
+}
 append XSCHEM_LIBRARY_PATH :$PDK_ROOT/sky130A/libs.tech/xschem

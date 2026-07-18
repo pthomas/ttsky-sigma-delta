@@ -243,6 +243,15 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
    consider chopping the OTA (distinct from the differential-topology
    question; see 2026-07-05 terminology entry).
 
+## Toolchain versions
+
+- ngspice 42, xschem 3.4.4 (noble packages) — fine.
+- **magic: noble's 8.3.105 is too old for the PDK tech file (requires
+  ≥ 8.3.411) — build from source** (github.com/RTimothyEdwards/magic).
+  Applies to the dev machine AND the CI runner (ci/lxd/cloud-init.yml
+  needs a source-build step before layout jobs can run there).
+- netgen-lvs 1.5.133 (noble) — version vs PDK unverified, check at first LVS.
+
 ## Decision log
 
 - **2026-07-05 — Toolflow: xschem + ngspice + Python, four tiers.** Why:
