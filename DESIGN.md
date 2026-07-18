@@ -99,8 +99,11 @@ PMOS input pair at CM 0.9 V, cascoded PMOS mirror load, tail/sink from 1:1
 mirrors (cascode gate biases still ideal sources — bias generator pending).
 Achieved: **A0 65 dB, GBW 209 MHz, PM 58°, slew +197/−253 V/µs, output
 range 0.31–2.28 V, 4.5 mW** (power driven by the slew target: 380 µA tail).
-PM is 2° shy of the 60° bar at nominal — revisit with corners and the real
-load. Sizing lessons (they cost iterations, don't relearn them):
+**Corners (2026-07-18):** tt/ss/ff/sf/fs all within A0 64.6–65.4 dB,
+GBW 199–220 MHz, PM 56–59°, SR+ 190–204 V/µs, 4.5 mW — sizes frozen for
+layout. Caveats: cascode gate biases and reference currents are still ideal
+sources (real bias gen will add spread), temperature not yet swept, PM
+consistently ~2–4° under the 60° bar (accepted for v1, revisit with PEX). Sizing lessons (they cost iterations, don't relearn them):
 - sky130 5 V fets are **width-binned** — arbitrary W is rejected; tile
   parallel unit fingers (WUNIT = 5 µm) with `m=`.
 - Thick-oxide devices have **soft saturation**: a cascode at normal current
