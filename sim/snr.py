@@ -30,7 +30,7 @@ def sndr(bits, osr, sig_bin):
     band = len(bits) // (2 * osr)
     p_sig = spec[sig_bin - 1:sig_bin + 2].sum()   # signal bin +- 1 guard
     inband = spec[1:band + 1].copy()              # exclude DC
-    inband[sig_bin - 2:sig_bin + 2] = 0.0
+    inband[sig_bin - 3:sig_bin + 4] = 0.0
     return 10 * np.log10(p_sig / inband.sum())
 
 
