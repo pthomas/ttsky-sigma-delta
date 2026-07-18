@@ -1,0 +1,18 @@
+# Runs on the shell-executor LXD runner defined in ci/lxd/.
+# Numbers assertion note: precision-path SNDR scatters +-1 dB run-to-run
+# (chaotic loop, see DESIGN.md) -- any future pass/fail thresholds must
+# carry that tolerance.
+
+stages:
+  - sim
+
+report:
+  stage: sim
+  script:
+    - make clean
+    - make snr
+    - make report
+  artifacts:
+    paths:
+      - reports/dac_compare.html
+    expire_in: 30 days

@@ -1,0 +1,43 @@
+#cloud-config
+
+apt:
+    sources:
+        gitlab-runner:
+            source: "deb https://packages.gitlab.com/runner/gitlab-runner/ubuntu noble main"
+            keyid: F6403F6544A38863DAA0B6E03F01618A51312F3F
+
+package_upgrade: true
+packages:
+  - gitlab-runner
+  - xschem
+  - ngspice
+  - magic
+  - netgen-lvs
+  - xvfb
+  - imagemagick
+  - make
+  - git
+  - python3-pip
+  - python3-venv
+  - python3-numpy
+  - python3-matplotlib
+  - tree
+
+users:
+  - name: gitlab-runner
+    groups:
+      - sudo
+    sudo:
+      - ALL=(ALL) NOPASSWD:ALL
+
+runcmd:
+  # sky130 PDK via ciel, pinned to the same version as the dev machine
+  # (see DESIGN.md "Target shuttle"); ~2 GB download
+  - python3 -m venv /opt/eda-venv
+  - /opt/eda-venv/bin/pip install ciel
+  - mkdir -p /opt/pdk
+  - /opt/eda-venv/bin/ciel enable --pdk-family sky130 --pdk-root /opt/pdk f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7
+  - chown -R gitlab-runner:gitlab-runner /opt/pdk /opt/eda-venv
+  # shell-executor jobs run login shells, so profile.d exports reach CI jobs
+  - echo 'export PDK_ROOT=/opt/pdk' > /etc/profile.d/pdk.sh
+  - rm -f /home/gitlab-runner/.bash_logout
