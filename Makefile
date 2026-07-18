@@ -29,6 +29,12 @@ char:
 specs: spice/tier1_headless.spice
 	python3 sim/spec_sweep.py
 
+# regenerate OTA schematic from sizes and verify equivalence
+xcheck:
+	python3 tools/gen_ota_sch.py
+	xschem --netlist --spice -q -x xschem/ota_top.sch
+	python3 sim/ota_xcheck.py
+
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 
@@ -38,4 +44,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report snr view clean
+.PHONY: all netlist report specs char xcheck snr view clean
