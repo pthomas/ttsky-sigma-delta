@@ -94,6 +94,29 @@ First-cut OTA feasibility against the gm/Id data: gm ≈ 1.9 mA/V into ~1.5 pF
 gives 200 MHz; at gm/Id ≈ 15 that's ~250 µA tail → folded cascode at
 ~1.7 mW, slew ~170 V/µs — all targets reachable with room.
 
+**OTA v1 sized (2026-07-18, sim/ota_tb.py, tt corner):** folded cascode,
+PMOS input pair at CM 0.9 V, cascoded PMOS mirror load, tail/sink from 1:1
+mirrors (cascode gate biases still ideal sources — bias generator pending).
+Achieved: **A0 65 dB, GBW 209 MHz, PM 58°, slew +197/−253 V/µs, output
+range 0.31–2.28 V, 4.5 mW** (power driven by the slew target: 380 µA tail).
+PM is 2° shy of the 60° bar at nominal — revisit with corners and the real
+load. Sizing lessons (they cost iterations, don't relearn them):
+- sky130 5 V fets are **width-binned** — arbitrary W is rejected; tile
+  parallel unit fingers (WUNIT = 5 µm) with `m=`.
+- Thick-oxide devices have **soft saturation**: a cascode at normal current
+  density burns 0.5 V of overdrive and sits in triode at Vds ≈ 0.35 V. Run
+  cascodes at ~1 µA/µm *and* L = 1 µm (gds at short L is poor even in
+  saturation; measured 17× boost at L=0.5 vs ~40× at L=1 low-density).
+- The single-ended **mirror pole** (two PMOS gates on the diode node) set
+  the phase margin; small/short mirror devices bought back ~6°.
+- Diagnose with `@m.x...msky130_...[gm]/[gds]/[vdsat]` op saves, not theory.
+
+**New coupling for open item 6:** the cascoded output floor is ~0.55 V
+(sink Vdsat + cascode Vdsat + margin), so the integrator swing cannot reach
+the 0.4 V window edge. Fix: shrink the integrator swing to ~0.65–1.15 V
+(halve K_FB via CINT or narrow the reference span at same RDAC) — 1st-order
+loop tolerates it, but confirm in tier 1 before locking params.
+
 ## Toolflow
 
 Four tiers, all generated from `params.py` so they cannot drift apart:
