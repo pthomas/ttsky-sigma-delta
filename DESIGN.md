@@ -113,9 +113,32 @@ load. Sizing lessons (they cost iterations, don't relearn them):
 
 **New coupling for open item 6:** the cascoded output floor is ~0.55 V
 (sink Vdsat + cascode Vdsat + margin), so the integrator swing cannot reach
-the 0.4 V window edge. Fix: shrink the integrator swing to ~0.65–1.15 V
-(halve K_FB via CINT or narrow the reference span at same RDAC) — 1st-order
-loop tolerates it, but confirm in tier 1 before locking params.
+the 0.4 V window edge. Fix **confirmed in tier 1 (2026-07-18)**: CINT
+1 pF → 2 pF halves the feedback step (k = 0.125); measured integrator swing
+VCM ± 0.22 V (→ 0.68–1.12 V at the 0.9 V CM), SNDR unchanged on both paths,
+and — important — **input full scale is untouched** (±0.5 V, set by
+RIN/RDAC and the reference span, independent of the internal swing).
+
+## Area budget (vs TTSKY26c tiles)
+
+1x2 analog tile = 160×225 µm = 36,000 µm²; 2x2 = 334×225 µm = 75,150 µm².
+Estimate for the 1st-order chip (placed area ≈ 3–4× gate area for actives):
+
+| Block | est. placed area |
+|---|---|
+| OTA (≈2,000 µm² gate) | ~8,000 µm² |
+| C_INT 2 pF MiM (2 fF/µm², M3–M4 — M5 ban doesn't bite) | 1,000 µm² |
+| R_IN + R_DAC (high-res poly, wide for matching) | <1,000 µm² |
+| comparator + DFF + level shifter + output drivers | ~2,000 µm² |
+| VCM + reference buffers | ~4,000 µm² |
+| bias, DAC switches, misc | ~1,500 µm² |
+| **total** | **~18,000 µm² ≈ 50% of 1x2** |
+
+So the 1st-order design fits a **1x2 (two tiles) with ~50% margin** (rest
+becomes decap, which VCM/refs want anyway). The 2nd-order upgrade adds
+roughly +10,000 µm² (second OTA + cap) → ~75% of a 1x2: possible but tight.
+**If the 2nd order (or differential) is the ambition, buy 2x2 (four
+tiles);** a pure 1st-order chip is comfortable in two.
 
 ## Toolflow
 
@@ -201,7 +224,17 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
    useless even for the low window (1.8 − 0.86 < 1.4) — the clk level
    shifter is mandatory, not optional. gm/Id sizing curves in the same
    report (weak-inversion plateau ≈19/V nfet, ≈21/V pfet, |Vds|=1.65 V).
-7. **OTA 1/f noise in the precision band** — sky130 flicker corners can reach
+7. **Input conditioning / scaling.** The virtual-ground input is itself a
+   passive conditioner: any external range maps onto the ±0.5 V full scale
+   with a scaled R_IN (gain <1) plus one offset resistor from a reference
+   into the summing node — linear, low-noise, no new block (e.g. 0–3.3 V
+   external ↦ full scale with R_IN ≈ 132k + shift R). An *active* input
+   op-amp (buffer/PGA) is only warranted if the source can't drive ~40 kΩ
+   or needs gain >1 — it would sit unshaped in the signal path and must
+   out-perform the ADC's noise, i.e. it's another OTA-class design; prefer
+   external conditioning on the PolarFire carrier for v1. Blocking
+   question: what is the actual source (impedance, range, bandwidth)?
+8. **OTA 1/f noise in the precision band** — sky130 flicker corners can reach
    the 100 kHz band. First response: PMOS input pair, generous device area.
    If tier-2 noise sims show 1/f still dominating the 10–12 ENOB budget,
    consider chopping the OTA (distinct from the differential-topology

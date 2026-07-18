@@ -25,7 +25,7 @@ VREFN = 1.15           # DAC low reference [V]
 # --- loop passives -------------------------------------------------------
 RIN  = 40e3            # input resistor [ohm]
 RDAC = 20e3            # feedback DAC resistor [ohm]
-CINT = 1e-12           # integration capacitor [F]
+CINT = 2e-12           # integration capacitor [F] (2p: halves int swing, see DESIGN)
 AOL  = 1e4             # OTA open-loop DC gain (80 dB baseline)
 GBW  = 200e6           # OTA gain-bandwidth [Hz] (4x fs baseline)
 SR   = 2e8             # OTA slew rate [V/s] (200 V/us baseline)
