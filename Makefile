@@ -39,6 +39,15 @@ pex:
 	python3 tools/pex_ota.py
 	python3 sim/ota_tb.py --pex
 
+# layout verification bundle: fresh-process DRC + LVS + GDS export + 3D
+# geometry JSON (fails if DRC != 0 or LVS mismatches)
+layout-report:
+	python3 tools/layout_report.py
+
+# build the public/ design-document site from docs/*.md + reports/results/
+site:
+	python3 tools/gen_docs.py
+
 # netgen LVS: routed OTA layout vs xschem golden netlist
 lvs:
 	PDK_ROOT=$${PDK_ROOT:-/home/nvme/pdk} netgen -batch lvs \
@@ -61,4 +70,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex lvs xcheck snr view clean
+.PHONY: all netlist report specs char layout pex layout-report site lvs xcheck snr view clean

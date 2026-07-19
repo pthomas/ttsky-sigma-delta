@@ -11,8 +11,10 @@ packages:
   - gitlab-runner
   - xschem
   - ngspice
-  - magic
-  - netgen-lvs
+  # magic + netgen are source-built in runcmd below: noble's magic 8.3.105
+  # is too old for the sky130A tech file, and DRC numbers must come from the
+  # same magic revision as the dev box (see DESIGN.md 2026-07-19 entries on
+  # version-sensitive DRC behavior)
   - xvfb
   - imagemagick
   - make
@@ -21,7 +23,17 @@ packages:
   - python3-venv
   - python3-numpy
   - python3-matplotlib
+  - python3-markdown
   - tree
+  # build deps for magic / netgen
+  - build-essential
+  - m4
+  - tcl8.6-dev
+  - tk8.6-dev
+  - libx11-dev
+  - libcairo2-dev
+  - libncurses-dev
+  - libglu1-mesa-dev
 
 users:
   - name: gitlab-runner
@@ -31,6 +43,13 @@ users:
       - ALL=(ALL) NOPASSWD:ALL
 
 runcmd:
+  # magic + netgen source builds, pinned to the dev box's exact versions
+  # (magic 8.3.676, netgen 1.5.323 — both tags verified on github). Installs
+  # to /usr/local/bin, which precedes /usr/bin in PATH.
+  - git clone --depth 1 --branch 8.3.676 https://github.com/RTimothyEdwards/magic /opt/magic-src
+  - cd /opt/magic-src && ./configure && make -j$(nproc) && make install
+  - git clone --depth 1 --branch 1.5.323 https://github.com/RTimothyEdwards/netgen /opt/netgen-src
+  - cd /opt/netgen-src && ./configure && make -j$(nproc) && make install
   # sky130 PDK via ciel, pinned to the same version as the dev machine
   # (see DESIGN.md "Target shuttle"); ~2 GB download
   - python3 -m venv /opt/eda-venv

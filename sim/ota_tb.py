@@ -17,6 +17,7 @@ GBW 150-200 MHz into 1.5 pF, SR >= 200 V/us, PM >= 60 deg.
 Usage: python3 sim/ota_tb.py    (sizes in the SIZES dict below)
 """
 
+import json
 import os
 import subprocess
 import sys
@@ -175,6 +176,16 @@ def run(p, pex=False):
     print(f"range: buffer tracks {lo:.2f} .. {hi:.2f} V")
     print(f"targets: A0>=60 dB, GBW 150-200 MHz, PM>=60, SR>=200 V/us, "
           f"range covers 0.4..1.4 V")
+
+    os.makedirs("reports/results", exist_ok=True)
+    json.dump(dict(a0_db=round(a0_db, 1), gbw_hz=round(ugf),
+                   pm_deg=round(pm, 1), sr_up=round(sr_up),
+                   sr_dn=round(sr_dn), ivdd_a=round(idd, 6),
+                   power_w=round(idd * 3.3, 5), out_v=round(vout0, 3),
+                   range_lo_v=round(lo, 2), range_hi_v=round(hi, 2),
+                   cl_f=p["CL"]),
+              open(f"reports/results/ota_{'pex' if pex else 'sch'}.json",
+                   "w"), indent=1)
 
 
 if __name__ == "__main__":

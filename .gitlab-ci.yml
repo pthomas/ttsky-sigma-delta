@@ -11,6 +11,8 @@ variables:
 stages:
   - smoke
   - reports
+  - layout
+  - pages
 
 snr:
   stage: smoke
@@ -19,6 +21,9 @@ snr:
     - make snr | tee snr.log
     # loose floor only: fast path is stable, 35 dB is far below nominal ~39
     - awk '/fast/ { if ($4 < 35) { print "FAIL fast-path SNDR " $4; exit 1 } }' snr.log
+  artifacts:
+    paths: [reports/results/snr.json]
+    expire_in: 30 days
 
 fet-char:
   stage: smoke
@@ -43,3 +48,47 @@ ota-specs:
   artifacts:
     paths: [reports/ota_specs.html]
     expire_in: 30 days
+
+# full layout verification chain (needs source-built magic + netgen on the
+# runner -- ci/lxd/cloud-init.yml provisions them):
+#   xcheck  = golden netlist generated + schematic equivalence proven
+#   ota_tb  = schematic-level metrics (JSON for the docs page)
+#   pex     = parasitic extraction + same TB on the extracted netlist
+#   layout_report = fresh-process DRC (must be 0) + netgen LVS (must match)
+#                   + GDS export + 3D geometry for the pages viewer
+layout-verify:
+  stage: layout
+  script:
+    - make xcheck
+    - python3 sim/ota_tb.py
+    - python3 tools/pex_ota.py
+    - python3 sim/ota_tb.py --pex
+    - python3 tools/layout_report.py
+  artifacts:
+    paths:
+      - reports/results/
+      - reports/ota_layout.gds
+    expire_in: 30 days
+
+# GitLab Pages: the generated design document, with every number sourced
+# from THIS pipeline's artifacts (tools/gen_docs.py marks anything missing
+# as "not verified in this build")
+pages:
+  stage: pages
+  needs:
+    - job: snr
+      artifacts: true
+    - job: fet-char
+      artifacts: true
+    - job: dac-report
+      artifacts: true
+    - job: ota-specs
+      artifacts: true
+    - job: layout-verify
+      artifacts: true
+  script:
+    - python3 tools/gen_docs.py
+  artifacts:
+    paths: [public]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

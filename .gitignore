@@ -3,3 +3,6 @@ spice/
 __pycache__/
 *.raw
 *.log
+public/
+reports/results/
+reports/ota_layout.gds

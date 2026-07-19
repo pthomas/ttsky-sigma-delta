@@ -8,6 +8,7 @@ coherent FFT of NFFT bits, and integrates noise+distortion up to the band
 edge fs/(2*OSR) for each decimation path defined in params.py.
 """
 
+import json
 import sys
 import os
 import numpy as np
@@ -40,7 +41,13 @@ if __name__ == "__main__":
     ones = (bits > 0).mean()
     print(f"{csv}: {len(bits)} bits analyzed, ones density {ones:.3f}")
     print(f"{'path':>10s} {'OSR':>5s} {'BW':>9s} {'SNDR':>8s} {'ENOB':>6s}")
+    res = dict(nbits=len(bits), ones_density=round(ones, 3),
+               fs_hz=P.FS, paths={})
     for name, osr in [("fast", P.OSR_FAST), ("precision", P.OSR_PREC)]:
         s = sndr(bits, osr, P.SIG_BIN)
         bw = P.FS / (2 * osr)
         print(f"{name:>10s} {osr:5d} {bw/1e3:7.0f}kHz {s:8.1f} {(s-1.76)/6.02:6.1f}")
+        res["paths"][name] = dict(osr=osr, bw_hz=bw, sndr_db=round(s, 1),
+                                  enob=round((s - 1.76) / 6.02, 1))
+    os.makedirs("reports/results", exist_ok=True)
+    json.dump(res, open("reports/results/snr.json", "w"), indent=1)

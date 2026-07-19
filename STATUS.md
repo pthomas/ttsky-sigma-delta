@@ -31,7 +31,8 @@ git@gitlab.com:pthomas1/sigma-delta.git.
 | Tier 3 layout cells | done — mag/rin, rdac, cint, sw_nmos (extraction-verified values) |
 | Tier 3 OTA layout | **DRC CLEAN + LVS CLEAN + PEX done** (fresh-process verified, fast & full DRC styles; make lvs: "Circuits match uniquely", 13/13 devices, 15/15 nets). Extracted (0.72 pF parasitics): A0 65.2 dB / GBW 119 MHz / PM 46° / SR +128/-508 V/µs / Ivdd 1.37 mA — all tier-1 knees (A0≥49.5 dB, GBW≥50 MHz, SR≥100 V/µs) still met ≥2×; PM 46° (was 58° pre-PEX) is the open question — see below |
 | Tier 1 params | params.py: fs=50MHz, CINT=2pF (swing fix), refs still 1.65V-centered — move to 0.4/0.9/1.4V window is open item 6, do at comparator/buffer design time |
-| CI | runner VM up; **a separate Sonnet instance is working on .gitlab-ci.yml / ci/ — do not touch those files until it lands** |
+| CI | 4 sim jobs (smoke/reports) + new **layout-verify** job (xcheck → ota_tb → pex → layout_report; fails on DRC≠0 or LVS mismatch) + **pages** job publishing the generated design doc. Runner VM needs rebuild from updated ci/lxd/cloud-init.yml (source-builds magic 8.3.676 + netgen 1.5.323) before layout-verify can pass |
+| Pages site | `make site` → public/index.html: 10-chapter narrative (docs/*.md) with CI-injected numbers via tools/gen_docs.py, interactive three.js 3D stack-up of the OTA GDS, verdict chips, GDS download. Set Pages visibility to "everyone" in GitLab project settings for the public showcase |
 
 ## OTA layout DRC — resolved (2026-07-19)
 
@@ -103,6 +104,10 @@ From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
   + route the OTA layout, extraction-compare vs golden (expect 13/13); the
   trustworthy DRC number is the "fresh reload of saved files" line (expect 0)
 - `make pex` — parasitic-extract the routed layout + run the OTA TB on it
+- `make layout-report` — fresh-process DRC + LVS + GDS export + 3D geometry
+  (fails if DRC ≠ 0 or LVS mismatch; feeds the site)
+- `make site` — build public/ from docs/*.md + reports/results/*.json
+  (preview: `cd public && python3 -m http.server`)
 - GUI schematic: `xschem xschem/tier1_sdm.sch` → Netlist → Simulate (silent
   ~10 s) → Ctrl-click LOAD WAVES; f=fit, right-drag=zoom, a/b=cursors
 - GUI layout: `magic -rcfile $PDK_ROOT/sky130A/libs.tech/magic/sky130A.magicrc mag/ota_layout.mag`
