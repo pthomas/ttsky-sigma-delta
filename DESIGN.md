@@ -501,3 +501,22 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   costing ~15/18 dB (fast/precision). comp_beh.sym now pins its output to
   the digital mid-rail explicitly: analog common mode and digital levels
   are independent domains. Reopen if: supply or digital levels change.
+- **2026-07-19 - Bias generator v1 (sim/bias_tb.py): constant-gm core,
+  cascoded mirrors, startup-with-disable - ACCEPTED against the golden
+  OTA.** Beta-multiplier (K=4, RB=4.6k) gives a ~19 uA master; IREFP/
+  IREFN are 19x/17x cascoded mirrors (cascode gates reuse the block's own
+  VBNC/VBPC - the 1.5 V rail is exactly an NMOS-sink cascode bias);
+  VBNC/VBPC are master x R ratios (R/RB - process-flat to first order).
+  Three measured lessons: (1) uncascoded 5V mirrors at L=1 ran 43% hot
+  and tracked VDD (soft saturation again); (2) a "weak" always-on PMOS
+  startup leaker at Vsg=2.45 V injects 3.4 uA = 17% master error - now a
+  stolen-away startup (leaker -> nst, VBNC-gated NMOS steals it once
+  running, PMOS pass feeds nb only when the core is off); (3) the PMOS
+  pass bulk must be VDD - tied to VSS its source junction forward-biases
+  and the core never starts. Acceptance (golden OTA, real bias vs ideal):
+  tt A0 65.4 dB / GBW 194 MHz / PM 57 deg (ideal: 65.2/209/58); corners
+  ss/ff within A0 64.3-66.2, PM 57-58 - tighter than ideal-bias corners
+  because the constant-gm master tracks the devices. VDD +-10%: currents
+  +-5%. Startup verified from a 0->3.3 V ramp. Open: schematic gen +
+  equivalence (gen_ota_sch pattern), layout, ideal-R -> poly R at layout
+  time. Reopen if: OTA sizing changes (mirror ratios follow SIZES).
