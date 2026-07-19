@@ -449,6 +449,10 @@ def main():
             "nodes lift off the precharge rail together; the input-seeded "
             "imbalance amplifies at τ ≈ 70 ps until the loser is pulled "
             "back down. The dashed trace is the SR-latched output."),
+        "fig_tier1_loop_trip": fig(
+            "tier1_loop_trip",
+            "One loop trip through the four schematic nodes (this build): "
+            "int → comp → q → dac, each on its own axis in real volts."),
         "fig_sch_tier1": fig(
             "sch_tier1",
             "The tier-1 xschem schematic as simulated: integrator, "

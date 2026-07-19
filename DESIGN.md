@@ -551,3 +551,14 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   now matches it. Open: schematic gen + equivalence, bias tap, layout,
   decap area (3 x 20 pF MiM ~ 3,000 um^2 - in budget). Reopen if: fs or
   the DAC pulse current changes, or CDEC shrinks below ~10 pF.
+- **2026-07-19 - Clock level shifter v1 (sim/lvl_tb.py): cross-coupled
+  1.8->3.3 V, ACCEPTED.** Thin-oxide input inverter on VDPWR, strong 5V
+  NMOS pulldowns (Vgs 1.8 vs Vth ~0.8) against a deliberately weak
+  cross-coupled 5V PMOS pair, buffered complementary outputs, 100 fF
+  loads. Corners x VDPWR 1.62/1.8/1.98: full rail swing, prop delay
+  0.22-0.92 ns, duty error 0.75-2.42%, ~300 uW. Duty gate set at 3%
+  deliberately: a corner-static duty error is a pure bit-independent
+  loop-gain shift (the benign error class per the tier-1 knees); what
+  must be zero is bit-dependent width variation, and the shifter is
+  pattern-blind by construction. Reopen if: fs changes or the clock load
+  grows past ~200 fF.

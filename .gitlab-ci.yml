@@ -95,6 +95,19 @@ comparator:
     paths: [reports/results/]
     expire_in: 30 days
 
+# bias generator + reference buffers + clock level shifter (each exits
+# nonzero if its acceptance gate fails)
+support-blocks:
+  stage: layout
+  script:
+    - make xcheck
+    - python3 sim/bias_tb.py
+    - python3 sim/buf_tb.py
+    - python3 sim/lvl_tb.py
+  artifacts:
+    paths: [reports/results/]
+    expire_in: 30 days
+
 # GitLab Pages: the generated design document, with every number sourced
 # from THIS pipeline's artifacts (tools/gen_docs.py marks anything missing
 # as "not verified in this build")
@@ -112,6 +125,8 @@ pages:
     - job: layout-verify
       artifacts: true
     - job: comparator
+      artifacts: true
+    - job: support-blocks
       artifacts: true
   script:
     - python3 tools/gen_docs.py

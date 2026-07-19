@@ -93,3 +93,21 @@ C {devices/lab_pin.sym} -920 -150 0 0 {name=l49 lab=IREFN}
 C {devices/lab_pin.sym} -880 -120 3 0 {name=l50 lab=VSS}
 C {devices/lab_pin.sym} -855 -150 2 0 {name=l51 lab=VSS}
 N -880 -150 -855 -150 {lab=VSS}
+N -920 -860 40 -860 {lab=VDD}
+N -880 -830 -880 -860 {lab=VDD}
+N -630 -830 -630 -860 {lab=VDD}
+N -280 -630 -280 -860 {lab=VDD}
+N 20 -630 20 -860 {lab=VDD}
+N -920 -90 40 -90 {lab=VSS}
+N -880 -120 -880 -90 {lab=VSS}
+N -280 -120 -280 -90 {lab=VSS}
+N 20 -120 20 -90 {lab=VSS}
+N -630 -770 -630 -680 {lab=tail}
+N -630 -700 -430 -700 {lab=tail}
+N -430 -700 -430 -680 {lab=tail}
+N -280 -570 -280 -480 {lab=pc1}
+N -280 -420 -280 -330 {lab=dio}
+N -280 -270 -280 -180 {lab=fn1}
+N 20 -570 20 -480 {lab=pc2}
+N 20 -420 20 -330 {lab=OUT}
+N 20 -270 20 -180 {lab=fn2}

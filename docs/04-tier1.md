@@ -19,6 +19,19 @@ as the silicon will be:
 
 {{fig_tier1_waves}}
 
+The loop's story is easiest to follow one station at a time. The four
+traces below are the four labeled nodes of the schematic above — `int`,
+`comp`, `q`, `dac` — over the same twenty clock cycles: the integrator
+drifts, the comparator decides (note it committing at *different times*
+within each cycle), the retimed bit releases each decision only on the
+clock edge, and the return-to-zero DAC pulse carries it back to the
+input summing node. The behavioral models behind each block (finite
+gain/bandwidth/slew for the amplifier, regeneration softness for the
+comparator) are plain ngspice subcircuits embedded in the schematic
+source, with their parameters injected from `params.py`.
+
+{{fig_tier1_loop_trip}}
+
 The spectrum below is the whole thesis of the architecture in one picture:
 the signal sits in a quiet band at the left while the quantization noise —
 which had to go *somewhere* — has been pushed up and out, rising at the

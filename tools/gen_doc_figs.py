@@ -45,19 +45,29 @@ def save(fig, name):
     print(f"wrote {FIGS}/{name}.svg")
 
 
-def export_sch(sch, name):
+def export_sch(sch, name, crop=None):
     """xschem SVG export of a schematic (works headless; the stray tkwait
-    warning is harmless)."""
+    warning is harmless). crop=(x, y, w, h) in SVG user units rewrites the
+    viewBox -- used to show just the circuit region of a schematic whose
+    page carries simulator control text."""
+    import re as _re
     import subprocess
     os.makedirs(FIGS, exist_ok=True)
     out = f"{FIGS}/{name}.svg"
     subprocess.run(["xschem", "-q", "-x", "--svg", "--plotfile",
                     os.path.abspath(out), f"xschem/{sch}.sch"],
                    capture_output=True, text=True)
-    if os.path.exists(out):
-        print(f"wrote {out}")
-    else:
+    if not os.path.exists(out):
         print(f"xschem export FAILED for {sch}")
+        return
+    if crop:
+        x, y, w, h = crop
+        txt = open(out).read()
+        txt = _re.sub(r'width="\d+" height="\d+"',
+                      f'width="{w}" height="{h}" '
+                      f'viewBox="{x} {y} {w} {h}"', txt, count=1)
+        open(out, "w").write(txt)
+    print(f"wrote {out}")
 
 
 def tier1():
@@ -65,35 +75,48 @@ def tier1():
     d = np.loadtxt("spice/tier1_out.csv")
     t, q, vin, vint = d[:, 0], d[:, 1], d[:, 5], d[:, 7]
     dac, comp = d[:, 9], d[:, 11]
-    fig, (a1, a2) = plt.subplots(2, 1, figsize=(7.2, 5.0), sharex=False,
-                                 height_ratios=[2, 3])
+    fig, (a1, a2) = plt.subplots(2, 1, figsize=(7.2, 3.4), sharex=False,
+                                 height_ratios=[2, 1])
     w = (t > 20e-6) & (t < 60e-6)
-    a1.plot(t[w] * 1e6, vin[w], color=C1, lw=1.4, label="input")
-    a1.plot(t[w] * 1e6, vint[w], color=C2, lw=0.7, label="integrator")
+    a1.plot(t[w] * 1e6, vin[w], color=C1, lw=1.4, label="vin (input)")
+    a1.plot(t[w] * 1e6, vint[w], color=C2, lw=0.7, label="int (integrator)")
     a1.set_ylabel("V")
-    a1.set_xlabel("time [µs]")
     a1.legend(loc="upper right", ncols=2)
     a1.set_title("Tier-1 loop: the integrator hugs the input it is forced "
                  "to track", loc="left", fontsize=9)
-    # one loop trip, all four stations: integrator -> comparator decision
-    # -> retimed bit -> return-to-zero DAC pulse back at the input
-    z = (t > 20e-6) & (t < 20.4e-6)
-    tz = t[z] * 1e6
-    a2.plot(tz, vint[z], color=C2, lw=1.2, label="integrator")
-    a2.plot(tz, comp[z] / 3.3 + 1.6, color=C1, lw=0.9,
-            label="comparator (scaled)")
-    a2.plot(tz, q[z] / 3.3 + 2.9, color=GRAY, lw=0.9,
-            label="retimed bit q (scaled)")
-    a2.plot(tz, dac[z] + 3.4, color=C2, lw=0.9, ls="--",
-            label="DAC feedback (RZ)")
+    z1 = (t > 20e-6) & (t < 21e-6)
+    a2.plot(t[z1] * 1e6, q[z1], color=GRAY, lw=0.9,
+            label="q (bitstream)")
+    a2.set_ylabel("V")
     a2.set_xlabel("time [µs]")
-    a2.set_yticks([])
-    a2.legend(loc="upper right", fontsize=7.5, ncols=2)
-    a2.set_title("one loop trip, 20 clock cycles: decision → retimed bit "
-                 "→ return-to-zero feedback pulse", loc="left", fontsize=9)
+    a2.legend(loc="center right")
     fig.tight_layout()
     save(fig, "tier1_waves")
-    export_sch("tier1_sdm", "sch_tier1")
+
+    # one loop trip through the four schematic nodes, 4x1 with real axes;
+    # names match the labels in the schematic above
+    z = (t > 20e-6) & (t < 20.4e-6)
+    tz = t[z] * 1e6
+    fig, axs = plt.subplots(4, 1, figsize=(7.2, 5.6), sharex=True)
+    for ax, (sig, node, desc, col, ls) in zip(axs, [
+            (vint, "int", "integrator output (0.9 V ± 0.22 V)", C2, "-"),
+            (comp, "comp", "comparator decision (wanders mid-cycle)",
+             C1, "-"),
+            (q, "q", "retimed bit (moves only on clock edges)", GRAY, "-"),
+            (dac, "dac", "DAC feedback: ±ref pulse, return-to-zero at "
+             "0.9 V", C2, "--")]):
+        ax.plot(tz, sig[z], color=col, lw=1.0, ls=ls)
+        ax.set_ylabel(f"v({node}) [V]")
+        ax.set_title(desc, loc="left", fontsize=8.5, color=INK)
+    axs[-1].set_xlabel("time [µs]")
+    axs[0].set_title("One loop trip, 20 clock cycles — node names match "
+                     "the schematic labels\nintegrator output "
+                     "(0.9 V ± 0.22 V)", loc="left", fontsize=8.5)
+    fig.tight_layout()
+    save(fig, "tier1_loop_trip")
+    # crop to the circuit region (the full page carries the behavioral
+    # model text, which the chapter prose covers instead)
+    export_sch("tier1_sdm", "sch_tier1", crop=(10, 0, 670, 210))
 
     # coherent spectrum of the bitstream (same resampling as sim/snr.py)
     import params as P

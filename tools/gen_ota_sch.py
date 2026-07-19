@@ -43,6 +43,31 @@ PINS = [  # (symbol, label) -- file order defines nothing; ota.sym fixes port or
     ("ipin", "IREFP"), ("ipin", "IREFN"), ("ipin", "VBNC"), ("ipin", "VBPC"),
 ]
 
+# drawn wires: the clean vertical branch runs + supply rails, so the
+# schematic READS as a folded cascode; connectivity authority stays with
+# the lab_pins (equivalence is proven by make xcheck either way)
+WIRES = [
+    # VDD rail (y=-860) + stubs from every top pfet source
+    (-920, -860, 40, -860, "VDD"),
+    (-880, -830, -880, -860, "VDD"), (-630, -830, -630, -860, "VDD"),
+    (-280, -630, -280, -860, "VDD"), (20, -630, 20, -860, "VDD"),
+    # VSS rail (y=-90) + stubs from every bottom nfet source
+    (-920, -90, 40, -90, "VSS"),
+    (-880, -120, -880, -90, "VSS"),
+    (-280, -120, -280, -90, "VSS"), (20, -120, 20, -90, "VSS"),
+    # tail: MT drain down to the pair's common source
+    (-630, -770, -630, -680, "tail"),
+    (-630, -700, -430, -700, "tail"), (-430, -700, -430, -680, "tail"),
+    # folded branch fn1 side: mirror -> pcas -> dio -> ncas -> sink
+    (-280, -570, -280, -480, "pc1"),
+    (-280, -420, -280, -330, "dio"),
+    (-280, -270, -280, -180, "fn1"),
+    # fn2 side
+    (20, -570, 20, -480, "pc2"),
+    (20, -420, 20, -330, "OUT"),
+    (20, -270, 20, -180, "fn2"),
+]
+
 
 def main():
     out = ["v {xschem version=3.4.4 file_version=1.2}",
@@ -69,6 +94,8 @@ def main():
             n += 1
         # short stub from B pin (at x+20) to its label at x+45
         out.append(f"N {x + 20} {y} {x + 45} {y} {{lab={b}}}")
+    for x1, y1, x2, y2, lab in WIRES:
+        out.append(f"N {x1} {y1} {x2} {y2} {{lab={lab}}}")
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                         "xschem", "ota.sch")
     open(path, "w").write("\n".join(out) + "\n")

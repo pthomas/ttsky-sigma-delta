@@ -56,6 +56,22 @@ PINS = [("ipin", "INP"), ("ipin", "INM"), ("ipin", "CLK"),
         ("opin", "Q"), ("opin", "QB"), ("opin", "ON1"), ("opin", "ON2"),
         ("iopin", "VDD"), ("iopin", "VSS")]
 
+# drawn wires (vertical branch runs + tail) so the core reads as a
+# StrongARM; connectivity authority stays with the lab_pins
+WIRES = [
+    # clocked tail into the input pair's common source
+    (-1080, -770, -1080, -700, "tail"),
+    (-1230, -680, -1230, -700, "tail"), (-950 + 20, -680, -930, -700, "tail"),
+    (-1230, -700, -930, -700, "tail"),
+    # di columns: input pair drain down into the cross-PMOS source
+    (-1230, -620, -1230, -530, "di1"), (-930, -620, -930, -530, "di2"),
+    # regeneration columns: cross-PMOS drain onto cross-NMOS drain
+    (-1230, -470, -1230, -380, "ON1"), (-930, -470, -930, -380, "ON2"),
+    # output chain: inverter drains, NAND stack nodes
+    (-630, -770, -630, -680, "n1b"), (-630, -470, -630, -380, "n2b"),
+    (-430, -470, -430, -380, "sq"), (-130, -470, -130, -380, "sb"),
+]
+
 
 def write_sch(path):
     out = ["v {xschem version=3.4.4 file_version=1.2}",
@@ -85,6 +101,8 @@ def write_sch(path):
                        f"{{name=l{n} lab={lab}}}")
             n += 1
         out.append(f"N {x + 20} {y} {x + 45} {y} {{lab={b}}}")
+    for x1, y1, x2, y2, lab in WIRES:
+        out.append(f"N {x1} {y1} {x2} {y2} {{lab={lab}}}")
     open(path, "w").write("\n".join(out) + "\n")
     print(f"wrote {path}: {len(DEVICES)} devices")
 

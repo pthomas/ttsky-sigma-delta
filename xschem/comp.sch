@@ -153,3 +153,15 @@ C {devices/lab_pin.sym} -170 -350 0 0 {name=l89 lab=Q}
 C {devices/lab_pin.sym} -130 -320 3 0 {name=l90 lab=VSS}
 C {devices/lab_pin.sym} -105 -350 2 0 {name=l91 lab=VSS}
 N -130 -350 -105 -350 {lab=VSS}
+N -1080 -770 -1080 -700 {lab=tail}
+N -1230 -680 -1230 -700 {lab=tail}
+N -930 -680 -930 -700 {lab=tail}
+N -1230 -700 -930 -700 {lab=tail}
+N -1230 -620 -1230 -530 {lab=di1}
+N -930 -620 -930 -530 {lab=di2}
+N -1230 -470 -1230 -380 {lab=ON1}
+N -930 -470 -930 -380 {lab=ON2}
+N -630 -770 -630 -680 {lab=n1b}
+N -630 -470 -630 -380 {lab=n2b}
+N -430 -470 -430 -380 {lab=sq}
+N -130 -470 -130 -380 {lab=sb}
