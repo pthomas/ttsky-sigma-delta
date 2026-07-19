@@ -4,6 +4,15 @@
 # Assertion policy (DESIGN.md): precision-path SNDR scatters +-1 dB
 # run-to-run (chaotic modulator) -- only loose floors, never exact values.
 
+# Lockdown: pipelines run ONLY for direct pushes to branches in THIS
+# project (membership required to push). No merge-request pipelines --
+# fork MRs must never execute on the private runner VM. Defense in depth
+# on top of: project runner not shared with forks, and no
+# merge_request_event rules anywhere below.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
 # shell executor may not source /etc/profile.d -- set PDK_ROOT explicitly
 variables:
   PDK_ROOT: /opt/pdk
