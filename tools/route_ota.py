@@ -87,6 +87,11 @@ def golden():
 
 
 def main():
+    # route saves back into ota_layout.mag: routing an already-routed file
+    # double-paints and shorts everything. Always gen_ota_layout.py first.
+    if "<< metal2 >>" in open("mag/ota_layout.mag").read():
+        sys.exit("mag/ota_layout.mag already contains routing -- run "
+                 "tools/gen_ota_layout.py first for a clean placement")
     man = json.load(open("mag/ota_layout.json"))
     inst = parse_parent()
     gold = golden()
@@ -174,9 +179,15 @@ def main():
     for net, xlo, xhi, anchor, yt in taps:
         cur_net[0] = net
         slot = None
-        for cand in range(int(math.ceil(xlo)), int(xhi) + 1):
-            if cand not in used:
-                slot = cand
+        # widen the search range only if the nominal one is full (keeps
+        # jogs short in the common case; stacked rows can exhaust slots)
+        for widen in (0, 2, 4, 6, 8):
+            for cand in range(int(math.ceil(xlo - widen)),
+                              int(xhi + widen) + 1):
+                if cand not in used:
+                    slot = cand
+                    break
+            if slot is not None:
                 break
         if slot is None:
             print(f"NO SLOT for tap of {net} in [{xlo:.1f},{xhi:.1f}]")

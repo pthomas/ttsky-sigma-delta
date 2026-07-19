@@ -35,8 +35,11 @@ PLACEMENT = [
     ("M10", PF, S["W_MIR"],  S["L_MIR"],  3, 1),
     ("M1",  PF, S["W_IN"],   S["L_IN"],   4, 0),
     ("M2",  PF, S["W_IN"],   S["L_IN"],   4, 1),
+    # MT/MDP stacked on separate rows: side by side they made the
+    # floorplan 204 um wide, wider than the TinyTapeout 1x2 tile interior
+    # (~145 um); stacked, the widest row is M3/M4/MDN at ~119 um
     ("MT",  PF, S["W_TAIL"], S["L_TAIL"], 5, 0),
-    ("MDP", PF, S["W_TAIL"], S["L_TAIL"], 5, 1),
+    ("MDP", PF, S["W_TAIL"], S["L_TAIL"], 6, 0),
 ]
 ROW_Y = [0, 12, 24, 36, 48, 62]      # um, provisional row baselines
 COL_X = [0, 60, 120]                  # um, provisional column starts
