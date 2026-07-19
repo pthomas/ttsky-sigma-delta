@@ -18,7 +18,7 @@ N -1450 -200 -1400 -200 {lab=sum}
 N -1450 -320 -1450 -200 {lab=sum}
 N -1450 -450 -1450 -320 {lab=sum}
 C {devices/lab_pin.sym} -1500 -200 0 0 {name=p2 lab=sum}
-C {opamp_beh.sym} -1320 -180 0 0 {name=X_OTA AOL=\{AOL\} GBW=\{GBW\} SR=\{SR\}}
+C {opamp_beh.sym} -1320 -180 0 0 {name=X_OTA AOL=\{AOL\} GBW=\{GBW\} SR=\{SR\} FP2=\{FP2\}}
 N -1440 -160 -1400 -160 {lab=vcm}
 C {devices/lab_pin.sym} -1440 -160 0 0 {name=p3 lab=vcm}
 N -1450 -320 -1360 -320 {lab=sum}
@@ -93,15 +93,22 @@ C {devices/gnd.sym} -850 130 0 0 {name=g6 lab=GND}
 C {devices/code_shown.sym} 40 -560 0 0 {name=CONTROL only_toplevel=false value=".include params.spice
 .model SW sw vt=1.65 vh=0.1 ron=100 roff=1e9
 * behavioral OTA: single-pole, slew-limited (AOL, GBW [Hz], SR [V/s])
-.subckt ota_beh PLUS MINUS OUT AOL=10000 GBW=200e6 SR=2e8
+.subckt ota_beh PLUS MINUS OUT AOL=10000 GBW=200e6 SR=2e8 FP2=100e9
 .param CI=100f
 .param GMI=\{6.2831853*GBW*CI\}
 .param ILIM=\{SR*CI\}
 .param RO=\{AOL/GMI\}
+.param RP2=1k
+.param CP2=\{1/(6.2831853*RP2*FP2)\}
 B_GM 0 x I=\{ILIM\}*tanh(\{GMI\}*(v(PLUS)-v(MINUS))/\{ILIM\})
 R_O x 0 \{RO\}
 C_O x 0 \{CI\}
-E_BUF OUT 0 x 0 1
+* second (parasitic) pole at FP2, buffered so it never loads the
+* integrator node -- excess-phase knob for the PM requirement sweep
+E_INT xb 0 x 0 1
+R_P2 xb y \{RP2\}
+C_P2 y 0 \{CP2\}
+E_BUF OUT 0 y 0 1
 .ends
 * behavioral DFF: master/slave sample-and-hold of D at rising CLK edge
 .subckt dff_beh D CLK Q QB
@@ -114,6 +121,10 @@ E_Q Q 0 VOL='1.65+1.65*tanh(20*(v(qraw)-1.65))'
 E_QB QB 0 VOL='3.3-v(Q)'
 .ends
 .ic v(int)=\{VCM\}
+* gear integration: the OTA model's parasitic second pole (FP2) is a fast
+* state; default trapezoidal rings on it at TSTEP and the ringing reads as
+* ~2/8 dB of fake SNDR loss (fast/precision). Gear is L-stable and damps it.
+.options method=gear
 .tran \{TSTEP\} \{TSTOP\} uic
 .control
 run

@@ -29,14 +29,31 @@ FIN = SIG_BIN * P.FS / NFFT
 TSTOP = (NFFT + NSETTLE) * P.TS
 SPICE_DIR = "spice"
 
-BASE = {"AOL": P.AOL, "GBW": P.GBW, "SR": P.SR}
+BASE = {"AOL": P.AOL, "GBW": P.GBW, "SR": P.SR, "FP2": P.FP2}
 SWEEPS = {
     "AOL": [30, 100, 300, 1e3, 3e3, 1e4],
     "GBW": [25e6, 50e6, 100e6, 150e6, 200e6, 400e6],
     "SR":  [1.25e7, 2.5e7, 5e7, 1e8, 2e8, 4e8],
+    "FP2": [50e6, 100e6, 141e6, 200e6, 400e6, 800e6, 2e9],
 }
-UNITS = {"AOL": ("V/V", 1), "GBW": ("MHz", 1e6), "SR": ("V/us", 1e6)}
+UNITS = {"AOL": ("V/V", 1), "GBW": ("MHz", 1e6), "SR": ("V/us", 1e6),
+         "FP2": ("MHz", 1e6)}
 C_FAST, C_PREC = "#2a78d6", "#1baf7a"
+
+
+def pm_of_fp2(fp2, a0=P.AOL, gbw=P.GBW):
+    """OTA-level phase margin for the two-pole model, same definition as
+    sim/ota_tb.py (phase at the unity-gain crossing of the open loop)."""
+    f = np.logspace(3, 11, 4000)
+    p1 = gbw / a0
+    h = a0 / ((1 + 1j * f / p1) * (1 + 1j * f / fp2))
+    mag = np.abs(h)
+    i = np.argmax(mag < 1)
+    fu = np.interp(0, [np.log10(mag[i]), np.log10(mag[i - 1])],
+                   [np.log10(f[i]), np.log10(f[i - 1])])
+    ph = np.angle(a0 / ((1 + 1j * 10**fu / p1) * (1 + 1j * 10**fu / fp2)),
+                  deg=True)
+    return 180 + ph
 
 
 def write_variant(tag, overrides):
@@ -80,10 +97,12 @@ def main():
             fast, prec = run_variant(tag, {**BASE, pname: v})
             results[pname].append((v, fast, prec))
             u, scale = UNITS[pname]
+            pm = f"  (PM {pm_of_fp2(v):.0f} deg)" if pname == "FP2" else ""
             print(f"{pname}={v/scale:8.3g} {u:5s}  fast {fast:5.1f} dB  "
-                  f"precision {prec:5.1f} dB", flush=True)
+                  f"precision {prec:5.1f} dB{pm}", flush=True)
 
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4.0), sharey=True)
+    fig, axes = plt.subplots(1, len(SWEEPS), figsize=(4 * len(SWEEPS), 4.0),
+                             sharey=True)
     fig.patch.set_facecolor(C_SURF)
     for ax, pname in zip(axes, SWEEPS):
         style_axes(ax)
@@ -93,10 +112,16 @@ def main():
                     ms=4)
         ax.semilogx(arr[:, 0] / scale, arr[:, 2], "o-", color=C_PREC, lw=1.8,
                     ms=4)
-        ax.axvline(BASE[pname] / scale, color="#e5e4e0", lw=1.0)
+        if BASE[pname] / scale <= 2 * arr[:, 0].max() / scale:
+            ax.axvline(BASE[pname] / scale, color="#e5e4e0", lw=1.0)
         ax.set_xlabel(f"{pname} [{u}]", color=C_TEXT2, fontsize=9)
         ax.set_title(f"sweep {pname} (others at baseline)", color=C_TEXT,
                      fontsize=10, loc="left")
+        if pname == "FP2":
+            for v, fast, _ in results[pname]:
+                ax.annotate(f"{pm_of_fp2(v):.0f}°", (v / scale, fast),
+                            textcoords="offset points", xytext=(0, -14),
+                            color=C_TEXT2, fontsize=7, ha="center")
     axes[0].set_ylabel("SNDR [dB]", color=C_TEXT2, fontsize=9)
     axes[0].text(0.05, 0.28, "fast (1 MHz)", color=C_TEXT, fontsize=9,
                  weight="bold", transform=axes[0].transAxes)
@@ -109,8 +134,10 @@ def main():
     for pname in SWEEPS:
         u, scale = UNITS[pname]
         for v, fast, prec in results[pname]:
-            rows.append(f"<tr><td>{pname}</td><td>{v/scale:.3g} {u}</td>"
-                        f"<td>{fast:.1f} dB</td><td>{prec:.1f} dB</td></tr>")
+            extra = f" (PM {pm_of_fp2(v):.0f}&deg;)" if pname == "FP2" else ""
+            rows.append(f"<tr><td>{pname}</td><td>{v/scale:.3g} {u}{extra}"
+                        f"</td><td>{fast:.1f} dB</td><td>{prec:.1f} dB</td>"
+                        f"</tr>")
     html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>OTA requirements sweep</title>
 <style>
@@ -125,7 +152,11 @@ def main():
 </style></head><body>
 <h1>OTA requirements sweep &mdash; tier-1 modulator</h1>
 <p>One parameter varied at a time; baseline AOL = {P.AOL:.0f},
-GBW = {P.GBW/1e6:.0f} MHz, SR = {P.SR/1e6:.0f} V/&mu;s (gray verticals).
+GBW = {P.GBW/1e6:.0f} MHz, SR = {P.SR/1e6:.0f} V/&mu;s, FP2 = none
+(gray verticals). The FP2 sweep adds a buffered second pole to the OTA
+model; each point is labeled with the equivalent OTA unity-gain phase
+margin, so the extracted layout's PM can be judged against a measured
+knee instead of a rule of thumb.
 fs = {P.FS/1e6:.0f} MHz, {NFFT} bits, pinned dither seed. Precision-path
 values scatter ~&plusmn;1 dB run to run (pattern noise) &mdash; read knees,
 not digits.</p>

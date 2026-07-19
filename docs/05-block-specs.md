@@ -9,7 +9,8 @@ above it. `make specs` regenerates the sweep report ({{report_links_specs}}).
 |---|---|---|---|
 | DC gain A<sub>OL</sub> | degraded at 30, recovered by 100–300 | ≥ 300 (50 dB) | 1000 (60 dB) |
 | GBW | **no knee down to 25 MHz** | ≥ 50 MHz | 150–200 MHz |
-| Slew rate | broken at 12.5 V/µs, marginal at 50 | ≥ 100 V/µs | 200 V/µs |
+| Slew rate | broken at ~3 V/µs, degraded at 6 | ≥ 100 V/µs | 200 V/µs |
+| Phase margin (2nd pole) | **no knee down to 28°** | none needed | — |
 
 Two of these rows carry lessons:
 
@@ -24,9 +25,21 @@ lets that target be set honestly instead of superstitiously.
 
 **Slew is the binding constraint.** Slew errors are the nonlinear ones —
 they depend on the step being taken, which depends on bit history — so
-they show up directly as in-band distortion. The measured knee sits ~2×
-above the naive pulse-edge estimate, and it, not GBW, ended up sizing the
-OTA's tail current (and therefore its power).
+they show up directly as in-band distortion. It, not GBW, ended up sizing
+the OTA's tail current (and therefore its power). A methodological bonus:
+when the integration capacitor was doubled (halving the loop coefficient),
+the re-measured knee moved down by the same factor — the sweep tracks the
+physics, not a memorized number.
+
+**Phase margin joined the non-knee club.** After parasitic extraction
+dropped the OTA's phase margin to 46° (see the PEX chapter), the
+behavioral model gained a second pole swept from 2 GHz down to 50 MHz —
+equivalent phase margins from 84° to 28°. No SNDR knee appeared: excess
+phase is still *linear* dynamics, and the loop converts it to gain error
+just like finite GBW. (The sweep exposed a simulator trap along the way:
+ngspice's default trapezoidal integration rings on a parasitic pole far
+above the timestep rate, reading as several dB of fake SNDR loss — the
+tier-1 deck now uses L-stable Gear integration.)
 
 Beyond the OTA: the comparator + DFF must fully regenerate in the 10 ns
 half-period (soft decisions cost ~25 dB, measured), DAC switch

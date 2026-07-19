@@ -60,17 +60,17 @@ netlist wrapped to the 5-pin interface with ideal refs).
 |---|---|---|---|---|
 | A0 | 65.2 dB | 65.2 dB | ≥49.5 dB | ok |
 | GBW | 209 MHz | 119 MHz | ≥50 MHz | ok (2.4×) |
-| PM | 58° | 46° | (no knee measured) | **open — decide** |
+| PM | 58° | 46° | no knee down to 28° | ok — **closed 2026-07-19** |
 | SR | +197/−253 | +128/−508 | ≥100 V/µs | ok |
 | Ivdd | 1.37 mA | 1.37 mA | — | 4.5 mW |
 
 The GBW/PM hit is self-load from the auto-router's generous metal (0.50 µm
 via pads, 0.8 µm-pitch m1 track bus, m3 risers): 0.72 pF total parasitic on
-top of CL=1.5 pF. Options if PM 46° is deemed too thin: (a) measure a PM
-knee in tier-1 (add ota model phase term / second pole to spec_sweep) to
-know if 46° actually costs SNDR; (b) slim the routing (narrower pads where
-enclosure allows, shorter track bus); (c) resize for margin (mirror pole).
-Decision parked for next session — discuss before building.
+top of CL=1.5 pF. **Resolved 2026-07-19:** the FP2 sweep in `make specs`
+measured no SNDR knee down to PM 28° (see DESIGN.md decision log) — 46°
+extracted is accepted, OTA layout closed for v1. Note the tier-1 deck now
+runs gear integration and the precision baseline reads 64.8 dB (the old
+77.8 was a lucky deterministic window; long-run truth is ~66).
 
 ## Toolchain (dev machine)
 
@@ -114,14 +114,18 @@ From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
 
 ## Next actions (priority order)
 
-1. Decide on the post-PEX PM 46° (see table above): measure a PM knee in
-   tier-1, slim the routing, or accept. Discuss with user first.
-2. StrongARM comparator: schematic + the metastability testbench (spec:
+1. StrongARM comparator: schematic + the metastability testbench (spec:
    full regeneration in 10 ns; tier-1 showed soft decisions cost ~25 dB).
-3. Reference window move (open item 6): retune params.py + tier-1 rerun
+   Open sub-question: input-pair flavor vs the 0.9 V common mode on 3.3 V
+   (NMOS overdrive is thin with 5 V-device Vth — PMOS input or window
+   co-design with open item 6).
+2. Reference window move (open item 6): retune params.py + tier-1 rerun
    when comparator/buffer common-mode design starts.
-4. Remaining blocks per the tier-2 list above, then top-level assembly in
+3. Remaining blocks per the tier-2 list above, then top-level assembly in
    the ttsky-analog-template frame.
+4. Pages URL: pipeline deploys, but pthomas1.gitlab.io/sigma-delta
+   redirects to sign-in — likely the "unique domain" setting; the real URL
+   is under Deploy → Pages (or disable unique domain there).
 
 ## Open questions for the user
 

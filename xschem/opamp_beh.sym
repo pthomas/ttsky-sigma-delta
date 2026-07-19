@@ -1,8 +1,8 @@
 v {xschem version=3.4.4 file_version=1.2}
 G {}
 K {type=primitive
-format="@name @@PLUS @@MINUS @@OUT ota_beh AOL=@AOL GBW=@GBW SR=@SR"
-template="name=X1 AOL=10000 GBW=200e6 SR=2e8"
+format="@name @@PLUS @@MINUS @@OUT ota_beh AOL=@AOL GBW=@GBW SR=@SR FP2=@FP2"
+template="name=X1 AOL=10000 GBW=200e6 SR=2e8 FP2=100e9"
 }
 V {}
 S {}

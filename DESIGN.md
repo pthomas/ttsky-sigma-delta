@@ -74,7 +74,8 @@ pattern-noise scatter).
 |---|---|---|---|
 | DC gain AOL | degraded at 30, recovered by 100–300 | ≥ 300 (50 dB) | 1000 (60 dB) |
 | GBW | **no knee down to 25 MHz** (see note) | ≥ 50 MHz | 150–200 MHz |
-| Slew rate | broken at 12.5, marginal at 50 V/µs | ≥ 100 V/µs | 200 V/µs |
+| Slew rate | broken at 3, degraded at 6 V/µs (2026-07-19, CINT=2p; the older "broken at 12.5" was at CINT=1p — knee scales with k) | ≥ 100 V/µs | 200 V/µs |
+| Phase margin (2nd pole) | **no knee down to PM 28°** (FP2 sweep 50 MHz–2 GHz, 2026-07-19) | none needed; 46° extracted accepted | — |
 
 GBW note: the loop is insensitive to single-pole bandwidth because finite-GBW
 settling errors are *linear* — the same every cycle per bit value — so they
@@ -409,3 +410,23 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   writeall unit handling, or any new tool step rewrites mag/ gencell files
   (watch for "Scaled magic input cell ... geometry by factor of 2" on load -
   that warning means a lossy rewrite already happened).
+- **2026-07-19 - PM knee measured: none exists; extracted OTA layout (PM
+  46°) accepted, OTA closed for v1.** Method: the tier-1 behavioral OTA
+  gained a buffered second pole (FP2 param, baseline 100 GHz ≈ none), and
+  `make specs` now sweeps it 50 MHz–2 GHz with each point labeled by the
+  equivalent OTA unity-gain phase margin (28°–84°). Result: SNDR flat
+  within pattern-noise scatter on both paths all the way down to PM 28°.
+  Physics: same mechanism as the GBW non-result — *linear* settling error
+  of any pole order is identical every cycle per bit value and aliases to
+  gain error; only nonlinear (slew) errors demodulate into the band. Slew
+  sensitivity re-validated in the same session: knee now at ~3–6 V/µs
+  (was 12.5 at CINT=1p; scales with the halved loop coefficient, resolving
+  the apparent contradiction with the 2026-07-18 table). Two supporting
+  changes: (1) tier-1 deck now uses `.options method=gear` — default
+  trapezoidal integration rings on the FP2 stage's fast state and read as
+  ~2/8 dB (fast/precision) of fake SNDR loss; gear is L-stable and damps
+  it; (2) precision-path baseline now reads 64.8 dB (was 77.8 pre-gear) —
+  the old number was one lucky deterministic window, the new one sits at
+  the documented long-run ~66 dB. Reopen if: the OTA is reused outside the
+  integrator role (a unity-gain buffer DOES care about PM), the 2nd-order
+  loop changes the phase budget, or fs moves.
