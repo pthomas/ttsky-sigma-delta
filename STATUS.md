@@ -111,24 +111,77 @@ From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
   ~10 s) → Ctrl-click LOAD WAVES; f=fit, right-drag=zoom, a/b=cursors
 - GUI layout: `magic -rcfile $PDK_ROOT/sky130A/libs.tech/magic/sky130A.magicrc mag/ota_layout.mag`
 
-## Next actions (priority order)
+## Next actions — ASSEMBLY CAMPAIGN (all blocks -> layout -> TT frame)
 
-1. Reference window move (open item 6): retune params.py + tier-1 rerun —
-   comparator/buffer common-mode design is now underway, so this is due.
-2. vref/VCM buffers (25 µA RZ pulses) and bias generator (replace the
-   ideal IREFP/IREFN/VBNC/VBPC sources; corner spread re-check after).
-3. Comparator + DFF layout (gen/route pattern from the OTA), then clk
-   level shifter and output drivers.
-4. Top-level assembly into the TT frame (tt_frame/, `make tt`): THIS
-   repo is now the TT submission (info.yaml, gds/, lef/, precheck
-   PASSING on the GitHub mirror github.com/pthomas/ttsky-sigma-delta;
-   plain `git push` feeds GitLab + the mirror via dual push URLs). v0
-   frame = OTA with ua[0]/ua[1] wired to its input/output. Tile choice:
-   1x2 (fits at ~60% with all planned blocks). Purchase still open.
-5. Drive comp_tb.py sim runtime down or promote corners/MC into CI when
-   the runner has headroom (currently dev-bench only; their page rows
-   appear only on builds that ran them).
+User directive (2026-07-19): "do all the things" — lay out every block,
+assemble the top level into the TT frame, per-component report sub-pages,
+report when TT-ready. Commit per milestone. Ordered plan with the key
+context a fresh session needs:
 
+1. **Reference plan fix (IN PROGRESS, immediate next step).** Discovered:
+   3x20 pF decap = ~30,000 um^2 of MiM — does NOT fit the 1x2 tile
+   (~32.8k um^2 interior). Validate small decaps in tier-1: monkeypatch
+   `sim.spec_sweep.CDEC` and run `run_variant` at RREF=754 (the measured
+   buffer Zout) with CDEC 20/10/5/2 pF; expect small C to be FINE or
+   better (larger droop but faster recovery; droop is bit-independent =
+   benign). Then pick decap size (likely 5 pF -> ~2.5k um^2 each), log in
+   DESIGN.md (the buf entry's reopen condition explicitly triggers).
+   ALSO: nothing yet defines the 0.4/0.9/1.4 V levels — add a poly
+   resistor ladder (e.g. 190k/50k/50k/40k from VAPWR, ~10 uA) feeding the
+   buffer inputs; VDD-referenced refs = gain error = benign class; extend
+   sim/bias_tb.py or buf_tb.py to include it.
+2. **Golden netlists + xschem schematics for remaining blocks.** Golden
+   .spice per block emitted from the TB subckt functions (single source =
+   SIZES dicts): comp has spice/comp_top.spice via make compcheck; need
+   emitters for dff/bias/buf/lvl/odrv (write spice/golden/<b>.spice).
+   One tools/gen_sch.py with per-block device tables (gen_comp_sch.py is
+   the pattern: DEVICES table + WIRES list + lab_pins; pin geometry:
+   xschem y is DOWN; pfet S=(x+20,y-30) D=(x+20,y+30), nfet mirrored,
+   G=(x-20,y), B=(x+20,y)) for the report sub-pages + equivalence.
+3. **Block layouts** (order: comp, dff, bias, buf, lvl, odrv). Refactor
+   gen_ota_layout.py/route_ota.py into a shared library (parametrize:
+   golden file+subckt name, device-name regex, placement rows, cellname).
+   Router facts a fresh session must know: strap ys at ty+-1.5; riser
+   slots on a 1 um grid with progressive widening; ALWAYS regen placement
+   before re-routing (route saves into the same .mag — guard exists);
+   DRC truth = fresh process + `select top cell; expand`; never
+   `writeall force` after load (magscale halving gotcha — save only the
+   painted cell). bias needs new poly R cells (RB 4.6k, 75k, 25k + the
+   ladder) via the gen_layout_cells.py pattern; buffers need decap MiM
+   cells (cint pattern); lvl/odrv are mixed 01v8+g5v0 cells (gencells
+   exist for both flavors; both rails in one cell).
+4. **Top assembly** (tools/asm_top.py): place blocks + rin/rdac/cint/
+   sw_nmos x3 + decaps in the frame (tt_frame/build_frame.tcl pattern,
+   `getcell child 0um 0um` to anchor ORIGINS); top nets: ua[0]->RIN->sum;
+   sum->OTA.INM (INP=vcm); OTA.OUT=int; CINT int<->sum; int->comp.INP
+   (INM=vcm); comp.Q->DFF.D; DFF q/qb -> DAC switches (S_TOP q&clk,
+   S_BOT qb&clk, S_MID clk -> vcm) -> RDAC -> sum; ladder->buffers->
+   vrefp/vcm/vrefn; lvl: TT clk (1.8V) -> clk33/clkb33; odrv x2:
+   q/qb -> uo[0]/uo[1]; ua[1] = int monitor (decide/confirm). Hand wire
+   lists like the v0 pad wiring (worked well; check crossings on the
+   same layer!). Power: met4 stripes exist (VDPWR/VGND/VAPWR); per-block
+   taps met3->via3->met4. Top DRC + top LVS vs a stitched golden netlist.
+5. **Extracted acceptance**: PEX the top, shortened modulator transient
+   (>=512 bits), fast-path SNDR sanity (>=35 dB floor).
+6. **Report sub-pages**: public/blocks/<name>.html per component
+   (schematic SVG + its own 3D geometry json + metrics from its
+   reports/results/<b>.json); main page: ONE combined top-level 3D
+   (replace the OTA-only viewer), links to sub-pages. layout_report.py's
+   geometry() generalizes (flatten per block cell); the three.js viewer
+   JS is reusable (parametrize the json path). User explicitly wants:
+   sub-page = schematic + 3D per component; combined geometry once.
+7. **TT final**: make tt with the assembled top, info.yaml pinout update
+   (clk 50MHz, uo[0]/uo[1] = Q/QB live, ua[0]=VIN, ua[1]=monitor),
+   analog_pins stays 2, push (single `git push` feeds GitLab + GitHub
+   mirror via dual push-urls already in .git/config), precheck green =
+   "TT ready" — then TELL THE USER explicitly.
+
+Standing context: user handles repo creation/settings; Pages
+unique-domain toggle still pending on user side (then add the clean URL
+to README); CI locked to push-only pipelines; support-blocks CI job
+gates bias/buf/lvl/odrv; DESIGN.md decision log is append-only and has
+today's 15+ entries (magic gotchas, race-sim methodology, PM/RREF/SR
+knees, IO decisions — READ IT before re-deriving anything).
 ## Open questions for the user
 
 - Source impedance/range/bandwidth of the real input signal (open item 7 —
