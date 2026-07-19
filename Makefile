@@ -57,6 +57,7 @@ lvs:
 
 # regenerate OTA schematic from sizes and verify equivalence
 xcheck:
+	mkdir -p spice
 	python3 tools/gen_ota_sch.py
 	xschem --netlist --spice -q -x xschem/ota_top.sch
 	python3 sim/ota_xcheck.py
