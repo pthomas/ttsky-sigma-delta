@@ -29,15 +29,20 @@ FIN = SIG_BIN * P.FS / NFFT
 TSTOP = (NFFT + NSETTLE) * P.TS
 SPICE_DIR = "spice"
 
-BASE = {"AOL": P.AOL, "GBW": P.GBW, "SR": P.SR, "FP2": P.FP2}
+BASE = {"AOL": P.AOL, "GBW": P.GBW, "SR": P.SR, "FP2": P.FP2, "RREF": 0.001}
 SWEEPS = {
     "AOL": [30, 100, 300, 1e3, 3e3, 1e4],
     "GBW": [25e6, 50e6, 100e6, 150e6, 200e6, 400e6],
     "SR":  [1.25e7, 2.5e7, 5e7, 1e8, 2e8, 4e8],
     "FP2": [50e6, 100e6, 141e6, 200e6, 400e6, 800e6, 2e9],
+    # reference-buffer output impedance (same R on VREFP/VREFN/VCM, each
+    # with CDEC to ground): sets the buffer spec the same way the OTA
+    # rows set the OTA's
+    "RREF": [10, 30, 100, 300, 1e3, 3e3, 1e4],
 }
 UNITS = {"AOL": ("V/V", 1), "GBW": ("MHz", 1e6), "SR": ("V/us", 1e6),
-         "FP2": ("MHz", 1e6)}
+         "FP2": ("MHz", 1e6), "RREF": ("ohm", 1)}
+CDEC = 20e-12   # assumed on-chip decap per reference [F]
 C_FAST, C_PREC = "#2a78d6", "#1baf7a"
 
 
@@ -57,6 +62,8 @@ def pm_of_fp2(fp2, a0=P.AOL, gbw=P.GBW):
 
 
 def write_variant(tag, overrides):
+    overrides = dict(overrides)
+    rref = overrides.pop("RREF", BASE["RREF"])
     par = open(os.path.join(SPICE_DIR, "params.spice")).read()
     par = re.sub(r"\.param FIN=\S+", f".param FIN={FIN:.6g}", par)
     par = re.sub(r"\.param TSTOP=\S+", f".param TSTOP={TSTOP:.6g}", par)
@@ -65,6 +72,16 @@ def write_variant(tag, overrides):
     open(os.path.join(SPICE_DIR, f"params_{tag}.spice"), "w").write(par)
 
     txt = open(os.path.join(SPICE_DIR, "tier1_headless.spice")).read()
+    # references through a source impedance + decap (buffer model)
+    for name, node in (("VCM_S", "vcm"), ("VREFP_S", "vrefp"),
+                       ("VREFN_S", "vrefn")):
+        val = "{" + node.replace("vrefp", "VREFP").replace(
+            "vrefn", "VREFN").replace("vcm", "VCM") + "}"
+        txt = txt.replace(
+            f"{name} {node} GND {val}",
+            f"{name} {node}_i GND {val}\n"
+            f"R{name} {node}_i {node} {rref:g}\n"
+            f"C{name} {node} GND {CDEC:g}")
     txt = txt.replace(".include params.spice", f".include params_{tag}.spice")
     txt = txt.replace("VIN vin GND SIN({VCM} {AMP} {FIN})",
                       "VIN vind GND SIN({VCM} {AMP} {FIN})\n"

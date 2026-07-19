@@ -520,3 +520,14 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   +-5%. Startup verified from a 0->3.3 V ramp. Open: schematic gen +
   equivalence (gen_ota_sch pattern), layout, ideal-R -> poly R at layout
   time. Reopen if: OTA sizing changes (mirror ratios follow SIZES).
+- **2026-07-19 - Reference-buffer spec measured (tier-1 RREF knee): soft.**
+  New RREF axis in `make specs`: each of VREFP/VREFN/VCM driven through a
+  source impedance with 20 pF decap to ground (the buffer model). Result:
+  fast path flat to 10 kohm; precision path within its normal scatter to
+  ~1 kohm, marginal at 3 kohm, broken at 10 kohm (45 dB). Physics: the
+  decap sources each 10 ns DAC pulse (~12.5 mV droop at 25 uA); the buffer
+  only recharges it between pulses, and droop is largely bit-independent
+  until recovery spans many periods. Spec: Rout <= 300 ohm with >= 20 pF
+  decap per reference (target <= 100 ohm) - a modest one-stage buffer
+  suffices; don't burn power on a fast one. Reopen if: CDEC shrinks below
+  ~10 pF in layout, fs changes, or the DAC pulse current grows.
