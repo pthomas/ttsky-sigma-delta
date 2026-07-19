@@ -120,10 +120,12 @@ From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
    ideal IREFP/IREFN/VBNC/VBPC sources; corner spread re-check after).
 3. Comparator + DFF layout (gen/route pattern from the OTA), then clk
    level shifter and output drivers.
-4. Top-level assembly in the ttsky-analog-template frame — see the TT
-   submission gap list (docs/STATUS 2026-07-19): repo is NOT yet in TT
-   template form (no info.yaml, no tt_um macro/pinout, no precheck run);
-   tile purchase decision (2 vs 4) still open.
+4. Top-level assembly into the TT frame (tt_frame/, `make tt`): THIS
+   repo is now the TT submission (info.yaml, gds/, lef/, precheck
+   PASSING on the GitHub mirror github.com/pthomas/ttsky-sigma-delta;
+   plain `git push` feeds GitLab + the mirror via dual push URLs). v0
+   frame = OTA with ua[0]/ua[1] wired to its input/output. Tile choice:
+   1x2 (fits at ~60% with all planned blocks). Purchase still open.
 5. Drive comp_tb.py sim runtime down or promote corners/MC into CI when
    the runner has headroom (currently dev-bench only; their page rows
    appear only on builds that ran them).
