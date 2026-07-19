@@ -562,3 +562,16 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   must be zero is bit-dependent width variation, and the shifter is
   pattern-blind by construction. Reopen if: fs changes or the clock load
   grows past ~200 fF.
+- **2026-07-19 - IO decisions (user): no 2-phase demux, no differential,
+  no true LVDS.** (1) The 2-phase output demux contingency is REJECTED -
+  if the TT pad/mux path can't toggle at 50 MHz, the fallback is lowering
+  fs (open item 1 stays: verify the TT limit), not adding output
+  machinery. (2) The fully differential signal path stays out of this
+  design (consistent with the 1x2 tile choice; it remains the note under
+  open item 4 for a future chip). (3) Output style: complementary
+  bitstream Q/QB on two ordinary 1.8 V digital outputs, received
+  differentially by the FPGA ("pseudo-LVDS") - a true current-mode LVDS
+  driver is dropped from the plan (previously a stretch goal). Clock in
+  is TT's standard 1.8 V clk pin through the level shifter. Reopen if:
+  measured TT pad toggle limit forces fs below ~25 MHz (revisit OSR
+  budget), or a future differential design is started.

@@ -104,6 +104,7 @@ support-blocks:
     - python3 sim/bias_tb.py
     - python3 sim/buf_tb.py
     - python3 sim/lvl_tb.py
+    - python3 sim/odrv_tb.py
   artifacts:
     paths: [reports/results/]
     expire_in: 30 days

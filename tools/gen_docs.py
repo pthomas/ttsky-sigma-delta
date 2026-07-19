@@ -433,8 +433,8 @@ def main():
         "dff_line": dff_line(),
         "fig_tier1_waves": fig(
             "tier1_waves",
-            "Tier-1 behavioral loop (this build): input and integrator "
-            "above; a 50-cycle zoom of the bitstream below."),
+            "Tier-1 behavioral loop (this build): the input and the "
+            "integrator output that tracks it."),
         "fig_tier1_spectrum": fig(
             "tier1_spectrum",
             "Coherent FFT of this build's bitstream. First-order noise "

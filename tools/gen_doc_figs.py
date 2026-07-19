@@ -75,21 +75,15 @@ def tier1():
     d = np.loadtxt("spice/tier1_out.csv")
     t, q, vin, vint = d[:, 0], d[:, 1], d[:, 5], d[:, 7]
     dac, comp = d[:, 9], d[:, 11]
-    fig, (a1, a2) = plt.subplots(2, 1, figsize=(7.2, 3.4), sharex=False,
-                                 height_ratios=[2, 1])
+    fig, a1 = plt.subplots(figsize=(7.2, 2.6))
     w = (t > 20e-6) & (t < 60e-6)
     a1.plot(t[w] * 1e6, vin[w], color=C1, lw=1.4, label="vin (input)")
     a1.plot(t[w] * 1e6, vint[w], color=C2, lw=0.7, label="int (integrator)")
     a1.set_ylabel("V")
+    a1.set_xlabel("time [µs]")
     a1.legend(loc="upper right", ncols=2)
     a1.set_title("Tier-1 loop: the integrator hugs the input it is forced "
                  "to track", loc="left", fontsize=9)
-    z1 = (t > 20e-6) & (t < 21e-6)
-    a2.plot(t[z1] * 1e6, q[z1], color=GRAY, lw=0.9,
-            label="q (bitstream)")
-    a2.set_ylabel("V")
-    a2.set_xlabel("time [µs]")
-    a2.legend(loc="center right")
     fig.tight_layout()
     save(fig, "tier1_waves")
 
