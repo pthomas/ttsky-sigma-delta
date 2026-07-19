@@ -29,7 +29,7 @@ git@gitlab.com:pthomas1/sigma-delta.git.
 | Tier 2 OTA schematic | done — folded cascode sized & corner-flat (A0 65dB, GBW 209MHz, PM 58°, ±195V/µs, 4.5mW); xschem/ota.sch GENERATED from sim/ota_tb.py SIZES; equivalence proven (make xcheck) |
 | Tier 2 other blocks | **not started**: StrongARM comparator (+10ns regeneration TB), vref/VCM buffers (25µA RZ pulses), bias generator (replaces ideal IREFP/IREFN/VBNC/VBPC), clk level shifter 1.8→3.3V, output drivers + 2-phase demux DFF |
 | Tier 3 layout cells | done — mag/rin, rdac, cint, sw_nmos (extraction-verified values) |
-| Tier 3 OTA layout | **DRC CLEAN + LVS CLEAN** (fresh-process verified, fast & full DRC styles; make lvs: "Circuits match uniquely", 13/13 devices, 15/15 nets). Next: PEX + re-run ota_tb.py analyses on extracted netlist |
+| Tier 3 OTA layout | **DRC CLEAN + LVS CLEAN + PEX done** (fresh-process verified, fast & full DRC styles; make lvs: "Circuits match uniquely", 13/13 devices, 15/15 nets). Extracted (0.72 pF parasitics): A0 65.2 dB / GBW 119 MHz / PM 46° / SR +128/-508 V/µs / Ivdd 1.37 mA — all tier-1 knees (A0≥49.5 dB, GBW≥50 MHz, SR≥100 V/µs) still met ≥2×; PM 46° (was 58° pre-PEX) is the open question — see below |
 | Tier 1 params | params.py: fs=50MHz, CINT=2pF (swing fix), refs still 1.65V-centered — move to 0.4/0.9/1.4V window is open item 6, do at comparator/buffer design time |
 | CI | runner VM up; **a separate Sonnet instance is working on .gitlab-ci.yml / ci/ — do not touch those files until it lands** |
 
@@ -48,6 +48,28 @@ and remain fixed via the `ENCLOSING_LAYERS`/`PAD` auto-padding in
 route_ota.py. route_ota.py now writes only the parent cell (`save
 ota_layout`) and self-verifies DRC via a fresh magic process on the saved
 files — expect "DRC errors (fresh reload of saved files): 0".
+
+## OTA post-PEX numbers (2026-07-19)
+
+`make pex` = tools/pex_ota.py (magic C-only extraction, cthresh 0, no R)
+-> spice/ota_pex.spice, then sim/ota_tb.py --pex (same 3-DUT deck, layout
+netlist wrapped to the 5-pin interface with ideal refs).
+
+| Metric | Schematic | Extracted | Tier-1 knee | Verdict |
+|---|---|---|---|---|
+| A0 | 65.2 dB | 65.2 dB | ≥49.5 dB | ok |
+| GBW | 209 MHz | 119 MHz | ≥50 MHz | ok (2.4×) |
+| PM | 58° | 46° | (no knee measured) | **open — decide** |
+| SR | +197/−253 | +128/−508 | ≥100 V/µs | ok |
+| Ivdd | 1.37 mA | 1.37 mA | — | 4.5 mW |
+
+The GBW/PM hit is self-load from the auto-router's generous metal (0.50 µm
+via pads, 0.8 µm-pitch m1 track bus, m3 risers): 0.72 pF total parasitic on
+top of CL=1.5 pF. Options if PM 46° is deemed too thin: (a) measure a PM
+knee in tier-1 (add ota model phase term / second pole to spec_sweep) to
+know if 46° actually costs SNDR; (b) slim the routing (narrower pads where
+enclosure allows, shorter track bus); (c) resize for margin (mirror pole).
+Decision parked for next session — discuss before building.
 
 ## Toolchain (dev machine)
 
@@ -78,18 +100,17 @@ From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
 - `make layout` — regenerate the four passive/switch cells in magic
 - `make lvs` — netgen LVS, mag/ota_layout.spice vs spice/ota_top.spice
 - `python3 tools/gen_ota_layout.py && python3 tools/route_ota.py` — regenerate
-  + route the OTA layout, extraction-compare vs golden (expect 13/13) and
-  report a DRC count (**re-verify independently per the gotcha above before
-  trusting the printed number**)
+  + route the OTA layout, extraction-compare vs golden (expect 13/13); the
+  trustworthy DRC number is the "fresh reload of saved files" line (expect 0)
+- `make pex` — parasitic-extract the routed layout + run the OTA TB on it
 - GUI schematic: `xschem xschem/tier1_sdm.sch` → Netlist → Simulate (silent
   ~10 s) → Ctrl-click LOAD WAVES; f=fit, right-drag=zoom, a/b=cursors
 - GUI layout: `magic -rcfile $PDK_ROOT/sky130A/libs.tech/magic/sky130A.magicrc mag/ota_layout.mag`
 
 ## Next actions (priority order)
 
-1. PEX (extract parasitics from mag/ota_layout) and re-run sim/ota_tb.py
-   analyses on the extracted netlist — phase margin (58° pre-parasitics) is
-   the number at risk.
+1. Decide on the post-PEX PM 46° (see table above): measure a PM knee in
+   tier-1, slim the routing, or accept. Discuss with user first.
 2. StrongARM comparator: schematic + the metastability testbench (spec:
    full regeneration in 10 ns; tier-1 showed soft decisions cost ~25 dB).
 3. Reference window move (open item 6): retune params.py + tier-1 rerun

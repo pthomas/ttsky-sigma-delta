@@ -33,6 +33,12 @@ specs: spice/tier1_headless.spice
 layout:
 	python3 tools/gen_layout_cells.py
 
+# parasitic extraction of the routed OTA layout, then TB on the extracted
+# netlist (compare against plain `python3 sim/ota_tb.py`)
+pex:
+	python3 tools/pex_ota.py
+	python3 sim/ota_tb.py --pex
+
 # netgen LVS: routed OTA layout vs xschem golden netlist
 lvs:
 	PDK_ROOT=$${PDK_ROOT:-/home/nvme/pdk} netgen -batch lvs \
@@ -55,4 +61,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout lvs xcheck snr view clean
+.PHONY: all netlist report specs char layout pex lvs xcheck snr view clean
