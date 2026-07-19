@@ -3,7 +3,7 @@
 {{build_stamp}}
 
 This is the living design document for a **first-order continuous-time
-sigma-delta (ΣΔ) modulator ADC** targeting the
+sigma-delta (ΣΔ) modulator analog-to-digital converter (ADC)** targeting the
 [TinyTapeout](https://tinytapeout.com) TTSKY26c shuttle on SkyWater
 **sky130**. It reads top to bottom: from *what a sigma-delta modulator is*,
 through every architecture decision and its supporting data, down to the
@@ -15,7 +15,8 @@ Two properties set this project apart:
    dictionary. The layout is placed and routed by Python scripts driving
    magic. The testbenches, the spec derivations, and this document are all
    generated. `git clone`, `make` — every artifact regenerates.
-2. **Every number on this page was produced by the CI pipeline that
+2. **Every number on this page was produced by the continuous-integration
+   (CI) pipeline that
    published the page.** Nothing here is hand-copied. If a verification
    step didn't run, you'll see an explicit "not verified in this build"
    marker instead of a stale number. The methodology sections describe not
@@ -26,4 +27,5 @@ The toolchain is entirely open source: [ngspice](https://ngspice.sourceforge.io)
 for simulation, [xschem](https://xschem.sourceforge.io) for schematic capture,
 [magic](http://opencircuitdesign.com/magic/) for layout,
 [netgen](http://opencircuitdesign.com/netgen/) for LVS, and the
-[open_pdks](http://opencircuitdesign.com/open_pdks/) sky130A PDK.
+[open_pdks](http://opencircuitdesign.com/open_pdks/) sky130A process
+design kit (PDK).

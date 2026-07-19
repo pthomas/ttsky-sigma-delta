@@ -84,7 +84,7 @@ def write_netlist(tag, mode, ron_dn):
     txt = txt.replace("write tier1_sdm.raw\n", "")  # no 90MB raws per variant
     txt = txt.replace(".control\nrun",
                       ".control\nset rndseed=17\nrun")  # paired dither across variants
-    txt = txt.replace("wrdata tier1_out.csv v(q) v(clk) v(vin) v(int)",
+    txt = txt.replace("wrdata tier1_out.csv v(q) v(clk) v(vin) v(int) v(dac) v(comp)",
                       f"wrdata out_{tag}.csv v(q) v(dac)")
     path = os.path.join(SPICE_DIR, f"cmp_{tag}.spice")
     open(path, "w").write(txt)

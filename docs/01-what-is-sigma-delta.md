@@ -1,6 +1,6 @@
 # What is a sigma-delta modulator?
 
-An ADC's job is to turn a voltage into a number. The obvious way — a flash
+An analog-to-digital converter's job is to turn a voltage into a number. The obvious way — a flash
 or SAR converter — compares the input against many reference levels at
 once and needs component matching as good as the resolution you want:
 16 bits means parts matched to ~0.002%. On an open-source shuttle with no
@@ -40,7 +40,7 @@ quantizer, but use it very fast, and shape where its error goes.**
   </g>
 </svg>
 <figcaption>The whole modulator: an integrator, a clocked comparator, and
-a 1-bit DAC closing the loop.</figcaption>
+a 1-bit digital-to-analog converter (DAC) closing the loop.</figcaption>
 </figure>
 
 The comparator's output — the only thing the digital world ever sees — is
@@ -57,7 +57,7 @@ in the loop's signal transfer function the input passes through, but the
 quantizer's error sees a **high-pass** response — it gets pushed up in
 frequency, away from the signal band. This is *noise shaping*. For a
 first-order loop, in-band quantization noise falls **9 dB for every
-doubling of the oversampling ratio** (OSR = f<sub>s</sub>/2 per Hz of
+doubling of the oversampling ratio**<sup>[[1]](#references)</sup> (OSR = f<sub>s</sub>/2 per Hz of
 signal bandwidth): 1.5 bits per octave, on top of the plain averaging.
 
 The price is time — resolution is bought with clock cycles — and the

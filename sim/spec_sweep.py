@@ -71,7 +71,7 @@ def write_variant(tag, overrides):
                       "VDITH vin vind DC 0 TRNOISE(0.5m 2n 0 0)")
     txt = txt.replace("write tier1_sdm.raw\n", "")
     txt = txt.replace(".control\nrun", ".control\nset rndseed=17\nrun")
-    txt = txt.replace("wrdata tier1_out.csv v(q) v(clk) v(vin) v(int)",
+    txt = txt.replace("wrdata tier1_out.csv v(q) v(clk) v(vin) v(int) v(dac) v(comp)",
                       f"wrdata out_{tag}.csv v(q)")
     path = os.path.join(SPICE_DIR, f"sw_{tag}.spice")
     open(path, "w").write(txt)

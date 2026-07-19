@@ -45,27 +45,55 @@ def save(fig, name):
     print(f"wrote {FIGS}/{name}.svg")
 
 
+def export_sch(sch, name):
+    """xschem SVG export of a schematic (works headless; the stray tkwait
+    warning is harmless)."""
+    import subprocess
+    os.makedirs(FIGS, exist_ok=True)
+    out = f"{FIGS}/{name}.svg"
+    subprocess.run(["xschem", "-q", "-x", "--svg", "--plotfile",
+                    os.path.abspath(out), f"xschem/{sch}.sch"],
+                   capture_output=True, text=True)
+    if os.path.exists(out):
+        print(f"wrote {out}")
+    else:
+        print(f"xschem export FAILED for {sch}")
+
+
 def tier1():
-    d = np.loadtxt("spice/tier1_out.csv")   # t q t clk t vin t int
+    # cols: t q t clk t vin t int t dac t comp
+    d = np.loadtxt("spice/tier1_out.csv")
     t, q, vin, vint = d[:, 0], d[:, 1], d[:, 5], d[:, 7]
-    fig, (a1, a2) = plt.subplots(2, 1, figsize=(7.2, 3.6), sharex=False,
-                                 height_ratios=[3, 2])
+    dac, comp = d[:, 9], d[:, 11]
+    fig, (a1, a2) = plt.subplots(2, 1, figsize=(7.2, 5.0), sharex=False,
+                                 height_ratios=[2, 3])
     w = (t > 20e-6) & (t < 60e-6)
     a1.plot(t[w] * 1e6, vin[w], color=C1, lw=1.4, label="input")
     a1.plot(t[w] * 1e6, vint[w], color=C2, lw=0.7, label="integrator")
     a1.set_ylabel("V")
+    a1.set_xlabel("time [µs]")
     a1.legend(loc="upper right", ncols=2)
     a1.set_title("Tier-1 loop: the integrator hugs the input it is forced "
                  "to track", loc="left", fontsize=9)
-    z = (t > 20e-6) & (t < 21e-6)
-    a2.plot(t[z] * 1e6, q[z], color=GRAY, lw=0.9, label="bitstream q")
+    # one loop trip, all four stations: integrator -> comparator decision
+    # -> retimed bit -> return-to-zero DAC pulse back at the input
+    z = (t > 20e-6) & (t < 20.4e-6)
+    tz = t[z] * 1e6
+    a2.plot(tz, vint[z], color=C2, lw=1.2, label="integrator")
+    a2.plot(tz, comp[z] / 3.3 + 1.6, color=C1, lw=0.9,
+            label="comparator (scaled)")
+    a2.plot(tz, q[z] / 3.3 + 2.9, color=GRAY, lw=0.9,
+            label="retimed bit q (scaled)")
+    a2.plot(tz, dac[z] + 3.4, color=C2, lw=0.9, ls="--",
+            label="DAC feedback (RZ)")
     a2.set_xlabel("time [µs]")
-    a2.set_ylabel("V")
-    a2.legend(loc="center right")
-    a2.set_title("the same loop, zoomed to 50 clock cycles: the 1-bit "
-                 "output doing the work", loc="left", fontsize=9)
+    a2.set_yticks([])
+    a2.legend(loc="upper right", fontsize=7.5, ncols=2)
+    a2.set_title("one loop trip, 20 clock cycles: decision → retimed bit "
+                 "→ return-to-zero feedback pulse", loc="left", fontsize=9)
     fig.tight_layout()
     save(fig, "tier1_waves")
+    export_sch("tier1_sdm", "sch_tier1")
 
     # coherent spectrum of the bitstream (same resampling as sim/snr.py)
     import params as P
@@ -119,6 +147,7 @@ def ota():
     ap.set_xlabel("frequency [Hz]")
     fig.tight_layout()
     save(fig, "ota_ac")
+    export_sch("ota", "sch_ota")
 
 
 def comp():
@@ -162,6 +191,7 @@ def comp():
                      fontsize=9)
         fig.tight_layout()
         save(fig, "dff_retime")
+    export_sch("comp", "sch_comp")
 
 
 if __name__ == "__main__":

@@ -489,3 +489,15 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   mid-cycle output transitions (the property the DAC needs - ISI is the
   #1 ranked non-ideality). Open: drive strength vs actual DAC switch +
   level-shifter load at assembly time.
+- **2026-07-19 - Open item 6 executed: reference window moved to
+  0.4/0.9/1.4 V (VREFN/VCM/VREFP).** Spans preserved (VREFP-VCM = 0.5 V)
+  so k and input full scale are untouched. Tier-1 result: fast 39.1 dB /
+  precision 66.6 dB, ones density 0.500, integrator swing 0.685-1.117 V -
+  exactly the designed VCM +-0.22 window. One latent bug flushed out: the
+  behavioral comparator output was centered on {VCM} (analog) while the
+  DFF thresholds at 1.65 (digital mid-rail) - symmetric only by
+  coincidence at the old 1.65-centered window; moving VCM to 0.9 shifted
+  the effective decision threshold ~24 mV and biased soft decisions,
+  costing ~15/18 dB (fast/precision). comp_beh.sym now pins its output to
+  the digital mid-rail explicitly: analog common mode and digital levels
+  are independent domains. Reopen if: supply or digital levels change.

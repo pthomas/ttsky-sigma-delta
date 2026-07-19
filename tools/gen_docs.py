@@ -367,7 +367,7 @@ text-decoration:none;border-left:2px solid var(--line)}
 nav a:hover{color:var(--ink)}
 main{flex:1;min-width:0;padding:2rem 2.5rem 6rem;max-width:52rem}
 h1{font-size:1.7rem;line-height:1.25;margin:3.5rem 0 1rem;
-padding-top:1rem;border-top:1px solid var(--line)}
+padding-top:1rem;border-top:1px solid var(--line);scroll-margin-top:1rem}
 section:first-child h1{margin-top:.5rem;border-top:none}
 h2{font-size:1.15rem;margin:2rem 0 .6rem}
 code{background:var(--surface);padding:.1em .35em;border-radius:4px;
@@ -449,6 +449,20 @@ def main():
             "nodes lift off the precharge rail together; the input-seeded "
             "imbalance amplifies at τ ≈ 70 ps until the loser is pulled "
             "back down. The dashed trace is the SR-latched output."),
+        "fig_sch_tier1": fig(
+            "sch_tier1",
+            "The tier-1 xschem schematic as simulated: integrator, "
+            "comparator, retiming flip-flop, totem-pole RZ DAC, with the "
+            "behavioral models inline (right)."),
+        "fig_sch_ota": fig(
+            "sch_ota",
+            "The generated OTA schematic (tools/gen_ota_sch.py) — the "
+            "LVS golden reference, regenerated from SIZES on every "
+            "change."),
+        "fig_sch_comp": fig(
+            "sch_comp",
+            "The generated comparator schematic (tools/gen_comp_sch.py): "
+            "StrongARM core, inverter buffers, NAND SR latch."),
         "fig_dff_retime": fig(
             "dff_retime",
             "Comparator output (upper) vs retimed output (lower) with an "
@@ -467,7 +481,10 @@ def main():
         plain = re.sub(r"<[^>]+>", "", title)
         sid = slug(plain)
         body = md.reset().convert(src)
-        sections.append(f'<section id="{sid}">{body}</section>')
+        # id on the heading itself (most robust anchor target), section
+        # kept id-less to avoid duplicates
+        body = body.replace("<h1>", f'<h1 id="{sid}">', 1)
+        sections.append(f"<section>{body}</section>")
         toc.append(f'<a href="#{sid}">{plain}</a>')
 
     page = f"""<!DOCTYPE html>

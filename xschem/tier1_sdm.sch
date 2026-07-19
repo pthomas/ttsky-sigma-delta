@@ -129,7 +129,7 @@ E_QB QB 0 VOL='3.3-v(Q)'
 .control
 run
 write tier1_sdm.raw
-wrdata tier1_out.csv v(q) v(clk) v(vin) v(int)
+wrdata tier1_out.csv v(q) v(clk) v(vin) v(int) v(dac) v(comp)
 .endc
 "}
 B 2 -1780 260 -380 660 {flags=graph

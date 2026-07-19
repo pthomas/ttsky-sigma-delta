@@ -1,7 +1,8 @@
 # Tier 1: the modulator as a behavioral circuit
 
 The tier-1 deck (`xschem/tier1_sdm.sch`) is the whole loop as a circuit —
-active-RC integrator around a behavioral OTA, clocked comparator, retiming
+active-RC integrator around a behavioral operational transconductance
+amplifier (OTA), clocked comparator, retiming
 DFF, and the RZ totem-pole DAC — with each block's non-idealities exposed
 as parameters from `params.py`: OTA DC gain, GBW and slew rate, DAC pulse
 shape and edge asymmetry, one full cycle of loop delay, comparator
@@ -10,6 +11,11 @@ decision quality.
 This is the workhorse tier: fast enough to run in seconds, faithful enough
 that every architecture decision (RZ vs NRZ, CINT resize, reference window)
 was made by measuring SNDR here, not by argument.
+
+This is the actual simulated schematic — behavioral blocks wired exactly
+as the silicon will be:
+
+{{fig_sch_tier1}}
 
 {{fig_tier1_waves}}
 
@@ -21,7 +27,8 @@ first-order loop's +20 dB/decade:
 {{fig_tier1_spectrum}}
 
 The bitstream analysis (`sim/snr.py`) resamples the comparator output at
-mid-period, takes a coherent FFT, and integrates noise + distortion to
+mid-period, takes a coherent fast Fourier transform (FFT), and integrates
+noise + distortion to
 each path's band edge:
 
 {{snr_table}}

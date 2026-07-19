@@ -1,8 +1,9 @@
-# PEX: what the layout costs
+# Parasitic extraction: what the layout costs
 
-Passing DRC and LVS proves the geometry is *legal* and *connected
+Passing the design-rule check (DRC) and layout-versus-schematic (LVS)
+comparison proves the geometry is *legal* and *connected
 correctly* — not that it still meets spec. The layout's metal has
-capacitance, and parasitic extraction (`make pex`) measures it: magic
+capacitance, and parasitic extraction (PEX, `make pex`) measures it: magic
 re-extracts the layout with every node-to-node and node-to-substrate
 capacitor kept, and the identical three-DUT testbench runs on the
 extracted netlist.

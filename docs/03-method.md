@@ -9,14 +9,14 @@ design never advances on optimism.
 | 0 | difference equations | Python/NumPy | SNDR statistics vs theory |
 | 1 | behavioral circuit (ideal blocks + measured non-idealities) | xschem + ngspice | SNDR floors asserted in CI |
 | 2 | transistor schematics | ngspice, sky130 models | specs from tier-1 knee sweeps; corner matrix |
-| 3 | mask geometry | magic + netgen | DRC, LVS vs tier-2 netlist, PEX re-simulation |
+| 3 | mask geometry | magic + netgen | design-rule check (DRC), layout-versus-schematic (LVS) vs tier-2 netlist, parasitic re-simulation |
 
 Three practices are worth stealing:
 
 **Specs are measured, not asserted.** The OTA requirements were found by
 sweeping one non-ideality at a time in the tier-1 loop and reading the
 SNDR knee (the [block specs chapter](#block-specs-sweeping-until-it-breaks)
-shows the curves). The result is sometimes surprising — finite GBW turned
+shows the curves). The result is sometimes surprising — finite gain-bandwidth (GBW) turned
 out to have *no knee down to 25 MHz* because single-pole settling error is
 linear and the loop doesn't care — and the surprise is documented next to
 the number that encodes it.

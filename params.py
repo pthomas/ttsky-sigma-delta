@@ -18,9 +18,12 @@ TR   = 0.2e-9          # clock rise/fall time [s]
 PWH  = TS / 2 - TR     # clock high time [s] (50% duty)
 
 # --- references (3.3 V single-ended core) --------------------------------
-VCM   = 1.65           # analog mid-rail [V]
-VREFP = 2.15           # DAC high reference [V]
-VREFN = 1.15           # DAC low reference [V]
+# Low window per DESIGN.md open item 6: NMOS DAC switches pass it with
+# full gate drive, PMOS input pairs (OTA, comparator) sense it. Spans and
+# k/FS_IN are unchanged from the old 1.65-centered window (VREFP-VCM=0.5).
+VCM   = 0.9            # analog common mode [V]
+VREFP = 1.4            # DAC high reference [V]
+VREFN = 0.4            # DAC low reference [V]
 
 # --- loop passives -------------------------------------------------------
 RIN  = 40e3            # input resistor [ohm]

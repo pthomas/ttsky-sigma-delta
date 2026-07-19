@@ -1,6 +1,7 @@
 # The OTA: a folded cascode, sized in code
 
-The first transistor-level block is the integrator's OTA: a folded cascode
+The first transistor-level block is the integrator's operational
+transconductance amplifier (OTA): a folded cascode
 with a PMOS input pair (input common mode 0.9 V), NMOS folded branch with
 cascodes, and a cascoded PMOS mirror load driving a single-ended output.
 All devices are sky130 5 V (g5v0d10v5) thick-oxide FETs on the 3.3 V
@@ -17,6 +18,8 @@ DC sweep for usable range). The xschem schematic humans read is
 *generated* from the same dictionary (`make xcheck` proves netlist
 equivalence), and the layout in the next chapter is placed from it too.
 
+{{fig_sch_ota}}
+
 **Schematic-level results (tt corner):**
 
 {{ota_sch_table}}
@@ -27,7 +30,7 @@ on that flatness. Known caveats, tracked openly: cascode gate biases and
 reference currents are still ideal sources (the bias generator is a
 pending block), and phase margin sits a few degrees under the 60° bar —
 accepted for v1 and revisited with extracted parasitics in the
-[PEX chapter](#pex-what-the-layout-costs).
+[parasitic extraction chapter](#parasitic-extraction-what-the-layout-costs).
 
 Sizing lessons that cost real iterations (recorded so nobody relearns
 them): sky130 5 V FETs are width-binned, so devices tile 5 µm unit fingers

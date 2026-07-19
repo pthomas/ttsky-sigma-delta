@@ -16,7 +16,7 @@ in batch mode:
 
 Verification is a chain with no human transcription in it: magic
 re-extracts the painted layout and the result is structurally compared
-against the golden netlist device by device, then netgen runs full LVS.
+against the golden netlist device by device, then netgen runs full layout-versus-schematic (LVS) verification.
 
 **Current verdicts (from this build's pipeline):**
 
@@ -24,7 +24,7 @@ against the golden netlist device by device, then netgen runs full LVS.
 
 ## Two war stories your DRC flow should inherit
 
-**The false clean.** magic's batch DRC on a freshly loaded cell reports
+**The false clean.** magic's batch design-rule check (DRC) on a freshly loaded cell reports
 0 errors even when violations exist, because subcell instances default to
 unexpanded and hierarchy-crossing checks are silently skipped. Every DRC
 number in this project therefore comes from a fresh magic process that

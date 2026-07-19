@@ -2,7 +2,7 @@
 
 The comparator gets one hard spec from tier 1: **decide completely within
 its 10 ns half-period**, because a soft, mid-rail decision reaching the
-DAC costs ~25 dB of SNDR (measured). A StrongARM latch is the natural
+DAC costs ~25 dB of SNDR (measured). A StrongARM latch<sup>[[4]](#references)</sup> is the natural
 choice — zero static power, and its speed is set by the regeneration time
 constant of a cross-coupled pair.
 
@@ -15,6 +15,8 @@ modulator lives. The rule that falls out, and that this chip now applies
 twice (the OTA made the same call): **NMOS passes the low window, PMOS
 senses it.** A PMOS input pair gets ~1.5 V of overdrive at the 0.9 V
 common mode — and speeds *up* at the low corner where NMOS would die.
+
+{{fig_sch_comp}}
 
 {{fig_comp_race}}
 
@@ -38,8 +40,8 @@ cap — the full set of lessons is in the repository's decision log.
 
 The comparator's output wanders mid-cycle as each decision completes.
 The feedback DAC must never see that — pulse timing that depends on how
-long the comparator thought is inter-symbol interference, the modulator's
-top-ranked non-ideality. A transistor-level master-slave DFF pins the DAC
+long the comparator thought is inter-symbol interference (ISI), the
+modulator's top-ranked non-ideality<sup>[[2]](#references)</sup>. A transistor-level master-slave DFF pins the DAC
 drive to the clock edge:
 
 {{fig_dff_retime}}

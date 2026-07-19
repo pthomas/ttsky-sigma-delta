@@ -1,7 +1,7 @@
 v {xschem version=3.4.4 file_version=1.2}
 G {}
 K {type=vsource
-format="@name @@OUT GND VOL='\{VCM\}+1.6*tanh(2000*(v( @@PLUS )-v( @@MINUS )))'"
+format="@name @@OUT GND VOL='1.65+1.65*tanh(2000*(v( @@PLUS )-v( @@MINUS )))'"
 template="name=E1"
 }
 V {}
