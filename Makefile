@@ -48,6 +48,16 @@ layout-report:
 site:
 	python3 tools/gen_docs.py
 
+# rebuild the TinyTapeout submission frame (gds/ + lef/) from mag/
+tt:
+	cd tt_frame && rm -f tt_um_pthomas_sigma_delta.mag && \
+	  SIGMA_DELTA_MAG=$(CURDIR)/mag magic -dnull -noconsole \
+	  -rcfile $${PDK_ROOT:-/home/nvme/pdk}/sky130A/libs.tech/magic/sky130A.magicrc \
+	  build_frame.tcl && \
+	  SIGMA_DELTA_MAG=$(CURDIR)/mag magic -dnull -noconsole \
+	  -rcfile $${PDK_ROOT:-/home/nvme/pdk}/sky130A/libs.tech/magic/sky130A.magicrc \
+	  export.tcl
+
 # netgen LVS: routed OTA layout vs xschem golden netlist
 lvs:
 	PDK_ROOT=$${PDK_ROOT:-/home/nvme/pdk} netgen -batch lvs \
@@ -78,4 +88,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site lvs xcheck compcheck snr view clean
+.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck snr view clean
