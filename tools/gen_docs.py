@@ -175,6 +175,53 @@ def viewer3d():
     return VIEWER_HTML
 
 
+def fig(name, caption):
+    if not os.path.exists(f"{RESULTS}/figs/{name}.svg"):
+        return missing(f"figure {name}")
+    return (f'<figure><img src="figs/{name}.svg" alt="{caption}" '
+            f'loading="lazy"><figcaption>{caption}</figcaption></figure>')
+
+
+def comp_table():
+    r = load("comp")
+    if not r:
+        return missing("comparator testbench")
+    c = load("comp_corners")
+    mc = load("comp_mc")
+    rows = [("Regeneration τ", f"{r['tau_ps']} ps"),
+            ("Worst decision time (CM 0.68–1.12 V, dv ≥ 10 µV)",
+             f"{r['worst_tdec_ns']} ns  (budget 10 ns)"),
+            ("Metastable input window @ 5 ns",
+             f"&lt; {r['meta_dv_v']:.0e} V (extrapolated)"),
+            ("Kickback onto integrator-node proxy",
+             f"{r['kickback_mv']} mV peak"),
+            ("Power @ 50 MHz", f"{r['power_uw']} µW")]
+    if c:
+        taus = [x["tau_ps"] for x in c]
+        worst = max(x["worst_tdec_ns"] for x in c)
+        okc = all(x["ok"] for x in c)
+        rows.append(("Corners tt/ss/ff/sf/fs",
+                     f"τ {min(taus)}–{max(taus)} ps, worst "
+                     f"{worst} ns{'' if okc else ' — FAIL'}"))
+    if mc:
+        rows.append((f"Input offset (mismatch MC, N={mc['n']})",
+                     f"σ = {mc['sigma_mv']} mV (benign in a 1-bit ΣΔ: "
+                     f"a DC shift, not an SNDR term)"))
+    body = "".join(f"<tr><td>{k}</td><td>{v}</td></tr>" for k, v in rows)
+    return (f"<table><thead><tr><th>Metric</th><th>Measured</th></tr>"
+            f"</thead><tbody>{body}</tbody></table>")
+
+
+def dff_line():
+    r = load("dff")
+    if not r:
+        return missing("DFF testbench")
+    text = (f"retimer: clk-to-Q {r['clk_to_q_ns']} ns, {r['flips']} "
+            f"consecutive alternating decisions retimed, "
+            f"{r['violations']} mid-cycle output transitions")
+    return f"<p>{chip(r['ok'], text)}</p>"
+
+
 # ------------------------------------------------------------------- page
 
 VIEWER_HTML = """
@@ -332,6 +379,7 @@ table{border-collapse:collapse;margin:1rem 0;width:100%;font-size:.92rem}
 th{text-align:left;color:var(--muted);font-weight:600}
 th,td{padding:.45rem .7rem;border-bottom:1px solid var(--line)}
 figure{margin:1.5rem 0;color:var(--ink)}
+figure img{width:100%;height:auto}
 figcaption,.fineprint{font-size:.82rem;color:var(--muted)}
 .stamp{background:var(--surface);border:1px solid var(--line);
 border-radius:8px;padding:.6rem .9rem;font-size:.88rem}
@@ -381,6 +429,31 @@ def main():
         "layout_status": layout_status(),
         "gds_link": gds_link(),
         "viewer3d": viewer3d(),
+        "comp_table": comp_table(),
+        "dff_line": dff_line(),
+        "fig_tier1_waves": fig(
+            "tier1_waves",
+            "Tier-1 behavioral loop (this build): input and integrator "
+            "above; a 50-cycle zoom of the bitstream below."),
+        "fig_tier1_spectrum": fig(
+            "tier1_spectrum",
+            "Coherent FFT of this build's bitstream. First-order noise "
+            "shaping rises at +20 dB/decade; both decimation bands marked."),
+        "fig_ota_ac": fig(
+            "ota_ac",
+            "OTA open-loop response, schematic vs extracted, from this "
+            "build's testbench runs."),
+        "fig_comp_race": fig(
+            "comp_race",
+            "The regeneration race at 10 mV overdrive (this build): both "
+            "nodes lift off the precharge rail together; the input-seeded "
+            "imbalance amplifies at τ ≈ 70 ps until the loser is pulled "
+            "back down. The dashed trace is the SR-latched output."),
+        "fig_dff_retime": fig(
+            "dff_retime",
+            "Comparator output (upper) vs retimed output (lower) with an "
+            "alternating input: the comparator commits mid-cycle, the DFF "
+            "releases it only on the clock edge the DAC sees."),
     }
 
     md = markdown.Markdown(extensions=["tables", "fenced_code"])
@@ -424,6 +497,9 @@ CI-verified.">
                      (f"{RESULTS}/ota_geom.json", "public/ota_geom.json")]:
         if os.path.exists(src):
             shutil.copy(src, dst)
+    if os.path.isdir(f"{RESULTS}/figs"):
+        shutil.copytree(f"{RESULTS}/figs", "public/figs",
+                        dirs_exist_ok=True)
     n_missing = len(re.findall(r'class="chip warn"', page))
     print(f"public/index.html written ({len(page)/1024:.0f} kB, "
           f"{len(sections)} chapters, {n_missing} unverified markers)")

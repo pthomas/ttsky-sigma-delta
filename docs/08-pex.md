@@ -11,6 +11,8 @@ extracted netlist.
 
 {{ota_compare_table}}
 
+{{fig_ota_ac}}
+
 The story the numbers tell: DC quantities (gain, operating point, power)
 don't move — parasitics are capacitors, and the netlists are LVS-identical.
 The dynamics pay: the auto-router's deliberately generous metal (0.5 µm

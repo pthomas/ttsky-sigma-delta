@@ -62,6 +62,13 @@ xcheck:
 	xschem --netlist --spice -q -x xschem/ota_top.sch
 	python3 sim/ota_xcheck.py
 
+# regenerate comparator schematic from sizes and verify equivalence
+compcheck:
+	mkdir -p spice
+	python3 tools/gen_comp_sch.py
+	xschem --netlist --spice -q -x xschem/comp_top.sch
+	python3 sim/comp_xcheck.py
+
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 
@@ -71,4 +78,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site lvs xcheck snr view clean
+.PHONY: all netlist report specs char layout pex layout-report site lvs xcheck compcheck snr view clean

@@ -9,7 +9,7 @@ sigma-delta (ΣΔ) modulator ADC** targeting the
 through every architecture decision and its supporting data, down to the
 mask geometry you can spin in 3D at the bottom of the layout chapter.
 
-Two properties make this project worth a researcher's afternoon:
+Two properties set this project apart:
 
 1. **The design is code.** The schematic is generated from a Python sizing
    dictionary. The layout is placed and routed by Python scripts driving

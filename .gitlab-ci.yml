@@ -21,8 +21,9 @@ snr:
     - make snr | tee snr.log
     # loose floor only: fast path is stable, 35 dB is far below nominal ~39
     - awk '/fast/ { if ($4 < 35) { print "FAIL fast-path SNDR " $4; exit 1 } }' snr.log
+    - python3 tools/gen_doc_figs.py tier1
   artifacts:
-    paths: [reports/results/snr.json]
+    paths: [reports/results/]
     expire_in: 30 days
 
 fet-char:
@@ -64,10 +65,25 @@ layout-verify:
     - python3 tools/pex_ota.py
     - python3 sim/ota_tb.py --pex
     - python3 tools/layout_report.py
+    - python3 tools/gen_doc_figs.py ota
   artifacts:
     paths:
       - reports/results/
       - reports/ota_layout.gds
+    expire_in: 30 days
+
+# comparator + retimer verification (quick grid; the corner sweep and the
+# offset Monte Carlo are dev-bench runs -- their page rows only appear on
+# builds that ran them)
+comparator:
+  stage: layout
+  script:
+    - python3 sim/comp_tb.py --quick
+    - make compcheck
+    - python3 sim/dff_tb.py
+    - python3 tools/gen_doc_figs.py comp
+  artifacts:
+    paths: [reports/results/]
     expire_in: 30 days
 
 # GitLab Pages: the generated design document, with every number sourced
@@ -85,6 +101,8 @@ pages:
     - job: ota-specs
       artifacts: true
     - job: layout-verify
+      artifacts: true
+    - job: comparator
       artifacts: true
   script:
     - python3 tools/gen_docs.py

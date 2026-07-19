@@ -1,8 +1,8 @@
 # Architecture: why continuous-time, first-order, return-to-zero
 
 **The chip is one modulator producing one bitstream that is decimated two
-ways at once** by the companion FPGA (a PolarFire SoC, which also supplies
-a clean low-jitter clock):
+ways at once** by whatever receives it — the reference setup is an FPGA
+(e.g. a PolarFire SoC) that also supplies a clean, low-jitter clock:
 
 | Path | Bandwidth | Target | Use |
 |---|---|---|---|

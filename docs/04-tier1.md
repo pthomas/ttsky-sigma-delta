@@ -11,6 +11,15 @@ This is the workhorse tier: fast enough to run in seconds, faithful enough
 that every architecture decision (RZ vs NRZ, CINT resize, reference window)
 was made by measuring SNDR here, not by argument.
 
+{{fig_tier1_waves}}
+
+The spectrum below is the whole thesis of the architecture in one picture:
+the signal sits in a quiet band at the left while the quantization noise —
+which had to go *somewhere* — has been pushed up and out, rising at the
+first-order loop's +20 dB/decade:
+
+{{fig_tier1_spectrum}}
+
 The bitstream analysis (`sim/snr.py`) resamples the comparator output at
 mid-period, takes a coherent FFT, and integrates noise + distortion to
 each path's band edge:

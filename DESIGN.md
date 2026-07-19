@@ -463,3 +463,29 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   and a 1-bit SD loop tolerates near-zero-overdrive sign errors as bounded
   quantization noise; what it cannot absorb - measured 25 dB - is a soft
   mid-rail decision, so decision TIME is enforced at every point).
+- **2026-07-19 - Comparator output chain corrected: inverter buffers +
+  NAND SR latch (the NOR latch wired straight to the regeneration nodes
+  was a real hysteresis bug).** Symptom: state-dependent wrong-sign
+  decisions surviving every solver-tolerance fix, including at 10 mV
+  overdrive, with decision times that shifted when supply series R was
+  added. Mechanism: the latch holds the previous decision through
+  precharge, so its gate loading on on1/on2 is asymmetric (the NMOS on
+  the held-high side sees its drain at VDD, the other at 0) - a
+  ~10 mV-equivalent dynamic hysteresis seeded by the PREVIOUS bit. This
+  is why the textbook StrongARM buffers its outputs before the latch:
+  both inverter outputs sit at VDD during precharge regardless of held
+  state, so the loading is symmetric by construction. After the fix the
+  race is monotone in overdrive and sign-correct at every enforced point
+  in all five corners (tau 63-97 ps, worst decision 1.18 ns). Verified
+  metrics (tt): tau 77 ps, worst 0.96 ns, 71 uW, kickback 10.5 mV,
+  offset MC (tt_mm, N=19) sigma 13.6 mV - benign DC shift in a 1-bit
+  loop, and it justifies the >=10 mV sign-enforcement floor in the TB.
+  Reopen if: the latch or its loading changes, or a hysteretic
+  comparator is ever intentionally wanted.
+- **2026-07-19 - DFF retimer v1 (transistor level) verified in-chain:**
+  static CMOS master-slave with transmission gates, driven by the real
+  comparator in sim/dff_tb.py with an alternating-sign input (hardest
+  retiming pattern). 9/9 decisions retimed, clk-to-Q 0.37 ns, zero
+  mid-cycle output transitions (the property the DAC needs - ISI is the
+  #1 ranked non-ideality). Open: drive strength vs actual DAC switch +
+  level-shifter load at assembly time.

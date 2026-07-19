@@ -178,6 +178,10 @@ def run(p, pex=False):
           f"range covers 0.4..1.4 V")
 
     os.makedirs("reports/results", exist_ok=True)
+    # keep the AC curve for the docs figure generator (sch/pex overlay)
+    import shutil
+    shutil.copy("spice/ota_ac.csv",
+                f"reports/results/ota_ac_{'pex' if pex else 'sch'}.csv")
     json.dump(dict(a0_db=round(a0_db, 1), gbw_hz=round(ugf),
                    pm_deg=round(pm, 1), sr_up=round(sr_up),
                    sr_dn=round(sr_dn), ivdd_a=round(idd, 6),

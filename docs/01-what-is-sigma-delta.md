@@ -43,13 +43,14 @@ quantizer, but use it very fast, and shape where its error goes.**
 a 1-bit DAC closing the loop.</figcaption>
 </figure>
 
-The loop works like a thermostat. The comparator's output — the only thing
-the digital world ever sees — is fed back through the DAC and subtracted
-from the input. The integrator accumulates the difference. Whatever the
-input voltage is, the feedback bitstream is forced to average to it: a DC
-input at 30% of full scale produces a bitstream whose *density of ones* is
-30%. Digital filtering (decimation) then averages N successive bits into
-one high-resolution sample.
+The comparator's output — the only thing the digital world ever sees — is
+fed back through the DAC and subtracted from the input, and the integrator
+accumulates the difference. Negative feedback around an integrator forces
+the *average* of the feedback to track the input: any persistent error
+would make the integrator ramp away, flipping decisions until the error is
+driven back to zero. So a DC input at 30% of full scale produces a
+bitstream whose *density of ones* is 30%. Digital filtering (decimation)
+then averages N successive bits into one high-resolution sample.
 
 Averaging alone would only buy √N. The integrator is what makes it a ΣΔ:
 in the loop's signal transfer function the input passes through, but the
