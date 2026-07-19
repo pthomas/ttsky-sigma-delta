@@ -11,7 +11,9 @@ then emits magic tcl that:
      horizontal tracks in the channels between rows, via1 at junctions;
   3. labels each net on met2 so extraction names match the golden netlist.
 
-Result saved as mag/ota_routed.mag, extracted, and structurally compared.
+Result saved back into mag/ota_layout.mag (parent cell only -- see the
+writeall-force gotcha in DESIGN.md 2026-07-19), extracted, DRC-verified in a
+fresh magic process, and structurally compared.
 Usage: python3 tools/route_ota.py   (after tools/gen_ota_layout.py)
 """
 
@@ -28,6 +30,16 @@ U = 200.0     # parent transforms, runtime boxes, AND .ext ports per um
 U_EXT = 200.0 # (subcell .mag rect files are 100/um -- not used here)
 MW = 0.6                  # met wire width um
 VIA = 0.34                # via/contact square um
+PAD = 0.50                # metal pad enclosing a via/contact cut, um (safely
+                          # above the largest required enclosure: via2/met2
+                          # needs 0.045um/side -> VIA+2*0.045=0.43 minimum)
+
+# contact/via type -> metal layers that must enclose it with a PAD-sized box
+ENCLOSING_LAYERS = {
+    "mcon": ["m1"],
+    "via1": ["m1", "m2"],
+    "via2": ["m2", "m3"],
+}
 
 
 def magic_run(script):
@@ -88,6 +100,20 @@ def main():
         for l in layers:
             tcl.append(f"paint {l}")
             audit.append((l, x1, y1, x2, y2, cur_net[0]))
+        # any via/contact cut gets a PAD-sized enclosing box on every metal
+        # layer it must be enclosed by, regardless of what nearby wire
+        # geometry happens to provide -- undersized/absent enclosure was the
+        # dominant DRC violation class before this.
+        contacts = [l for l in layers if l in ENCLOSING_LAYERS]
+        if contacts:
+            cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+            px1, py1 = cx - PAD / 2, cy - PAD / 2
+            px2, py2 = cx + PAD / 2, cy + PAD / 2
+            pads = sorted({m for l in contacts for m in ENCLOSING_LAYERS[l]})
+            tcl.append(f"box {px1:.3f}um {py1:.3f}um {px2:.3f}um {py2:.3f}um")
+            for m in pads:
+                tcl.append(f"paint {m}")
+                audit.append((m, px1, py1, px2, py2, cur_net[0]))
 
     # taps: (net, x_lo, x_hi, y) ranges where a riser may drop
     taps = []
@@ -192,15 +218,31 @@ def main():
     if bad:
         print(f"{bad} same-layer cross-net collisions -- fix before painting")
 
-    tcl += ["writeall force", "extract all",
+    # save ONLY the modified parent: "writeall force" in magic 8.3.676
+    # rewrites the (unmodified) gencell subcells lambda-normalized without
+    # their magscale header, halving odd 0.005um coordinates lossily -- on
+    # the next load the rounding error shows up as hundreds of fake
+    # spacing/width DRC violations inside the devices (licon.9+psdm.5a etc.)
+    tcl += ["save ota_layout", "extract all",
             "ext2spice lvs", "ext2spice hierarchy off",
             "ext2spice subcircuit top on",
             "ext2spice merge conservative", "ext2spice",
-            "drc on", "drc check", "drc catchup",
+            "drc on", "select top cell", "expand", "drc check", "drc catchup",
             'puts "DRCCOUNT [drc listall count total]"', "quit -noprompt"]
     out = magic_run("\n".join(tcl) + "\n")
     m = re.search(r"DRCCOUNT (\d+)", out)
-    print(f"routing painted; DRC errors: {m.group(1) if m else '?'}")
+    print(f"routing painted; DRC errors (in-session): {m.group(1) if m else '?'}")
+
+    # the number that counts: re-check the SAVED files in a fresh process
+    # (catches save/reload grid-quantization damage the in-session check
+    # cannot see -- see DESIGN.md 2026-07-19 writeall gotcha)
+    out2 = magic_run("load ota_layout\nselect top cell\nexpand\n"
+                     "drc check\ndrc catchup\n"
+                     'puts "DRCCOUNT [drc listall count total]"\n'
+                     "quit -noprompt\n")
+    m2 = re.search(r"DRCCOUNT (\d+)", out2)
+    print(f"DRC errors (fresh reload of saved files): "
+          f"{m2.group(1) if m2 else '?'}")
 
     # structural compare by net names
     got = []

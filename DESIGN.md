@@ -350,3 +350,62 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   OTA input/output polarity) that shifts offset and 1/f noise out of band; it
   does not fix ISI or supply rejection. Orthogonal decisions; chopping tracked
   in open item 6.
+- **2026-07-19 - magic batch-DRC gotcha: a freshly-loaded cell with no
+  in-session paint reports 0 errors even when real violations exist,**
+  because subcell instances default to unexpanded (collapsed bbox) and
+  `drc check` silently skips hierarchy-crossing checks against them; a cell
+  painted fresh in the same session (e.g. gen_ota_layout.py's own gencell
+  placement) does not have this problem. Always do `select top cell; expand`
+  before `drc check`/`drc listall count total` on anything loaded from disk,
+  and don't trust a suspiciously-clean number without independently
+  reproducing it in a fresh process. Confirmed the checker itself works via
+  a deliberately-injected spacing violation. tools/route_ota.py's own final
+  check now does this; STATUS.md's DRC figures going forward should all be
+  from this method. Why this matters: an earlier session's LVS-fix commit
+  (a6dbfdb) reported "~4.2k DRC violations pending" from before this gotcha
+  was known - that number was never independently re-verified and turned out
+  to undercount; true count when properly checked was 5034 pre-fix. Reopen
+  if: a magic version upgrade changes default expand behavior.
+- **2026-07-19 - Via/contact painting must always draw its own enclosing
+  metal pad, never rely on incidental overlap from nearby wire geometry.**
+  Root cause of ~4140 of the 5034 real DRC violations above: route_ota.py
+  painted bare via/contact-sized cuts (via1, via2, mcon) and depended on
+  whatever metal happened to already be nearby - zero, in the case of the
+  bulk-tap mcon+via1 stack landing on an li-only guard ring with no m1 at
+  all. Fixed with a PAD-sized (0.50 um, safely above the largest required
+  enclosure of 0.045 um/side) box auto-painted on every metal layer a given
+  contact type must be enclosed by (ENCLOSING_LAYERS dict), any time that
+  contact type appears in a paint() call. Took DRC 5034 -> 894, LVS still
+  clean. Reopen if: a future contact type is added to paint() calls without
+  a matching ENCLOSING_LAYERS entry.
+- **2026-07-19 - magic `writeall force` after `load` corrupts unmodified
+  gencell subcells (grid halving) - the "remaining 894" DRC violations were
+  entirely this artifact, and the layout is actually DRC clean.** Mechanism,
+  proven by isolated experiment (plain `load ota_layout; writeall force`
+  with no editing reproduces it): magic 8.3.676 writes cells it considers
+  unmodified lambda-normalized *without* their `magscale 1 2` header,
+  halving every internal coordinate into 100/um file units. Gencell devices
+  contain odd internal coordinates (e.g. the licon.9+psdm.5a poly-contact to
+  P-diff gap of exactly 47 units = 0.235 um), so the halving rounds them
+  (47 -> 23 -> 46 on reload = 0.230 um < 0.235 um), manufacturing hundreds
+  of fake sub-0.005um spacing/width violations inside every device. Modified
+  cells (the painted parent) are written exact with `magscale 1 2`, which is
+  why only subcells were hit. Evidence that convicted it: violation slivers
+  sat between device-internal shapes (poly contact row vs S/D diffusion top,
+  pfet rows only), not at anything route_ota.py paints - falsifying the
+  earlier "strap ty±1.5 lands in the finger structure" hypothesis (that
+  root-cause entry in STATUS.md was wrong); gen-written subcells carry
+  `magscale 1 2` with exact coords, route-written ones were coordinate-halved
+  copies; and a freshly generated+routed layout DRCs clean in-session but
+  showed 894 only after the lossy write+reload. Also retroactively taints
+  the "5034 real violations pre-fix" number above: the ~890 licon/width
+  portion of it was this artifact (the ~4140 metal-enclosure portion was
+  real). Fix: tools/route_ota.py now uses `save ota_layout` (writes only the
+  cell it painted) instead of `writeall force`, and re-verifies DRC on the
+  saved files in a *fresh* magic process (expand + full-cell check) - that
+  reload count is the only number to trust. Result: DRC 0 (fast and full
+  styles, independent processes), LVS still "Circuits match uniquely",
+  13/13 devices from a fresh-load extraction. Reopen if: magic changes
+  writeall unit handling, or any new tool step rewrites mag/ gencell files
+  (watch for "Scaled magic input cell ... geometry by factor of 2" on load -
+  that warning means a lossy rewrite already happened).
