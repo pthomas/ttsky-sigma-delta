@@ -18,7 +18,7 @@ snr:
     - make clean
     - make snr | tee snr.log
     # loose floor only: fast path is stable, 35 dB is far below nominal ~39
-    - awk '/fast/ { if ($5 < 35) { print "FAIL fast-path SNDR " $5; exit 1 } }' snr.log
+    - awk '/fast/ { if ($4 < 35) { print "FAIL fast-path SNDR " $4; exit 1 } }' snr.log
 
 fet-char:
   stage: smoke
