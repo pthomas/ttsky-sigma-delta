@@ -16,6 +16,18 @@ output at the mirror side. Closed-loop Zout ~= 1/gm(input). Tail is an
 ideal source in this TB (a 1x tap off the bias block's master lands at
 layout time, like the OTA's mirrors).
 
+The 0.4/0.9/1.4 V levels come from a resistor ladder off VAPWR
+(190k/50k/50k/40k top-to-bottom, ~10 uA): VDD-referenced references are
+a pure gain error on the ADC span (the benign class per the tier-1
+knees), and the ratios track since all four Rs are the same poly
+material. Ideal Rs here; poly cells at layout (same rule as bias).
+
+CDEC = 5 pF per reference (2026-07-19): 3 x 20 pF MiM (~30k um^2) does
+not fit the 1x2 tile. Tier-1 at RREF=754 (measured Zout) with CDEC
+20/10/5/2 pF: fast path 38.6-39.6 dB flat, precision 56.9-58.7 dB, all
+inside normal scatter -- smaller decap recovers faster and droop is
+bit-independent, so 5 pF (~2.5k um^2 each) is the pick.
+
 Loads: 20 pF decap plus a worst-pattern (alternating-bit) replica of the
 RZ DAC currents -- VREFP sources 25 uA pulses every other period, VREFN
 sinks them on the opposite bits, VCM absorbs an alternating-sign return
@@ -47,7 +59,9 @@ FSIZES = dict(
     W_IN=60, L_IN=0.5,    # input pair (gm sets Zout ~ 1/gm)
     W_MIR=30, L_MIR=1.0,  # NMOS mirror load
     ITAIL=320e-6,         # tail (bias-block tap at layout time)
-    CDEC=20e-12,
+    CDEC=5e-12,           # tier-1 validated at RREF=754 (see docstring)
+    # reference ladder off VAPWR, top to bottom (total 330k, ~10 uA)
+    RL_TOP=190e3, RL_PC=50e3, RL_CM=50e3, RL_BOT=40e3,
 )
 
 REFS = {"vrefn": 0.4, "vcm": 0.9, "vrefp": 1.4}
@@ -80,9 +94,11 @@ def deck(p, corner):
 .options method=gear reltol=1e-5 vntol=1e-8 abstol=1e-13
 VDDS vddi 0 3.3
 RVDD vddi vdd 1
-VRP inp_p 0 1.4
-VRM inp_m 0 0.4
-VRC inp_c 0 0.9
+* reference ladder (VAPWR-referenced; buffer gates draw no DC)
+RLT vdd   inp_p {p['RL_TOP']:g}
+RLP inp_p inp_c {p['RL_PC']:g}
+RLC inp_c inp_m {p['RL_CM']:g}
+RLM inp_m 0     {p['RL_BOT']:g}
 XBP inp_p outp vdd 0 buf
 XBM inp_m outm vdd 0 buf
 XBC inp_c outc vdd 0 buf
@@ -123,15 +139,17 @@ def measure_corner(p, corner):
     for name, w in outs.items():
         tgt = REFS[name]
         settle = t > 0.5e-6
-        # sample at the END of each pulse window (worst residual) and at
-        # the end of each full period (what the next cycle inherits)
+        # sample at the END of each pulse window (worst residual) and
+        # just BEFORE each pulse window opens (the initial condition a
+        # pulse inherits -- the droop during a pulse is the same for
+        # every pulse, so only the inherited state carries bit history)
         te_pulse = np.arange(19.4e-9, TSTOP, TPER)
-        te_per = np.arange(19.9e-9, TSTOP, TPER)
+        te_inh = np.arange(9.9e-9, TSTOP, TPER)
         vp = np.interp(te_pulse[te_pulse > 0.5e-6], t, w)
-        vq = np.interp(te_per[te_per > 0.5e-6], t, w)
+        vq = np.interp(te_inh[te_inh > 0.5e-6], t, w)
         dc = w[settle].mean() - tgt
         worst = np.abs(vp - tgt).max()
-        # bit-dependent component: period-end value difference between
+        # bit-dependent component: inherited-state difference between
         # even and odd cycles (the alternating pattern makes these the
         # two bit histories)
         isi = abs(vq[0::2].mean() - vq[1::2].mean())

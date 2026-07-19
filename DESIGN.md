@@ -575,3 +575,29 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   is TT's standard 1.8 V clk pin through the level shifter. Reopen if:
   measured TT pad toggle limit forces fs below ~25 MHz (revisit OSR
   budget), or a future differential design is started.
+- **2026-07-19 - Reference decap resized 20 pF -> 5 pF + ladder defined
+  (reopen of the buf entry, triggered by layout area).** 3 x 20 pF MiM
+  is ~30,000 um^2 and does not fit the 1x2 tile interior (~32.8k um^2);
+  the buf entry's "CDEC shrinks below ~10 pF" reopen condition fired.
+  Tier-1 validation (monkeypatched sim.spec_sweep.CDEC, RREF=754 = the
+  measured buffer Zout, CDEC 20/10/5/2 pF): fast path 38.6-39.6 dB flat,
+  precision 56.9-58.7 dB - all inside the precision path's normal
+  benign-setting scatter (the archived specs table spans 53.6-63.9 dB
+  across settings with no knee). Physics: smaller decap means larger
+  per-pulse droop (45 mV at 5 pF vs 11 mV at 20 pF) but recovery tau
+  Zout*CDEC drops 15 ns -> 3.8 ns, so every pulse inherits a fully
+  recovered reference - droop becomes bit-independent (benign class),
+  true ISI *shrinks*. DECISION: CDEC = 5 pF per reference (~2.5k um^2
+  each, 7.5k um^2 total - fits). TB metric fix that this exposed:
+  buf_tb.py's bit-dep metric sampled period-END voltage, which at small
+  CDEC measures the (bit-independent) droop itself and false-failed;
+  it now samples the state each pulse INHERITS at its window start
+  (even/odd split unchanged). Post-fix corners: bit-dep <= 2.5 mV
+  (gate 8), DC offsets -16..+39 mV (gate 40), 3.2 mW.
+  ALSO: the 0.4/0.9/1.4 V levels are now actually defined - poly ladder
+  off VAPWR 190k/50k/50k/40k top-to-bottom (330k total, ~10 uA, 33 uW)
+  feeding the buffer gates (no DC load). VDD-referenced refs = pure gain
+  error on the span (benign class); ratios track (same poly material).
+  Ideal Rs in TB, poly cells at layout (same rule as bias). Reopen if:
+  DAC pulse current grows past ~50 uA, fs changes, or layout forces the
+  ladder onto a different supply than the buffers' VAPWR.

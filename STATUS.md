@@ -118,18 +118,13 @@ assemble the top level into the TT frame, per-component report sub-pages,
 report when TT-ready. Commit per milestone. Ordered plan with the key
 context a fresh session needs:
 
-1. **Reference plan fix (IN PROGRESS, immediate next step).** Discovered:
-   3x20 pF decap = ~30,000 um^2 of MiM — does NOT fit the 1x2 tile
-   (~32.8k um^2 interior). Validate small decaps in tier-1: monkeypatch
-   `sim.spec_sweep.CDEC` and run `run_variant` at RREF=754 (the measured
-   buffer Zout) with CDEC 20/10/5/2 pF; expect small C to be FINE or
-   better (larger droop but faster recovery; droop is bit-independent =
-   benign). Then pick decap size (likely 5 pF -> ~2.5k um^2 each), log in
-   DESIGN.md (the buf entry's reopen condition explicitly triggers).
-   ALSO: nothing yet defines the 0.4/0.9/1.4 V levels — add a poly
-   resistor ladder (e.g. 190k/50k/50k/40k from VAPWR, ~10 uA) feeding the
-   buffer inputs; VDD-referenced refs = gain error = benign class; extend
-   sim/bias_tb.py or buf_tb.py to include it.
+1. **Reference plan fix — DONE 2026-07-19.** CDEC = 5 pF per reference
+   (tier-1 validated at RREF=754, CDEC 20/10/5/2 pF all inside scatter;
+   ~7.5k um^2 total MiM, fits). Ladder added: 190k/50k/50k/40k off VAPWR
+   (~10 uA) feeding the buffer gates, now in sim/buf_tb.py (ACCEPT:
+   bit-dep <= 2.5 mV, DC <= 39 mV, 3.2 mW). TB isi metric fixed to
+   sample the pulse-inherited state (period-end sampling false-failed
+   small decaps). Full entry in DESIGN.md.
 2. **Golden netlists + xschem schematics for remaining blocks.** Golden
    .spice per block emitted from the TB subckt functions (single source =
    SIZES dicts): comp has spice/comp_top.spice via make compcheck; need
