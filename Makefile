@@ -33,6 +33,13 @@ specs: spice/tier1_headless.spice
 layout:
 	python3 tools/gen_layout_cells.py
 
+# netgen LVS: routed OTA layout vs xschem golden netlist
+lvs:
+	PDK_ROOT=$${PDK_ROOT:-/home/nvme/pdk} netgen -batch lvs \
+	  "mag/ota_layout.spice ota_layout" "spice/ota_top.spice ota" \
+	  $${PDK_ROOT:-/home/nvme/pdk}/sky130A/libs.tech/netgen/sky130A_setup.tcl \
+	  spice/lvs_report.out
+
 # regenerate OTA schematic from sizes and verify equivalence
 xcheck:
 	python3 tools/gen_ota_sch.py
@@ -48,4 +55,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout xcheck snr view clean
+.PHONY: all netlist report specs char layout lvs xcheck snr view clean

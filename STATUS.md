@@ -18,7 +18,7 @@ git@gitlab.com:pthomas1/sigma-delta.git.
 | Tier 2 OTA schematic | done — folded cascode sized & corner-flat (A0 65dB, GBW 209MHz, PM 58°, ±195V/µs, 4.5mW); xschem/ota.sch GENERATED from sim/ota_tb.py SIZES; equivalence proven (make xcheck) |
 | Tier 2 other blocks | **not started**: StrongARM comparator (+10ns regeneration TB), vref/VCM buffers (25µA RZ pulses), bias generator (replaces ideal IREFP/IREFN/VBNC/VBPC), clk level shifter 1.8→3.3V, output drivers + 2-phase demux DFF |
 | Tier 3 layout cells | done — mag/rin, rdac, cint, sw_nmos (extraction-verified values) |
-| Tier 3 OTA layout | **connectivity done, 13/13 devices match golden netlist** (mag/ota_layout.mag); ~4.2k DRC violations pending (routing min-width/space — mechanical); LVS pending netgen install; PEX + re-sim after that |
+| Tier 3 OTA layout | **LVS CLEAN — netgen: "Circuits match uniquely"** (make lvs); ~4.2k DRC violations pending (routing min-width/space — mechanical); PEX + re-sim after that |
 | Tier 1 params | params.py: fs=50MHz, CINT=2pF (swing fix), refs still 1.65V-centered — move to 0.4/0.9/1.4V window is open item 6, do at comparator/buffer design time |
 | CI | runner VM up; **a separate Sonnet instance is working on .gitlab-ci.yml / ci/ — do not touch those files until it lands** |
 
@@ -28,9 +28,7 @@ git@gitlab.com:pthomas1/sigma-delta.git.
 - magic **8.3.676 source-built** (`/usr/local/bin/magic`) — noble's 8.3.105 is
   too old for the PDK. Runner VM still has the old one (cloud-init needs a
   source-build step before layout CI).
-- **netgen LVS still missing**: `/usr/bin/netgen` is the MESH GENERATOR
-  (name collision). Install `github.com/RTimothyEdwards/netgen`
-  (./configure && make && sudo make install → /usr/local/bin shadows it).
+- netgen **1.5.323 source-built** at /usr/local/bin (apt mesher removed).
 - PDK: sky130A via ciel at `PDK_ROOT=/home/nvme/pdk` (pinned hash in
   ci/lxd/cloud-init.yml and DESIGN.md); `/opt/pdk` on the runner.
 - glab installed but **no token stored** — `glab auth login` with api scope

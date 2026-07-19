@@ -1,7 +1,7 @@
 magic
 tech sky130A
 magscale 1 2
-timestamp 1784462681
+timestamp 1784463941
 << checkpaint >>
 rect -1260 13573 41992 13668
 rect -1355 9554 41992 13573
@@ -12,6 +12,20 @@ rect -1355 2877 15048 4892
 rect -1325 2776 15048 2877
 rect -1325 -1260 25122 2776
 rect -1325 -1325 24097 -1260
+<< viali >>
+rect 9999 10875 10067 10943
+rect 30665 10875 30733 10943
+rect 5145 8681 5213 8749
+rect 16103 8681 16171 8749
+rect 1383 6487 1451 6555
+rect 4817 6487 4885 6555
+rect 1383 4293 1451 4361
+rect 4817 4293 4885 4361
+rect 3263 2147 3331 2215
+rect 10457 2147 10525 2215
+rect 3743 31 3811 99
+rect 11897 31 11965 99
+rect 20051 31 20119 99
 << metal1 >>
 rect 3540 15282 15460 15308
 rect 3540 15214 3566 15282
@@ -1761,71 +1775,80 @@ rect 19360 31 19366 99
 rect 19434 31 19440 99
 rect 19360 25 19440 31
 use sky130_fd_pr__pfet_g5v0d10v5_4EM7XL  M1
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 5179 0 1 9417
 box -5179 -797 5179 797
 use sky130_fd_pr__pfet_g5v0d10v5_4EM7XL  M2
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 16137 0 1 9417
 box -5179 -797 5179 797
 use sky130_fd_pr__nfet_g5v0d10v5_NEENEQ  M3
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 3777 0 1 758
 box -3777 -758 3777 758
 use sky130_fd_pr__nfet_g5v0d10v5_NEENEQ  M4
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 11931 0 1 758
 box -3777 -758 3777 758
 use sky130_fd_pr__nfet_g5v0d10v5_TDP94P  M5
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 3297 0 1 2874
 box -3297 -758 3297 758
 use sky130_fd_pr__nfet_g5v0d10v5_TDP94P  M6
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 10491 0 1 2874
 box -3297 -758 3297 758
 use sky130_fd_pr__pfet_g5v0d10v5_DQYU2U  M7
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 1417 0 1 5029
 box -1417 -797 1417 797
 use sky130_fd_pr__pfet_g5v0d10v5_DQYU2U  M8
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 4851 0 1 5029
 box -1417 -797 1417 797
 use sky130_fd_pr__pfet_g5v0d10v5_DQYU2U  M9
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 1417 0 1 7223
 box -1417 -797 1417 797
 use sky130_fd_pr__pfet_g5v0d10v5_DQYU2U  M10
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 4851 0 1 7223
 box -1417 -797 1417 797
 use sky130_fd_pr__nfet_g5v0d10v5_NEENEQ  MDN
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 20085 0 1 758
 box -3777 -758 3777 758
 use sky130_fd_pr__pfet_g5v0d10v5_ZQSKCX  MDP
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 30699 0 1 11611
 box -10033 -797 10033 797
 use sky130_fd_pr__pfet_g5v0d10v5_ZQSKCX  MT
-timestamp 1784462680
+timestamp 1784463941
 transform 1 0 10033 0 1 11611
 box -10033 -797 10033 797
 << labels >>
 flabel metal1 -400 13448 -360 13528 0 FreeSans 400 0 0 0 IREFP
+port 1 nsew
 flabel metal1 800 14088 840 14168 0 FreeSans 400 0 0 0 VDD
+port 2 nsew
 flabel metal1 -200 13128 -160 13208 0 FreeSans 400 0 0 0 INP
+port 3 nsew
 flabel metal1 3600 15208 3640 15288 0 FreeSans 400 0 0 0 tail
 flabel metal1 10600 12968 10640 13048 0 FreeSans 400 0 0 0 INM
+port 4 nsew
 flabel metal1 0 14408 40 14488 0 FreeSans 400 0 0 0 dio
 flabel metal1 200 13928 240 14008 0 FreeSans 400 0 0 0 VBPC
+port 5 nsew
 flabel metal1 400 13768 440 13848 0 FreeSans 400 0 0 0 VBNC
+port 6 nsew
 flabel metal1 2400 14248 2440 14328 0 FreeSans 400 0 0 0 VSS
+port 7 nsew
 flabel metal1 600 13288 640 13368 0 FreeSans 400 0 0 0 IREFN
+port 8 nsew
 flabel metal1 3800 15048 3840 15128 0 FreeSans 400 0 0 0 pc2
 flabel metal1 1400 14888 1440 14968 0 FreeSans 400 0 0 0 pc1
 flabel metal1 5000 13608 5040 13688 0 FreeSans 400 0 0 0 OUT
+port 9 nsew
 flabel metal1 2000 14568 2040 14648 0 FreeSans 400 0 0 0 fn1
 flabel metal1 8000 14728 8040 14808 0 FreeSans 400 0 0 0 fn2
 << end >>

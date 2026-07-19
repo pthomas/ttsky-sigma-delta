@@ -131,7 +131,7 @@ def main():
             bx, by = bulk[0]
             cur_net[0] = g["B"]
             paint(bx - VIA / 2, by - VIA / 2, bx + VIA / 2, by + VIA / 2,
-                  ["via1", "m2"])
+                  ["mcon", "via1"])
             taps.append((g["B"], bx - 4.0, bx + 4.0, bx, by))
 
     if os.environ.get("STAGE") in ("straps", "bars"):
@@ -174,6 +174,9 @@ def main():
         tcl.append(f"box {min(slots):.3f}um {ytr - 0.2:.3f}um "
                    f"{min(slots) + 0.2:.3f}um {ytr + 0.2:.3f}um")
         tcl.append(f"label {net} FreeSans 0.25um 0 0 0 c m1")
+        if net in ("INP", "INM", "OUT", "VDD", "VSS", "IREFP", "IREFN",
+                   "VBNC", "VBPC"):
+            tcl.append("port make")
 
     bad = 0
     for i in range(len(audit)):
@@ -191,6 +194,7 @@ def main():
 
     tcl += ["writeall force", "extract all",
             "ext2spice lvs", "ext2spice hierarchy off",
+            "ext2spice subcircuit top on",
             "ext2spice merge conservative", "ext2spice",
             "drc on", "drc check", "drc catchup",
             'puts "DRCCOUNT [drc listall count total]"', "quit -noprompt"]
