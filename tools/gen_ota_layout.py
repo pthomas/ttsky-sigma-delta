@@ -57,7 +57,7 @@ def build():
     for name, model, w, l, row, col in PLACEMENT:
         nf = max(1, round(w / 5))
         probe.append(f"magic::gencell sky130::{model} {name} "
-                     f"w 5 l {l:g} nf {nf} guard 1 doports 1")
+                     f"w 5 l {l:g} nf {nf} guard 1 conn_gates 1 doports 1")
         probe.append(f"select cell {name}")
         probe.append(f"puts \"BBOX {name} [box values]\"")
         probe.append("delete")
@@ -92,14 +92,18 @@ def build():
         nf = max(1, round(w / 5))
         px, py = pos[name]
         lines.append(f"magic::gencell sky130::{model} {name} "
-                     f"w 5 l {l:g} nf {nf} guard 1 doports 1")
+                     f"w 5 l {l:g} nf {nf} guard 1 conn_gates 1 doports 1")
         lines.append(f"select cell {name}")
         lines.append(f"move to {px:.2f}um {py:.2f}um")
-    lines += ["save ota_layout", "extract all",
+    lines += ["writeall force", "extract all",
               "ext2spice merge conservative", "ext2spice lvs", "ext2spice",
               "drc on", "drc check", "drc catchup",
               'puts "DRCCOUNT [drc listall count total]"',
               "quit -noprompt"]
+    import json
+    manifest = {n: dict(x=p[0], y=p[1], w=dims[n][0], h=dims[n][1])
+                for n, p in pos.items()}
+    json.dump(manifest, open("mag/ota_layout.json", "w"), indent=1)
     out = magic_run("\n".join(lines) + "\n")
     m = re.search(r"DRCCOUNT (\d+)", out)
     print(f"placed {len(PLACEMENT)} devices, "

@@ -1,0 +1,15 @@
+* NGSPICE file created from ota_layout.ext - technology: sky130A
+
+X0 VDD dio pc2 M10/B sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=1.45 ps=10.58 w=5 l=0.7 M=12
+X1 tail IREFP VDD MT/B sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=76
+X2 fn1 INP tail M1/B sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.7 M=50
+X3 fn2 INM tail M2/B sky130_fd_pr__pfet_g5v0d10v5 ad=37.7 pd=275.07999 as=129.05 ps=941.62 w=5 l=0.7 M=50
+X4 VSS IREFN fn2 VSUBS sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1.2 M=24
+X5 VSS IREFN fn1 VSUBS sky130_fd_pr__nfet_g5v0d10v5 ad=52.2 pd=380.88 as=36.25 ps=264.5 w=5 l=1.2 M=24
+X6 dio VBNC fn1 VSUBS sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=24
+X7 OUT VBNC fn2 VSUBS sky130_fd_pr__nfet_g5v0d10v5 ad=18.85 pd=137.53999 as=36.25 ps=264.5 w=5 l=1 M=24
+X8 pc1 VBPC dio M7/B sky130_fd_pr__pfet_g5v0d10v5 ad=18.85 pd=137.53999 as=10.15 ps=74.06 w=5 l=0.7 M=12
+X9 VSS IREFN IREFN VSUBS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=18.85 ps=137.53999 w=5 l=1.2 M=24
+X10 IREFP IREFP VDD MDP/B sky130_fd_pr__pfet_g5v0d10v5 ad=56.55 pd=412.62 as=127.6 ps=931.03998 w=5 l=1 M=76
+X11 pc2 VBPC OUT M8/B sky130_fd_pr__pfet_g5v0d10v5 ad=18.85 pd=137.53999 as=10.15 ps=74.06 w=5 l=0.7 M=12
+X12 VDD dio pc1 M9/B sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.7 M=12

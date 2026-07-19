@@ -143,6 +143,24 @@ roughly +10,000 µm² (second OTA + cap) → ~75% of a 1x2: possible but tight.
 **If the 2nd order (or differential) is the ambition, buy 2x2 (four
 tiles);** a pure 1st-order chip is comfortable in two.
 
+## Layout notes (tier 3, learned on the OTA cell)
+
+- OTA layout is fully generated: `tools/gen_ota_layout.py` (placement from
+  SIZES, bbox-measured rows) + `tools/route_ota.py` (straps/routing derived
+  from the golden xschem netlist; extraction-verified 13/13 devices matched).
+- sky130 gencells with `full_metal` come with every contact column already
+  strapped in met1 full-height — group columns on **met2** (via1 down), run
+  risers on **met3**, tracks met1 above the array. Any met1 painted across a
+  device shorts everything.
+- Unit zoo: parent .mag transforms and runtime `box values` are 200/µm;
+  subcell .mag rects 100/µm; .ext port coords 200/µm. Layout gencell `w` is
+  per-finger (schematic W is total).
+- The router self-audits: same-layer overlaps between different-net paint
+  boxes are reported before painting. Jogs must anchor at the tap point,
+  not the slot-search range edge.
+- Status: connectivity done; ~4k DRC violations (min width/space of painted
+  routing) to clean, then netgen LVS (install pending) and PEX.
+
 ## Toolflow
 
 Four tiers, all generated from `params.py` so they cannot drift apart:
