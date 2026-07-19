@@ -531,3 +531,23 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   decap per reference (target <= 100 ohm) - a modest one-stage buffer
   suffices; don't burn power on a fast one. Reopen if: CDEC shrinks below
   ~10 pF in layout, fs changes, or the DAC pulse current grows.
+- **2026-07-19 - Reference buffers v1 (sim/buf_tb.py): three 5T unity
+  followers - ACCEPTED against the RREF knee.** One design at three
+  levels (VREFN 0.4 / VCM 0.9 / VREFP 1.4): five-transistor OTA, PMOS
+  input (the house rule), NMOS mirror load, unity feedback, 320 uA tail
+  each (bias-block tap at layout time), 20 pF decap per output. Spec
+  refinement: Zout <= 1 kohm is the honest 10x-under-breakage figure
+  (breakage 10 kohm; the earlier <=300 was 10x under the merely-marginal
+  3 kohm point and would triple buffer power). Measured (tt/ss/ff flat):
+  Zout 754 ohm, bit-dependent residual 6.9 mV on VREFP/VREFN and 2.2 mV
+  on VCM (exactly the tier-1-blessed 1 kohm-class behavior), worst
+  deviation <= 44 mV at pulse ends, DC offsets -16/+39 mV (5T systematic
+  mirror-Vds error - pure gain/offset on the reference span, no
+  linearity term; documented, not fought), 3.2 mW total. TB lesson: the
+  first VCM load model (sustained +-25 uA half-period pulses) was wrong -
+  during the RZ return phase the DAC node sits AT VCM with the virtual
+  ground also at VCM, so the sustained current is ~0 and the real load is
+  ~2 ns edge transients; tier-1 models the true switch network and the TB
+  now matches it. Open: schematic gen + equivalence, bias tap, layout,
+  decap area (3 x 20 pF MiM ~ 3,000 um^2 - in budget). Reopen if: fs or
+  the DAC pulse current changes, or CDEC shrinks below ~10 pF.
