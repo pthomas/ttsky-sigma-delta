@@ -430,3 +430,36 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   the documented long-run ~66 dB. Reopen if: the OTA is reused outside the
   integrator role (a unity-gain buffer DOES care about PM), the 2nd-order
   loop changes the phase budget, or fs moves.
+- **2026-07-19 - StrongARM comparator v1: PMOS input pair, electrically
+  validated in sim/comp_tb.py.** Topology decision: the 0.4-1.4 V window
+  (open item 6) was chosen so NMOS *passes* it — the complementary rule is
+  that PMOS *senses* it, same reasoning that gave the OTA its PMOS input
+  pair. NMOS-input StrongARM at the 0.68 V swing floor would have ~zero
+  overdrive against the ~0.8 V thick-oxide Vth; PMOS input gets ~1.5 V and
+  speeds up at exactly the corner where NMOS dies. Mirrored StrongARM:
+  PMOS clocked tail (evaluates CLK-low, matching tier-1 DFF phasing),
+  precharge-to-VSS resets, cross-coupled regeneration, NOR SR latch;
+  single-phase clock, no inverters. Measured (tt): regeneration tau 69 ps,
+  worst decision 1.01 ns over CM 0.68-1.12 V and dv 10 uV-100 mV (10 ns
+  budget), 0 sign errors at >=10 mV, SR latch holds through precharge,
+  metastable window ~1e-31 V at 5 ns, kickback 10.6 mV peak on an RC proxy
+  of the integrator node, 61 uW at 50 MHz. Open: xschem schematic gen +
+  equivalence check, mismatch/offset MC, corners, kickback re-check in the
+  closed loop. Reopen if: reference window moves, or fs changes.
+- **2026-07-19 - Simulating regenerative races: the solver picks the
+  winner unless you take it seriously.** Lessons from comp_tb.py, all
+  measured: (1) default ngspice tolerances (reltol 1e-3, vntol 1 uV) are
+  larger than mV-scale race seeds - wrong-sign decisions at 10 mV
+  overdrive; (2) many DUTs sharing one transient share one timestep
+  controller - the most active DUT under-resolves everyone else's seed;
+  one ngspice process per measurement point; (3) even per-point, the
+  verdict was timestep-dependent until tmax was forced to 1 ps through the
+  violent di-ramp (5 ps and 2 ps steps gave opposite winners); (4) ideal
+  V-sources choke ("timestep too small, trouble with node v*#branch") at
+  tight abstol - 10 ohm series resistors on every ideal source; (5) gear,
+  per the tier-1 finding. Even then, sub-mV sign verdicts sit at the
+  amplified-solver-noise floor and are NOT meaningful - the TB enforces
+  sign only >=10 mV (silicon offset/thermal noise owns that regime anyway,
+  and a 1-bit SD loop tolerates near-zero-overdrive sign errors as bounded
+  quantization noise; what it cannot absorb - measured 25 dB - is a soft
+  mid-rail decision, so decision TIME is enforced at every point).

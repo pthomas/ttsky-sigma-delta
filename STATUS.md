@@ -27,7 +27,7 @@ git@gitlab.com:pthomas1/sigma-delta.git.
 | NRZ-vs-RZ decision | done — RZ confirmed by data (reports/dac_compare.html) |
 | Block spec table | done — measured knees in DESIGN.md (AOL≥300, GBW≥50M, SR≥100V/µs) |
 | Tier 2 OTA schematic | done — folded cascode sized & corner-flat (A0 65dB, GBW 209MHz, PM 58°, ±195V/µs, 4.5mW); xschem/ota.sch GENERATED from sim/ota_tb.py SIZES; equivalence proven (make xcheck) |
-| Tier 2 other blocks | **not started**: StrongARM comparator (+10ns regeneration TB), vref/VCM buffers (25µA RZ pulses), bias generator (replaces ideal IREFP/IREFN/VBNC/VBPC), clk level shifter 1.8→3.3V, output drivers + 2-phase demux DFF |
+| Tier 2 other blocks | **StrongARM comparator v1 done** (sim/comp_tb.py: PMOS input, tau 69 ps, worst decision 1.01 ns over the full window, 61 µW — see DESIGN.md 2026-07-19; open: sch gen/equiv, offset MC, corners). Not started: vref/VCM buffers (25µA RZ pulses), bias generator (replaces ideal IREFP/IREFN/VBNC/VBPC), clk level shifter 1.8→3.3V, output drivers + 2-phase demux DFF |
 | Tier 3 layout cells | done — mag/rin, rdac, cint, sw_nmos (extraction-verified values) |
 | Tier 3 OTA layout | **DRC CLEAN + LVS CLEAN + PEX done** (fresh-process verified, fast & full DRC styles; make lvs: "Circuits match uniquely", 13/13 devices, 15/15 nets). Extracted (0.72 pF parasitics): A0 65.2 dB / GBW 119 MHz / PM 46° / SR +128/-508 V/µs / Ivdd 1.37 mA — all tier-1 knees (A0≥49.5 dB, GBW≥50 MHz, SR≥100 V/µs) still met ≥2×; PM 46° (was 58° pre-PEX) is the open question — see below |
 | Tier 1 params | params.py: fs=50MHz, CINT=2pF (swing fix), refs still 1.65V-centered — move to 0.4/0.9/1.4V window is open item 6, do at comparator/buffer design time |
@@ -114,11 +114,9 @@ From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
 
 ## Next actions (priority order)
 
-1. StrongARM comparator: schematic + the metastability testbench (spec:
-   full regeneration in 10 ns; tier-1 showed soft decisions cost ~25 dB).
-   Open sub-question: input-pair flavor vs the 0.9 V common mode on 3.3 V
-   (NMOS overdrive is thin with 5 V-device Vth — PMOS input or window
-   co-design with open item 6).
+1. Comparator follow-through: generate xschem schematic from comp_tb
+   SIZES + equivalence check (gen_ota_sch.py pattern), mismatch/offset
+   Monte Carlo, corners; then the DFF retimer at transistor level.
 2. Reference window move (open item 6): retune params.py + tier-1 rerun
    when comparator/buffer common-mode design starts.
 3. Remaining blocks per the tier-2 list above, then top-level assembly in
