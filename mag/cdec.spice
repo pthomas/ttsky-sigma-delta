@@ -1,0 +1,18 @@
+* NGSPICE file created from cdec.ext - technology: sky130A
+
+.subckt sky130_fd_pr__cap_mim_m3_1_VXPU36 C2_0 C1_0 C2_1 C1_1 C2_2 C1_2 C2_3 C1_3
++ C2_4 C1_4
+X0 C1_1 C2_1 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X1 C1_4 C2_4 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X2 C1_0 C2_0 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X3 C1_2 C2_2 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X4 C1_3 C2_3 sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+.ends
+
+
+* Top level circuit cdec
+
+XX0 X0/C2_0 X0/C1_0 X0/C2_1 X0/C1_1 X0/C2_2 X0/C1_2 X0/C2_3 X0/C1_3 X0/C2_4 X0/C1_4
++ sky130_fd_pr__cap_mim_m3_1_VXPU36
+.end
+

@@ -92,7 +92,7 @@ C {sky130_fd_pr/res_high_po_1p41.sym} -700 -650 0 0 {name=RBNC model=res_high_po
 C {devices/lab_pin.sym} -700 -620 3 0 {name=l51 lab=VSS}
 C {devices/lab_pin.sym} -700 -680 1 0 {name=l52 lab=vbnc_i}
 C {devices/lab_pin.sym} -720 -650 0 0 {name=l53 lab=VSS}
-C {sky130_fd_pr/res_high_po_1p41.sym} -700 -500 0 0 {name=RNB1 model=res_high_po_1p41 spiceprefix=X L=3.23 mult=1}
+C {sky130_fd_pr/res_high_po_1p41.sym} -700 -500 0 0 {name=RNB1 model=res_high_po_1p41 spiceprefix=X L=3.235 mult=1}
 C {devices/lab_pin.sym} -700 -470 3 0 {name=l54 lab=VBNC}
 C {devices/lab_pin.sym} -700 -530 1 0 {name=l55 lab=vbnc_i}
 C {devices/lab_pin.sym} -720 -500 0 0 {name=l56 lab=VSS}
@@ -106,7 +106,7 @@ C {sky130_fd_pr/res_high_po_1p41.sym} -500 -650 0 0 {name=RBPC model=res_high_po
 C {devices/lab_pin.sym} -500 -620 3 0 {name=l61 lab=VSS}
 C {devices/lab_pin.sym} -500 -680 1 0 {name=l62 lab=vbpc_i}
 C {devices/lab_pin.sym} -520 -650 0 0 {name=l63 lab=VSS}
-C {sky130_fd_pr/res_high_po_1p41.sym} -500 -500 0 0 {name=RNB2 model=res_high_po_1p41 spiceprefix=X L=3.23 mult=1}
+C {sky130_fd_pr/res_high_po_1p41.sym} -500 -500 0 0 {name=RNB2 model=res_high_po_1p41 spiceprefix=X L=3.235 mult=1}
 C {devices/lab_pin.sym} -500 -470 3 0 {name=l64 lab=VBPC}
 C {devices/lab_pin.sym} -500 -530 1 0 {name=l65 lab=vbpc_i}
 C {devices/lab_pin.sym} -520 -500 0 0 {name=l66 lab=VSS}

@@ -79,10 +79,13 @@ def m(w):
 
 
 def buf_subckt(p):
-    mt = round(p["ITAIL"] / IUNIT)
+    # tail split into two half-mult devices: a single nf=64 gencell row
+    # is 84 um wide and dominates the block bbox at assembly
+    mt = round(p["ITAIL"] / IUNIT) // 2
     return f"""
 .subckt buf IN OUT IREFP VDD VSS
-XT tail IREFP VDD VDD {PF} W={WUNIT} L={OTA_S['L_TAIL']} nf=1 m={mt}
+XTA tail IREFP VDD VDD {PF} W={WUNIT} L={OTA_S['L_TAIL']} nf=1 m={mt}
+XTB tail IREFP VDD VDD {PF} W={WUNIT} L={OTA_S['L_TAIL']} nf=1 m={mt}
 X1 o1  IN  tail VDD {PF} W={WUNIT} L={p['L_IN']} nf=1 m={m(p['W_IN'])}
 X2 OUT OUT tail VDD {PF} W={WUNIT} L={p['L_IN']} nf=1 m={m(p['W_IN'])}
 X3 o1  o1  VSS VSS {NF} W={WUNIT} L={p['L_MIR']} nf=1 m={m(p['W_MIR'])}

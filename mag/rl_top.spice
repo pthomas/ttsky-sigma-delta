@@ -1,0 +1,10 @@
+* NGSPICE file created from rl_top.ext - technology: sky130A
+
+.subckt sky130_fd_pr__res_high_po_1p41_V5J9E7 B R1 R2
+X0 R2 R1 B sky130_fd_pr__res_high_po_1p41 l=820.90002
+.ends
+
+.subckt rl_top
+XX0 VSUBS X0/R1 X0/R2 sky130_fd_pr__res_high_po_1p41_V5J9E7
+.ends
+

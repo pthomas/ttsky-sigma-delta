@@ -2,7 +2,7 @@
 
 .subckt buf_layout OUT IREFP VDD IN VSS
 X0 tail IN o1 VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=1.45 ps=10.58 w=5 l=0.5 M=12
-X1 tail OUT OUT VDD sky130_fd_pr__pfet_g5v0d10v5 ad=65.25 pd=476.10001 as=10.15 ps=74.06 w=5 l=0.5 M=12
+X1 tail OUT OUT VDD sky130_fd_pr__pfet_g5v0d10v5 ad=66.7 pd=486.67999 as=10.15 ps=74.06 w=5 l=0.5 M=12
 X2 o1 o1 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=6
 X3 OUT o1 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 ad=5.8 pd=42.32 as=8.7 ps=63.48 w=5 l=1 M=6
 X4 tail IREFP VDD VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=64

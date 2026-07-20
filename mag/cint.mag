@@ -1,7 +1,7 @@
 magic
 tech sky130A
 magscale 1 2
-timestamp 1784397988
+timestamp 1784510509
 << checkpaint >>
 rect -7358 -1260 6692 5340
 use sky130_fd_pr__cap_mim_m3_1_7BWDBD  X0

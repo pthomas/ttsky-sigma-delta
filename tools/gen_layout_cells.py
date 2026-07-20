@@ -81,6 +81,30 @@ def fet_cell(name, w, l):
     return True
 
 
+def res_cell_model(name, target):
+    """Model-calibrated resistor (no magic-RHO pass): drawn length from
+    sim.bias_tb.res_geom -- the ngspice model carries a ~256 ohm end
+    resistance magic's sheet extraction does not (DESIGN.md
+    2026-07-19); magic-extracted ohms on these cells read high, which
+    is informational only."""
+    sys.path.insert(0, os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))))
+    from sim.bias_tb import res_geom
+    nx, seg, ltot = res_geom(target)
+    dev = "sky130_fd_pr__res_high_po_1p41"
+    txt = gen_cell(name, dev, dict(w=WRES, l=seg, nx=nx, snake=1))
+    leff = float(re.search(r"res_high_po_1p41 l=([0-9.]+)", txt).group(1))
+    # magic folds snake corners into a shorter effective length; scale
+    # the drawn segments so the EXTRACTED length hits the model target
+    seg2 = round(seg * ltot / leff / 0.005) * 0.005
+    txt = gen_cell(name, dev, dict(w=WRES, l=seg2, nx=nx, snake=1))
+    leff = float(re.search(r"res_high_po_1p41 l=([0-9.]+)", txt).group(1))
+    print(f"{name}: target {target/1e3:.0f}k -> extracted l={leff} "
+          f"(want {ltot}, nx={nx} x {seg2}; model R = "
+          f"{256.2 + 230.06*leff:.0f})")
+    return abs(leff - ltot) / ltot < 0.01
+
+
 def main():
     os.makedirs("mag", exist_ok=True)
     ok = True
@@ -88,6 +112,16 @@ def main():
     ok &= res_cell("rdac", 20e3, nx=6, l0=14.7)
     ok &= cap_cell("cint", 2.0, w=25, l=20, nx=2)
     ok &= fet_cell("sw_nmos", 10, 0.5)
+    # reference ladder off VAPWR (0.4/0.9/1.4 V taps; DESIGN.md
+    # 2026-07-19) -- model-calibrated lengths
+    ok &= res_cell_model("rl_top", 190e3)
+    ok &= res_cell_model("rl_pc", 50e3)
+    ok &= res_cell_model("rl_cm", 50e3)
+    ok &= res_cell_model("rl_bot", 40e3)
+    # reference decaps (5 pF each, tier-1 validated at RREF=754) and
+    # the VBNC/VBPC 1 pF filter caps (moved out of the bias block)
+    ok &= cap_cell("cdec", 5.0, w=25, l=20, nx=5)
+    ok &= cap_cell("cflt", 1.0, w=22.2, l=22.2, nx=1)
     print("all cells OK" if ok else "SOME CELLS OFF TARGET")
     sys.exit(0 if ok else 1)
 

@@ -56,7 +56,9 @@ def parse_subckt(path, name):
             if "=" in tok:
                 k, v = tok.split("=", 1)
                 par[k.lower()] = v
-        num = lambda k, d=None: float(par.get(k, d))
+        # xschem trims trailing digits when netlisting (3.235 ->
+        # 3.23): compare dimensions at 0.01 um resolution
+        num = lambda k, d=None: round(float(par.get(k, d)), 2)
         if "fet" in model:
             devs.append(("fet", model, tuple(nodes), num("w"), num("l"),
                          float(par.get("m", par.get("mult", 1)))))

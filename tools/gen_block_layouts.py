@@ -42,16 +42,17 @@ ROWS = {
     "buf": [
         ["3", "4"],
         ["1", "2"],
-        ["T"],
+        ["TA"],
+        ["TB"],
     ],
     "lvl": [
         ["IN", "N1", "N2", "B1N", "B2N"],
         ["IP", "P1", "P2", "B1P", "B2P"],
     ],
+    # single row: two odrv instances must fit side by side in a
+    # ~64 um column at assembly
     "odrv": [
-        ["1N", "2N"],
-        ["1P", "2P"],
-        ["3N", "3P"],
+        ["1N", "2N", "1P", "2P", "3N", "3P"],
     ],
 }
 

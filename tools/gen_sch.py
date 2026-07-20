@@ -177,9 +177,11 @@ def block_bias():
 
 def block_buf():
     p = FSIZES
-    mt = round(p["ITAIL"] / IUNIT)
+    mt = round(p["ITAIL"] / IUNIT) // 2
     devs = [
-        fet("XT", -300, -800, PF, "tail", "IREFP", "VDD", "VDD",
+        fet("XTA", -400, -800, PF, "tail", "IREFP", "VDD", "VDD",
+            WUNIT, OTA_S["L_TAIL"], mt),
+        fet("XTB", -200, -800, PF, "tail", "IREFP", "VDD", "VDD",
             WUNIT, OTA_S["L_TAIL"], mt),
         fet("X1", -400, -650, PF, "o1", "IN", "tail", "VDD",
             WUNIT, p["L_IN"], m(p["W_IN"])),
@@ -191,7 +193,8 @@ def block_buf():
             WUNIT, p["L_MIR"], m(p["W_MIR"])),
     ]
     wires = [
-        (-280, -770, -280, -700, "tail"),
+        (-380, -770, -380, -700, "tail"),
+        (-180, -770, -180, -700, "tail"),
         (-380, -700, -180, -700, "tail"),
         (-380, -680, -380, -700, "tail"), (-180, -680, -180, -700, "tail"),
         (-380, -620, -380, -480, "o1"),

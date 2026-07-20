@@ -1,0 +1,12 @@
+* NGSPICE file created from cflt.ext - technology: sky130A
+
+.subckt sky130_fd_pr__cap_mim_m3_1_JS2Y8Z C2 C1
+X0 C1 C2 sky130_fd_pr__cap_mim_m3_1 l=22.2 w=22.2
+.ends
+
+
+* Top level circuit cflt
+
+XX0 X0/C2 X0/C1 sky130_fd_pr__cap_mim_m3_1_JS2Y8Z
+.end
+

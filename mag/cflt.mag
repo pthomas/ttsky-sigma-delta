@@ -1,0 +1,10 @@
+magic
+tech sky130A
+timestamp 1784510512
+<< checkpaint >>
+rect -630 -630 3066 2890
+use sky130_fd_pr__cap_mim_m3_1_JS2Y8Z  X0
+timestamp 0
+transform 1 0 1218 0 1 1130
+box -1218 -1130 1218 1130
+<< end >>

@@ -1,0 +1,11 @@
+magic
+tech sky130A
+magscale 1 2
+timestamp 1784510511
+<< checkpaint >>
+rect -1313 -1313 4845 6563
+use sky130_fd_pr__res_high_po_1p41_43A84S  X0
+timestamp 0
+transform 1 0 1766 0 1 2625
+box -1819 -2678 1819 2678
+<< end >>
