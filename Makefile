@@ -79,6 +79,17 @@ compcheck:
 	xschem --netlist --spice -q -x xschem/comp_top.sch
 	python3 sim/comp_xcheck.py
 
+# golden netlists + generated schematics for all support blocks, then
+# canonical (device-for-device) equivalence of the xschem netlists
+blockcheck:
+	mkdir -p spice
+	python3 tools/gen_golden.py
+	python3 tools/gen_comp_sch.py
+	python3 tools/gen_sch.py
+	for b in comp dff bias buf lvl odrv; do \
+	  xschem --netlist --spice -q -x xschem/$${b}_top.sch || exit 1; done
+	python3 tools/xcheck_blocks.py
+
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 
@@ -88,4 +99,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck snr view clean
+.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck snr view clean

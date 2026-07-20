@@ -1,0 +1,23 @@
+v {xschem version=3.4.4 file_version=1.2}
+G {}
+K {type=subcircuit
+format="@name @pinlist @symname"
+template="name=XODRV"
+}
+V {}
+S {}
+E {}
+L 4 -100 -80 100 -80 {}
+L 4 100 -80 100 80 {}
+L 4 100 80 -100 80 {}
+L 4 -100 80 -100 -80 {}
+L 4 -140 0 -100 0 {}
+B 5 -142.5 -2.5 -137.5 2.5 {name=IN33 dir=in}
+L 4 100 0 140 0 {}
+B 5 137.5 -2.5 142.5 2.5 {name=OUT18 dir=out}
+L 4 -20 -100 -20 -80 {}
+B 5 -22.5 -102.5 -17.5 -97.5 {name=VDD18 dir=inout}
+L 4 -20 100 -20 80 {}
+B 5 -22.5 97.5 -17.5 102.5 {name=VSS dir=inout}
+T {ODRV} -35 -10 0 0 0.4 0.4 {}
+T {@name} -30 -120 0 0 0.25 0.25 {}

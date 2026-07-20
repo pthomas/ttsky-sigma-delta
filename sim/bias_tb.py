@@ -40,9 +40,46 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sim.ota_tb import SIZES as OTA_S, PDK_LIB, WUNIT
+from tools.gen_layout_cells import RHO, WRES, CAREA, CPERI
 
 NF = "sky130_fd_pr__nfet_g5v0d10v5"
 PF = "sky130_fd_pr__pfet_g5v0d10v5"
+RES, CAP = "sky130_fd_pr__res_high_po_1p41", "sky130_fd_pr__cap_mim_m3_1"
+
+LAYOUT = False   # --layout: emit real poly-R / MiM devices in the subckt
+
+
+# ngspice model calibration (tt, pinned PDK): R = REND + RPUM * L.
+# Measured 2026-07-19 by op on L=10/100/330.7 -- the model carries a
+# 256 ohm end resistance that magic's sheet-rho extraction (RHO=319.8)
+# does not, so lengths are calibrated against the MODEL (silicon truth);
+# magic-extracted ohms will read ~5-10% high on short Rs, which is
+# informational only (LVS compares geometry, not ohms).
+REND, RPUM = 256.2, 230.06
+
+
+def r_len(r):
+    """Drawn length of a res_high_po_1p41 for target R (ngspice-model
+    calibrated; R must exceed REND -- no sub-260-ohm poly Rs)."""
+    assert r > REND + 50, f"target {r} below realizable minimum"
+    return round((r - REND) / RPUM, 2)
+
+
+def c_side(c):
+    """Side of a square cap_mim_m3_1 for target C [F]."""
+    cf = c * 1e15
+    import math
+    return round((-4 * CPERI + math.sqrt(16 * CPERI**2
+                                         + 4 * CAREA * cf)) / (2 * CAREA), 2)
+
+
+def r_card(name, a, b, r):
+    return f"X{name} {a} {b} VSS {RES} L={r_len(r):g} mult=1 m=1"
+
+
+def c_card(name, a, b, c):
+    s = c_side(c)
+    return f"X{name} {a} {b} {CAP} W={s:g} L={s:g} m=1"
 
 BSIZES = dict(
     W_N=10, L_N=1.0,      # M1 NMOS diode (M2 = K x W_N)
@@ -61,13 +98,31 @@ def m(w):
     return max(1, round(w / WUNIT))
 
 
-def bias_subckt(p):
+def bias_subckt(p, layout=None):
+    if layout is None:
+        layout = LAYOUT
+    if layout:
+        rb = r_card("RB", "rs", "VSS", p["RB"])
+        rbnc = r_card("RBNC", "vbnc_i", "VSS", p["R_BNC"])
+        rbpc = r_card("RBPC", "vbpc_i", "VSS", p["R_BPC"])
+        rnb1 = r_card("RNB1", "vbnc_i", "VBNC", 1e3)
+        rnb2 = r_card("RNB2", "vbpc_i", "VBPC", 1e3)
+        cbn = c_card("CBN", "VBNC", "VSS", 1e-12)
+        cbp = c_card("CBP", "VBPC", "VSS", 1e-12)
+    else:
+        rb = f"RB rs VSS {p['RB']}"
+        rbnc = f"RBNC vbnc_i VSS {p['R_BNC']}"
+        rbpc = f"RBPC vbpc_i VSS {p['R_BPC']}"
+        rnb1 = "RNB1 vbnc_i VBNC 1k"
+        rnb2 = "RNB2 vbpc_i VBPC 1k"
+        cbn = "CBN VBNC VSS 1p"
+        cbp = "CBP VBPC VSS 1p"
     return f"""
 .subckt bias IREFP IREFN VBNC VBPC VDD VSS
 * constant-gm core: M1 diode vs K-wide degenerated M2, PMOS mirror top
 XM1 nb nb VSS VSS {NF} W={WUNIT} L={p['L_N']} nf=1 m={m(p['W_N'])}
 XM2 pb nb rs VSS {NF} W={WUNIT} L={p['L_N']} nf=1 m={m(p['K'] * p['W_N'])}
-RB rs VSS {p['RB']}
+{rb}
 XMP1 nb pb VDD VDD {PF} W={WUNIT} L={p['L_P']} nf=1 m={m(p['W_P'])}
 XMP2 pb pb VDD VDD {PF} W={WUNIT} L={p['L_P']} nf=1 m={m(p['W_P'])}
 * startup with disable: the leaker feeds nst; while the core is off
@@ -86,15 +141,17 @@ XIP ipd nb VSS VSS {NF} W={WUNIT} L={p['L_N']} nf=1 m={m(p['M_IREFP'] * p['W_N']
 XIPC IREFP vbnc_i ipd VSS {NF} W={WUNIT} L=0.5 nf=1 m={m(p['M_IREFP'] * p['W_N'])}
 XIN ind pb VDD VDD {PF} W={WUNIT} L={p['L_P']} nf=1 m={m(p['M_IREFN'] * p['W_P'])}
 XINC IREFN vbpc_i ind VDD {PF} W={WUNIT} L=0.5 nf=1 m={m(p['M_IREFN'] * p['W_P'])}
-* cascode gate biases: master current into resistor strings (R ratios)
+* cascode gate biases: master current into resistor strings (R ratios);
+* RNB isolation Rs are 1k (100 was below the poly end-resistance floor
+* of ~260 ohm; pure RC isolation, no DC -- value non-critical)
 XVN vbnc_i pb VDD VDD {PF} W={WUNIT} L={p['L_P']} nf=1 m={m(p['W_P'])}
-RBNC vbnc_i VSS {p['R_BNC']}
+{rbnc}
 XVP vbpc_i pb VDD VDD {PF} W={WUNIT} L={p['L_P']} nf=1 m={m(p['W_P'])}
-RBPC vbpc_i VSS {p['R_BPC']}
-RNB1 vbnc_i VBNC 100
-RNB2 vbpc_i VBPC 100
-CBN VBNC VSS 1p
-CBP VBPC VSS 1p
+{rbpc}
+{rnb1}
+{rnb2}
+{cbn}
+{cbp}
 .ends
 """
 
@@ -207,6 +264,10 @@ wrdata bias_ota_ac.csv v(outa)
 
 
 def main():
+    global LAYOUT
+    if "--layout" in sys.argv:
+        LAYOUT = True
+        print("(layout netlist: real poly-R / MiM devices)")
     os.makedirs("spice", exist_ok=True)
     print(f"{'corner':>7s} {'VDD':>5s} {'IREFP':>8s} {'IREFN':>8s} "
           f"{'VBNC':>6s} {'VBPC':>6s}")

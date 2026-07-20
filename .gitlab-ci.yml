@@ -102,9 +102,11 @@ support-blocks:
   script:
     - make xcheck
     - python3 sim/bias_tb.py
+    - python3 sim/bias_tb.py --layout
     - python3 sim/buf_tb.py
     - python3 sim/lvl_tb.py
     - python3 sim/odrv_tb.py
+    - make blockcheck
   artifacts:
     paths: [reports/results/]
     expire_in: 30 days

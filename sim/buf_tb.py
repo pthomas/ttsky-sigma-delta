@@ -12,9 +12,11 @@ optimizes for simplicity and low power, not speed.
 
 Topology: five-transistor OTA in unity feedback -- PMOS input pair
 (senses the low window, same rule as OTA/comparator), NMOS mirror load,
-output at the mirror side. Closed-loop Zout ~= 1/gm(input). Tail is an
-ideal source in this TB (a 1x tap off the bias block's master lands at
-layout time, like the OTA's mirrors).
+output at the mirror side. Closed-loop Zout ~= 1/gm(input). Tail is a
+real PMOS mirror off the OTA's IREFP diode line (the OTA subckt's XMDP
+diode runs 380 uA through mult 76 = 5 uA per unit finger, so 320 uA =
+mult 64 at the same L; gate-line tap only, no extra bias-block branch).
+The TB replicates the diode + the bias block's ideal 380 uA sink.
 
 The 0.4/0.9/1.4 V levels come from a resistor ladder off VAPWR
 (190k/50k/50k/40k top-to-bottom, ~10 uA): VDD-referenced references are
@@ -50,7 +52,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from sim.ota_tb import PDK_LIB, WUNIT
+from sim.ota_tb import SIZES as OTA_S, PDK_LIB, WUNIT
 
 NF = "sky130_fd_pr__nfet_g5v0d10v5"
 PF = "sky130_fd_pr__pfet_g5v0d10v5"
@@ -58,11 +60,14 @@ PF = "sky130_fd_pr__pfet_g5v0d10v5"
 FSIZES = dict(
     W_IN=60, L_IN=0.5,    # input pair (gm sets Zout ~ 1/gm)
     W_MIR=30, L_MIR=1.0,  # NMOS mirror load
-    ITAIL=320e-6,         # tail (bias-block tap at layout time)
+    ITAIL=320e-6,         # tail current (mirror mult derived from this)
     CDEC=5e-12,           # tier-1 validated at RREF=754 (see docstring)
     # reference ladder off VAPWR, top to bottom (total 330k, ~10 uA)
     RL_TOP=190e3, RL_PC=50e3, RL_CM=50e3, RL_BOT=40e3,
 )
+
+# OTA IREFP diode line: 5 uA per unit finger (380 uA / mult 76)
+IUNIT = OTA_S["IREFP"] / round(OTA_S["W_TAIL"] / WUNIT)
 
 REFS = {"vrefn": 0.4, "vcm": 0.9, "vrefp": 1.4}
 TPER = 20e-9
@@ -74,15 +79,23 @@ def m(w):
 
 
 def buf_subckt(p):
+    mt = round(p["ITAIL"] / IUNIT)
     return f"""
-.subckt buf IN OUT VDD VSS
-ITAIL VDD tail {p['ITAIL']:g}
+.subckt buf IN OUT IREFP VDD VSS
+XT tail IREFP VDD VDD {PF} W={WUNIT} L={OTA_S['L_TAIL']} nf=1 m={mt}
 X1 o1  IN  tail VDD {PF} W={WUNIT} L={p['L_IN']} nf=1 m={m(p['W_IN'])}
 X2 OUT OUT tail VDD {PF} W={WUNIT} L={p['L_IN']} nf=1 m={m(p['W_IN'])}
 X3 o1  o1  VSS VSS {NF} W={WUNIT} L={p['L_MIR']} nf=1 m={m(p['W_MIR'])}
 X4 OUT o1  VSS VSS {NF} W={WUNIT} L={p['L_MIR']} nf=1 m={m(p['W_MIR'])}
 .ends
 """
+
+
+def irefp_ctx():
+    """The OTA-side IREFP diode + the bias block's sink, for TBs."""
+    return (f"XMD irefp irefp vdd vdd {PF} W={WUNIT} L={OTA_S['L_TAIL']} "
+            f"nf=1 m={round(OTA_S['W_TAIL'] / WUNIT)}\n"
+            f"ISNK irefp 0 {OTA_S['IREFP']:g}")
 
 
 def deck(p, corner):
@@ -99,9 +112,10 @@ RLT vdd   inp_p {p['RL_TOP']:g}
 RLP inp_p inp_c {p['RL_PC']:g}
 RLC inp_c inp_m {p['RL_CM']:g}
 RLM inp_m 0     {p['RL_BOT']:g}
-XBP inp_p outp vdd 0 buf
-XBM inp_m outm vdd 0 buf
-XBC inp_c outc vdd 0 buf
+{irefp_ctx()}
+XBP inp_p outp irefp vdd 0 buf
+XBM inp_m outm irefp vdd 0 buf
+XBC inp_c outc irefp vdd 0 buf
 CDP outp 0 {p['CDEC']:g}
 CDM outm 0 {p['CDEC']:g}
 CDC outc 0 {p['CDEC']:g}
@@ -157,8 +171,9 @@ def measure_corner(p, corner):
                          worst_mv=round(worst * 1e3, 2),
                          isi_mv=round(isi * 1e3, 3))
     cyc = (t > 1e-6) & (t < 2e-6)
-    res["power_mw"] = round(abs(np.trapz(ivdd[cyc], t[cyc]) / 1e-6 * 3.3)
-                            * 1e3, 2)
+    # subtract the TB-context diode branch (belongs to bias/OTA, not buf)
+    ib = abs(np.trapz(ivdd[cyc], t[cyc]) / 1e-6) - OTA_S["IREFP"]
+    res["power_mw"] = round(ib * 3.3 * 1e3, 2)
     return res
 
 
@@ -168,7 +183,8 @@ def zout(p):
 {buf_subckt(p)}
 VDDS vdd 0 3.3
 VRC inp 0 0.9
-XB inp out vdd 0 buf
+{irefp_ctx()}
+XB inp out irefp vdd 0 buf
 CD out 0 {p['CDEC']:g}
 IAC 0 out DC 0 AC 1
 .control

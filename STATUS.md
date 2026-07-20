@@ -125,14 +125,15 @@ context a fresh session needs:
    bit-dep <= 2.5 mV, DC <= 39 mV, 3.2 mW). TB isi metric fixed to
    sample the pulse-inherited state (period-end sampling false-failed
    small decaps). Full entry in DESIGN.md.
-2. **Golden netlists + xschem schematics for remaining blocks.** Golden
-   .spice per block emitted from the TB subckt functions (single source =
-   SIZES dicts): comp has spice/comp_top.spice via make compcheck; need
-   emitters for dff/bias/buf/lvl/odrv (write spice/golden/<b>.spice).
-   One tools/gen_sch.py with per-block device tables (gen_comp_sch.py is
-   the pattern: DEVICES table + WIRES list + lab_pins; pin geometry:
-   xschem y is DOWN; pfet S=(x+20,y-30) D=(x+20,y+30), nfet mirrored,
-   G=(x-20,y), B=(x+20,y)) for the report sub-pages + equivalence.
+2. **Golden netlists + xschem schematics — DONE 2026-07-19.** `make
+   blockcheck`: tools/gen_golden.py emits spice/golden/<b>.spice for all
+   six blocks (bias with real poly-R/MiM cards, ngspice-model-calibrated
+   lengths — see DESIGN.md; ACCEPT via `bias_tb.py --layout`);
+   tools/gen_sch.py draws dff/bias/buf/lvl/odrv schematics+syms+wrappers;
+   tools/xcheck_blocks.py proves device-for-device identity + port order
+   (ALL MATCH). buf tail is now a real mirror off the OTA IREFP diode
+   line (mult 64). RNB isolation Rs 100→1k (poly end-resistance floor).
+   CI support-blocks job runs the layout variant + blockcheck.
 3. **Block layouts** (order: comp, dff, bias, buf, lvl, odrv). Refactor
    gen_ota_layout.py/route_ota.py into a shared library (parametrize:
    golden file+subckt name, device-name regex, placement rows, cellname).

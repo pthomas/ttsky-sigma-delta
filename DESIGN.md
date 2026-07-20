@@ -601,3 +601,38 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   Ideal Rs in TB, poly cells at layout (same rule as bias). Reopen if:
   DAC pulse current grows past ~50 uA, fs changes, or layout forces the
   ladder onto a different supply than the buffers' VAPWR.
+- **2026-07-19 - Poly-R lengths calibrated against the ngspice model,
+  not magic's sheet rho; RNB isolation Rs 100 -> 1k.** Measured (op on
+  L=10/100/330.7): the res_high_po_1p41 MODEL is R = 256.2 + 230.06*L
+  [ohm, L in um] - it carries a ~256 ohm end resistance that magic's
+  RHO=319.8 sheet extraction does not. Uncalibrated, the bias block's
+  layout netlist ran ~10% cold (IREFP 307 vs 343 uA). Decision: drawn
+  lengths for all bias/ladder poly Rs come from the MODEL inverse
+  (r_len in sim/bias_tb.py); magic-extracted ohms will read ~5-10% high
+  on short Rs, which is informational only (LVS compares geometry).
+  Consequence: no poly R below ~310 ohm is realizable, so the RNB1/RNB2
+  cascode-gate RC isolation Rs went 100 -> 1k (no DC current, value
+  non-critical). bias TB now ACCEPTs identically in ideal and --layout
+  (real poly-R/MiM cards) variants: IREFP 342.6 vs 343.1 uA at tt.
+  Reopen if: PDK pin changes the res model, or a sub-300-ohm poly R is
+  ever needed (use a wider flavor).
+- **2026-07-19 - Support-block golden netlists + generated schematics +
+  canonical equivalence (make blockcheck).** Every block now has ONE
+  size home (the TB SIZES dict) emitting: (a) a golden netlist
+  spice/golden/<b>.spice via tools/gen_golden.py (bias emitted with
+  layout=True: real poly-R/MiM cards, ACCEPT-verified by bias_tb
+  --layout); (b) an xschem schematic + symbol + netlisting wrapper via
+  tools/gen_sch.py (comp keeps gen_comp_sch.py, the pattern gen_sch
+  generalizes); (c) a canonical equivalence check tools/xcheck_blocks.py
+  that parses both netlists and requires device-for-device identity
+  (model, nodes, W/L/mult; res ends unordered) plus exact port order -
+  stronger than the sim-tolerance xcheck and cheap enough for CI
+  (support-blocks job now runs it). Symbol pin order is the LVS
+  contract: dff D CLK Q QB VDD VSS; bias IREFP IREFN VBNC VBPC VDD VSS;
+  buf IN OUT IREFP VDD VSS; lvl CLK18 CLK33 CLKB33 VDD18 VDD33 VSS;
+  odrv IN33 OUT18 VDD18 VSS. ALSO the buf tail decision: the ideal
+  ITAIL became a real PMOS mirror (mult 64, L=1) tapping the OTA's
+  IREFP diode gate line (5 uA per unit finger, gate-only tap, no new
+  bias branch); buf re-ACCEPTed (Zout 759 ohm, 3.1-3.2 mW, bit-dep
+  <= 2.4 mV). Reopen if: any SIZES dict changes (regen + blockcheck
+  re-proves), or a block gains pins at layout.
