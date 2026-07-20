@@ -667,3 +667,100 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   pads leave sub-0.14 same-net notches. Reopen if: any SIZES change
   (regen goldens -> blockcheck -> re-run gen_block_layouts), or a new
   device flavor (cap, other res widths) enters a block.
+
+- **2026-07-20: Top-level assembly wiring -- tools/asm_top.py +
+  tools/asm_route.py.** tools/asm_top.py places every block/passive
+  from PLACE, taps all terminals to met3 (met4 for cap C1/C2), and
+  paints WIRES from tools/asm_wires.py (net -> polylines of ("T",inst,
+  port) terminal refs and plain (x,y) corners; via3 auto-inserted at
+  direction changes and at m3/m4 terminal-layer boundaries). Hand-
+  routing 27 nets across ~110 terminals was intractable by inspection,
+  so tools/asm_route.py is a real grid-based (1um) maze router
+  (Dijkstra, manhattan-only) that enforces the SAME rules asm_top.py's
+  own audit checks: horizontal runs (met3) forbidden over BLOCK+CAP
+  bboxes, vertical runs (met4) forbidden over CAP bboxes only (blocks
+  have no met4 so met4 crosses them freely) -- this asymmetry is the
+  key fact the whole strategy leans on: escape a block's interior by
+  going UP/DOWN first (unrestricted except by caps), THEN sideways only
+  in genuinely clear channels, not the reverse. Different nets are kept
+  a grid cell apart per layer (real gap 1.0-2*0.3=0.4um, just clears
+  the met3.2/met4.2 0.3um spacing rule) via an owner-per-cell map,
+  reset fresh each run; a net may freely reuse/cross its own earlier
+  cells. Run order matters a lot: whichever net claims a congested
+  corridor (the y~151 gap past cint/cdec1, the y~189 gap past
+  cdec2/cdec3, the switch row) first wins it; ORDER in asm_route.py was
+  tuned empirically by moving failing nets earlier until all 27 found
+  a path.
+  Bugs found only by actually running the painter (the router alone
+  can't see them, since it doesn't model paint width or the terminal-
+  tap phase at all):
+  (1) **Terminal coordinates aren't grid-aligned.** Router corners are
+  integers; the true terminal position can be off by up to 0.5um. Any
+  segment ending at a "T" ref must have its adjacent corner's shared
+  axis re-snapped to the EXACT terminal value, or the segment silently
+  goes non-manhattan (sub-0.001 diagonal) and asm_top.py's own
+  resolve() loop throws "non-manhattan segment". Fix: fixup() in
+  asm_route.py replaces path endpoints with exact coordinates and
+  re-snaps (not just copies) the neighboring corner's matching
+  coordinate, with a repair pass that inserts a corner if the two still
+  don't share an axis (can happen when the router's whole path was one
+  straight run at grid resolution but the two real terminals differ by
+  a fraction of a um on that axis).
+  (2) **A cap's own C1 stub always overlaps its own bbox.** The C1
+  met4 stub necessarily starts inside the cap's footprint (that's
+  where the mimcc contact is) and extends up through it -- forbid_m4's
+  blanket "any m4 over any cap bbox is bad" would flag this on every
+  single cap, always. Old code tried a name-prefix hack ("cap:" on
+  cur[0]) that collided with fix (3) below. Real fix: a SEPARATE
+  cur_capself[0] flag threaded through the audit tuple (now 7-wide),
+  set only while painting a cap's own C1 stub, checked instead of
+  string-matching the net name.
+  (3) **Terminal-tap audit entries and the wire that connects to them
+  were never the same name.** The terminal-tapping phase named its
+  audit entries f"{inst}.{port}" (e.g. "ota.INP"); the wire-routing
+  phase names them by net (e.g. "vcm"). Since the NEAR/CROSS check
+  exempts same-name pairs, EVERY block port's own via stack showed up
+  as a false-positive conflict against the very wire meant to connect
+  to it (hundreds of them). Fix: build term_to_net from asm_wires.WIRES
+  (scan every ("T",inst,port) reference) BEFORE terminal-tapping runs,
+  and use it for cur[0] throughout the BLOCKS/RESC/SWS/CAPS loops
+  instead of the raw "{inst}.{port}" string.
+  (4) **A wire legitimately entering its OWN destination block still
+  looks like a foreign crossing.** M3-OVER-CELL doesn't know "this
+  segment is reaching MY port inside this exact bbox" is fine. Two-part
+  fix: (a) clip_entry() in asm_route.py inserts a corner right at the
+  block's edge (offset by the 0.3um paint half-width) so only a short
+  stub actually enters, keeping the painted-rectangle width under the
+  2.0um check threshold where geometrically possible; (b) forbid_m3/
+  forbid_m4 in asm_top.py now carry (inst, bbox) pairs plus an
+  own_nets[inst] set (nets with a real terminal inside that inst) and
+  skip the check entirely when the flagged net owns a terminal there --
+  needed because clip_entry alone can't help when the port sits deeper
+  inside the block than the 2.0um budget allows (e.g. lvl.VSS at
+  1.4um deep: minimum legal entry stub is already right at the
+  threshold).
+  (5) **D/S contacts on the DAC switches (sw_nmos) sit ~0.79um apart**
+  (single-finger nfet) -- too tight for two independent via1/via2
+  PAD-sized (0.5um) stacks on different top-level nets to keep 0.3um
+  clearance (real gap comes out to 0.29um). Fixed in asm_top.py's SWS
+  loop (and mirrored in asm_route.py's term computation) by pushing
+  each via out 0.4um along its own m1 finger, away from the other, before
+  stacking up -- same idea as the existing G-tap m1 flag.
+  Net result: all 27 nets + 8 top-level port labels route with correct
+  topology, zero non-manhattan segments, zero BLOCK/CAP crossings.
+  ~86 NEAR/CROSS (met3/met4 spacing, real gap <0.3um) conflicts remain,
+  clustered in a handful of congested spots (the switch-row taps
+  around dac/vcm/vrefn/vrefp; the y~189-190 band where cdec2/cdec3/
+  VDPWR/VAPWR/VGND/clkb33 all thread past the caps; the y~172-174 band
+  where VGND crosses q33/qb33 near dff/odrvq; the vbpc bus vs UO0/UO1's
+  rise to their pin labels; lad_p vs lad_c near the buffers). A blanket
+  extra-dilation experiment (thickening every supply net's committed
+  cells by 1 more grid row) traded these for a different, equally-sized
+  set of routing FAILURES elsewhere -- capacity in these corridors is
+  genuinely tight, not just under-separated. Next step: either widen
+  PLACE spacing in the worst 1-2 spots, or hand-patch the remaining
+  clusters one at a time the same way lvl.VDD33 was (route via a
+  different corridor/side), verifying each with `python3
+  tools/asm_top.py` and folding the fix into build_wires() in
+  asm_route.py. Re-run: `python3 tools/asm_route.py && python3
+  tools/asm_top.py`.

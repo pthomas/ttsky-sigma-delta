@@ -143,17 +143,26 @@ context a fresh session needs:
    merging, go-wide floorplans, grid-snapped via centers). Bias/ladder
    R cells + MiM decaps for top level still to generate at assembly
    (cint/gen_layout_cells pattern).
-4. **Top assembly** (tools/asm_top.py): place blocks + rin/rdac/cint/
-   sw_nmos x3 + decaps in the frame (tt_frame/build_frame.tcl pattern,
-   `getcell child 0um 0um` to anchor ORIGINS); top nets: ua[0]->RIN->sum;
-   sum->OTA.INM (INP=vcm); OTA.OUT=int; CINT int<->sum; int->comp.INP
-   (INM=vcm); comp.Q->DFF.D; DFF q/qb -> DAC switches (S_TOP q&clk,
-   S_BOT qb&clk, S_MID clk -> vcm) -> RDAC -> sum; ladder->buffers->
-   vrefp/vcm/vrefn; lvl: TT clk (1.8V) -> clk33/clkb33; odrv x2:
-   q/qb -> uo[0]/uo[1]; ua[1] = int monitor (decide/confirm). Hand wire
-   lists like the v0 pad wiring (worked well; check crossings on the
-   same layer!). Power: met4 stripes exist (VDPWR/VGND/VAPWR); per-block
-   taps met3->via3->met4. Top DRC + top LVS vs a stitched golden netlist.
+4. **Top assembly -- IN PROGRESS 2026-07-20.** tools/asm_top.py places
+   every block/passive from PLACE, taps all terminals, paints WIRES
+   from tools/asm_wires.py (generated -- do not hand-edit) and runs
+   fresh-process DRC + netgen LVS vs spice/golden/top.spice (built by
+   tools/gen_top_golden.py, which also documents the full connectivity
+   contract in its docstring). tools/asm_route.py is a real grid maze
+   router (writes tools/asm_wires.py) -- hand-routing 27 nets across
+   ~110 terminals wasn't tractable by inspection. Current state: `make`
+   equivalent is `python3 tools/asm_route.py && python3
+   tools/asm_top.py` -- all 27 nets + 8 pin labels route with correct
+   topology (0 non-manhattan, 0 BLOCK/CAP crossings); ~86 NEAR/CROSS
+   met3/met4 spacing near-misses remain in a few congested corridors
+   (switch-row taps, the y~189-190 cap-escape band, y~172-174 near
+   dff/odrvq, vbpc bus vs UO0/UO1, lad_p vs lad_c). DESIGN.md
+   2026-07-20 has the full bug list (precision/self-overlap/terminal-
+   naming/entry-depth/D-S-pitch fixes) and the exact next step (either
+   widen PLACE spacing at 1-2 tight spots, or keep hand-patching
+   corridors one at a time the way lvl.VDD33 already was, in
+   build_wires() in asm_route.py). NOT yet run: `make tt` / top DRC+LVS
+   pass (blocked on the NEAR/CROSS cleanup above).
 5. **Extracted acceptance**: PEX the top, shortened modulator transient
    (>=512 bits), fast-path SNDR sanity (>=35 dB floor).
 6. **Report sub-pages**: public/blocks/<name>.html per component
