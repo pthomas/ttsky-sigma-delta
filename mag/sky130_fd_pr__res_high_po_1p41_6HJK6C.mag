@@ -1,0 +1,86 @@
+magic
+tech sky130A
+magscale 1 2
+timestamp 1784511411
+<< checkpaint >>
+rect -3646 2730 3646 3164
+rect -3646 -3164 5559 2730
+rect -1401 -3266 1401 -3164
+rect 2757 -3266 5559 -3164
+<< pwell >>
+rect -2386 -1904 2386 1904
+<< psubdiff >>
+rect -2350 1834 -2254 1868
+rect 2254 1834 2350 1868
+rect -2350 1772 -2316 1834
+rect 2316 1772 2350 1834
+rect -2350 -1834 -2316 -1772
+rect 2316 -1834 2350 -1772
+rect -2350 -1868 -2254 -1834
+rect 2254 -1868 2350 -1834
+<< psubdiffcont >>
+rect -2254 1834 2254 1868
+rect -2350 -1772 -2316 1772
+rect 2316 -1772 2350 1772
+rect -2254 -1868 2254 -1834
+<< xpolycontact >>
+rect -2220 -1738 -1938 -1306
+rect 1938 -1738 2220 -1306
+<< ppolyres >>
+rect -2220 1456 -1560 1738
+rect -2220 -1306 -1938 1456
+rect -1842 -920 -1560 1456
+rect -1464 1456 -804 1738
+rect -1464 -920 -1182 1456
+rect -1842 -1202 -1182 -920
+rect -1086 -920 -804 1456
+rect -708 1456 -48 1738
+rect -708 -920 -426 1456
+rect -1086 -1202 -426 -920
+rect -330 -920 -48 1456
+rect 48 1456 708 1738
+rect 48 -920 330 1456
+rect -330 -1202 330 -920
+rect 426 -920 708 1456
+rect 804 1456 1464 1738
+rect 804 -920 1086 1456
+rect 426 -1202 1086 -920
+rect 1182 -920 1464 1456
+rect 1560 1456 2220 1738
+rect 1560 -920 1842 1456
+rect 1182 -1202 1842 -920
+rect 1938 -1306 2220 1456
+<< locali >>
+rect -2350 1834 -2254 1868
+rect 2254 1834 2350 1868
+rect -2350 1772 -2316 1834
+rect 2316 1772 2350 1834
+rect -2350 -1834 -2316 -1772
+rect 2316 -1834 2350 -1772
+rect -2350 -1868 -2254 -1834
+rect 2254 -1868 2350 -1834
+<< viali >>
+rect -2204 -1720 -1954 -1323
+rect 1954 -1720 2204 -1323
+<< metal1 >>
+rect -2210 -1323 -1948 -1311
+rect -2210 -1720 -2204 -1323
+rect -1954 -1720 -1948 -1323
+rect -2210 -1732 -1948 -1720
+rect 1948 -1323 2210 -1311
+rect 1948 -1720 1954 -1323
+rect 2204 -1720 2210 -1323
+rect 1948 -1732 2210 -1720
+<< labels >>
+rlabel psubdiffcont 0 -1851 0 -1851 0 B
+port 1 nsew
+rlabel xpolycontact -2079 -1703 -2079 -1703 0 R1
+port 2 nsew
+rlabel xpolycontact 2079 -1703 2079 -1703 0 R2
+port 3 nsew
+<< properties >>
+string FIXED_BBOX -2333 -1851 2333 1851
+string gencell sky130_fd_pr__res_high_po_1p41
+string library sky130
+string parameters w 1.41 l 14.7 m 1 nx 12 wmin 1.410 lmin 0.50 class resistor rho 319.8 val 43.803k dummy 0 dw 0.0 term 194.82 sterm 0.0 caplen 0 guard 1 glc 1 grc 1 gtc 1 gbc 1 compatible {sky130_fd_pr__res_high_po_0p35  sky130_fd_pr__res_high_po_0p69 sky130_fd_pr__res_high_po_1p41  sky130_fd_pr__res_high_po_2p85 sky130_fd_pr__res_high_po_5p73} snake 1 full_metal 1 wmax 1.410 n_guard 0 hv_guard 0 vias 1 viagb 0 viagt 0 viagl 0 viagr 0 doports 1
+<< end >>

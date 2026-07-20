@@ -1,11 +1,11 @@
 magic
 tech sky130A
 magscale 1 2
-timestamp 1784510510
+timestamp 1784511413
 << checkpaint >>
-rect -1313 -1313 5601 6665
-use sky130_fd_pr__res_high_po_1p41_CPXBP6  X0
-timestamp 0
-transform 1 0 2144 0 1 2676
-box -2197 -2729 2197 2729
+rect -1313 -1313 3333 11361
+use sky130_fd_pr__res_high_po_1p41_HQBJZB  X0
+timestamp 1784511413
+transform 1 0 1010 0 1 5024
+box -1063 -5077 1063 5077
 << end >>

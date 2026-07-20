@@ -34,7 +34,7 @@ def gen_cell(name, device, params):
     magic_run(f"""cellname create {name}
 load {name}
 magic::gencell sky130::{device} X0 {p}
-save {name}
+writeall force
 extract all
 ext2spice lvs
 ext2spice
@@ -81,7 +81,7 @@ def fet_cell(name, w, l):
     return True
 
 
-def res_cell_model(name, target):
+def res_cell_model(name, target, nx_force=None):
     """Model-calibrated resistor (no magic-RHO pass): drawn length from
     sim.bias_tb.res_geom -- the ngspice model carries a ~256 ohm end
     resistance magic's sheet extraction does not (DESIGN.md
@@ -91,6 +91,9 @@ def res_cell_model(name, target):
         os.path.abspath(__file__))))
     from sim.bias_tb import res_geom
     nx, seg, ltot = res_geom(target)
+    if nx_force:
+        nx = nx_force
+        seg = round(ltot / nx / 0.005) * 0.005
     dev = "sky130_fd_pr__res_high_po_1p41"
     txt = gen_cell(name, dev, dict(w=WRES, l=seg, nx=nx, snake=1))
     leff = float(re.search(r"res_high_po_1p41 l=([0-9.]+)", txt).group(1))
@@ -114,13 +117,16 @@ def main():
     ok &= fet_cell("sw_nmos", 10, 0.5)
     # reference ladder off VAPWR (0.4/0.9/1.4 V taps; DESIGN.md
     # 2026-07-19) -- model-calibrated lengths
-    ok &= res_cell_model("rl_top", 190e3)
-    ok &= res_cell_model("rl_pc", 50e3)
-    ok &= res_cell_model("rl_cm", 50e3)
-    ok &= res_cell_model("rl_bot", 40e3)
-    # reference decaps (5 pF each, tier-1 validated at RREF=754) and
+    # nx chosen for the assembly floorplan (tall-skinny right column)
+    ok &= res_cell_model("rl_top", 190e3, nx_force=15)
+    ok &= res_cell_model("rl_pc", 50e3, nx_force=5)
+    ok &= res_cell_model("rl_cm", 50e3, nx_force=5)
+    ok &= res_cell_model("rl_bot", 40e3, nx_force=5)
+    # reference decaps: 2 pF each (tier-1 validated the full 20/10/5/2
+    # sweep at RREF=754 -- all inside scatter; 5 pF bricks turned out
+    # unplaceable in the 2x2 floorplan, 2 pF is the assembly pick) and
     # the VBNC/VBPC 1 pF filter caps (moved out of the bias block)
-    ok &= cap_cell("cdec", 5.0, w=25, l=20, nx=5)
+    ok &= cap_cell("cdec", 2.0, w=25, l=20, nx=2)
     ok &= cap_cell("cflt", 1.0, w=22.2, l=22.2, nx=1)
     print("all cells OK" if ok else "SOME CELLS OFF TARGET")
     sys.exit(0 if ok else 1)

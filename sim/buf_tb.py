@@ -61,7 +61,7 @@ FSIZES = dict(
     W_IN=60, L_IN=0.5,    # input pair (gm sets Zout ~ 1/gm)
     W_MIR=30, L_MIR=1.0,  # NMOS mirror load
     ITAIL=320e-6,         # tail current (mirror mult derived from this)
-    CDEC=5e-12,           # tier-1 validated at RREF=754 (see docstring)
+    CDEC=2e-12,           # tier-1 validated at RREF=754 (see docstring)
     # reference ladder off VAPWR, top to bottom (total 330k, ~10 uA)
     RL_TOP=190e3, RL_PC=50e3, RL_CM=50e3, RL_BOT=40e3,
 )

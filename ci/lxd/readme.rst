@@ -30,11 +30,10 @@ or for gitlab-runner::
 
     lxc exec eda-runner -- su --shell /bin/bash --login gitlab-runner
 
-
 To register the runner on gitlab (project runner token from
 Settings -> CI/CD -> Runners on gitlab.com/pthomas1/sigma-delta)::
 
-    lxc exec eda-runner -- gitlab-runner register --url https://gitlab.com --token xxx
+    gitlab-runner register --url https://gitlab.com --token xxx
 
 When asked to 'Enter an executor' use 'shell'.
 
