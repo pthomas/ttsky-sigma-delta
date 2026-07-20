@@ -35,7 +35,11 @@ NF18, PF18 = "sky130_fd_pr__nfet_01v8", "sky130_fd_pr__pfet_01v8"
 
 OSIZES = dict(
     W_IN_N=5, W_IN_P=10, L5=0.5,   # stage 1: 5V devices on the 1.8V rail
-    W_B1=2, W_B2=5, L18=0.15,      # thin-oxide buffer chain (W in um)
+    W_B1=5, W_B2=12, L18=0.35,     # thin-oxide buffer chain (W in um).
+                                   # L=0.35 (not 0.15): the 0.44um
+                                   # column pitch at L=0.15 cannot fit
+                                   # a DRC-legal strap via pad; W
+                                   # scaled to keep W/L
 )
 
 TPER = 20e-9

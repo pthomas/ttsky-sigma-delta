@@ -1,0 +1,67 @@
+magic
+tech sky130A
+magscale 1 2
+timestamp 1784510098
+<< pwell >>
+rect -1063 -2853 1063 2853
+<< psubdiff >>
+rect -1027 2783 -931 2817
+rect 931 2783 1027 2817
+rect -1027 2721 -993 2783
+rect 993 2721 1027 2783
+rect -1027 -2783 -993 -2721
+rect 993 -2783 1027 -2721
+rect -1027 -2817 -931 -2783
+rect 931 -2817 1027 -2783
+<< psubdiffcont >>
+rect -931 2783 931 2817
+rect -1027 -2721 -993 2721
+rect 993 -2721 1027 2721
+rect -931 -2817 931 -2783
+<< xpolycontact >>
+rect 615 2255 897 2687
+rect -897 -2687 -615 -2255
+<< ppolyres >>
+rect -897 1869 -237 2151
+rect -897 -2255 -615 1869
+rect -519 -1869 -237 1869
+rect -141 1869 519 2151
+rect -141 -1869 141 1869
+rect -519 -2151 141 -1869
+rect 237 -1869 519 1869
+rect 615 -1869 897 2255
+rect 237 -2151 897 -1869
+<< locali >>
+rect -1027 2783 -931 2817
+rect 931 2783 1027 2817
+rect -1027 2721 -993 2783
+rect 993 2721 1027 2783
+rect -1027 -2783 -993 -2721
+rect 993 -2783 1027 -2721
+rect -1027 -2817 -931 -2783
+rect 931 -2817 1027 -2783
+<< viali >>
+rect 631 2272 881 2669
+rect -881 -2669 -631 -2272
+<< metal1 >>
+rect 625 2669 887 2681
+rect 625 2272 631 2669
+rect 881 2272 887 2669
+rect 625 2260 887 2272
+rect -887 -2272 -625 -2260
+rect -887 -2669 -881 -2272
+rect -631 -2669 -625 -2272
+rect -887 -2681 -625 -2669
+<< labels >>
+rlabel psubdiffcont 0 -2800 0 -2800 0 B
+port 1 nsew
+rlabel xpolycontact -756 -2652 -756 -2652 0 R1
+port 2 nsew
+rlabel xpolycontact 756 2652 756 2652 0 R2
+port 3 nsew
+<< properties >>
+string FIXED_BBOX -1010 -2800 1010 2800
+string gencell sky130_fd_pr__res_high_po_1p41
+string library sky130
+string parameters w 1.41 l 21.51 m 1 nx 5 wmin 1.410 lmin 0.50 class resistor rho 319.8 val 25.948k dummy 0 dw 0.0 term 194.82 sterm 0.0 caplen 0 guard 1 glc 1 grc 1 gtc 1 gbc 1 compatible {sky130_fd_pr__res_high_po_0p35  sky130_fd_pr__res_high_po_0p69 sky130_fd_pr__res_high_po_1p41  sky130_fd_pr__res_high_po_2p85 sky130_fd_pr__res_high_po_5p73} snake 1 full_metal 1 wmax 1.410 n_guard 0 hv_guard 0 vias 1 viagb 0 viagt 0 viagl 0 viagr 0 doports 1
+<< end >>

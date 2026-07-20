@@ -1,0 +1,14 @@
+* NGSPICE file created from lvl_layout.ext - technology: sky130A
+
+.subckt lvl_layout VSS VDD18 CLK33 CLKB33 CLK18 VDD33
+X0 CLKB33 n2 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+X1 CLKB33 n2 VDD33 VDD33 sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+X2 CLK33 n1 VSS VSS sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=14.5 ps=105.8 w=5 l=0.5 M=2
+X3 CLK33 n1 VDD33 VDD33 sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=5.8 ps=42.32 w=5 l=0.5 M=2
+X4 n1 n2 VDD33 VDD33 sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X5 VSS CLK18 nb18 VSS sky130_fd_pr__nfet_01v8 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.35
+X6 n2 n1 VDD33 VDD33 sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X7 VSS CLK18 n1 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.5 M=8
+X8 VDD18 CLK18 nb18 VDD18 sky130_fd_pr__pfet_01v8 ad=2.9 pd=20.58 as=2.9 ps=20.58 w=10 l=0.35
+X9 VSS nb18 n2 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=7.25 ps=52.9 w=5 l=0.5 M=8
+.ends

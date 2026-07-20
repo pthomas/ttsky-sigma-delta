@@ -1,0 +1,22 @@
+* NGSPICE file created from bias_layout.ext - technology: sky130A
+
+.subckt bias_layout VSS VDD VBNC VBPC IREFN IREFP
+X0 nb pb VDD VDD sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=2
+X1 pb pb VDD VDD sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=31.9 ps=232.75999 w=5 l=1 M=2
+X2 rs VSS VSS sky130_fd_pr__res_high_po_1p41 l=18.88
+X3 VSS vbpc_i VSS sky130_fd_pr__res_high_po_1p41 l=105.03
+X4 vbnc_i pb VDD VDD sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=1 M=2
+X5 VSS vbnc_i VSS sky130_fd_pr__res_high_po_1p41 l=314.01001
+X6 vbpc_i pb VDD VDD sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=1 M=2
+X7 nst VSS nb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=2
+X8 VDD VSS nst VDD sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=50
+X9 IREFP vbnc_i ipd VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.5 M=38
+X10 IREFN vbpc_i ind VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.5 M=34
+X11 nst vbnc_i VSS VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+X12 vbpc_i VBPC VSS sky130_fd_pr__res_high_po_1p41 l=3.24
+X13 vbnc_i VBNC VSS sky130_fd_pr__res_high_po_1p41 l=3.24
+X14 VDD pb ind VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=34
+X15 VSS nb ipd VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=38
+X16 pb nb rs VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=8
+X17 nb nb VSS VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=2
+.ends

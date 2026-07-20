@@ -22,25 +22,25 @@ C {devices/lab_pin.sym} -580 -530 1 0 {name=l4 lab=a}
 C {devices/lab_pin.sym} -620 -500 0 0 {name=l5 lab=IN33}
 C {devices/lab_pin.sym} -580 -470 3 0 {name=l6 lab=VSS}
 C {devices/lab_pin.sym} -555 -500 2 0 {name=l7 lab=VSS}
-C {sky130_fd_pr/pfet_01v8.sym} -400 -650 0 0 {name=X2P model=pfet_01v8 spiceprefix=X W=4 L=0.15 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/pfet_01v8.sym} -400 -650 0 0 {name=X2P model=pfet_01v8 spiceprefix=X W=10 L=0.35 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -380 -650 -355 -650 {lab=VDD18}
 C {devices/lab_pin.sym} -380 -620 1 0 {name=l8 lab=b}
 C {devices/lab_pin.sym} -420 -650 0 0 {name=l9 lab=a}
 C {devices/lab_pin.sym} -380 -680 3 0 {name=l10 lab=VDD18}
 C {devices/lab_pin.sym} -355 -650 2 0 {name=l11 lab=VDD18}
-C {sky130_fd_pr/nfet_01v8.sym} -400 -500 0 0 {name=X2N model=nfet_01v8 spiceprefix=X W=2 L=0.15 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/nfet_01v8.sym} -400 -500 0 0 {name=X2N model=nfet_01v8 spiceprefix=X W=5 L=0.35 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -380 -500 -355 -500 {lab=VSS}
 C {devices/lab_pin.sym} -380 -530 1 0 {name=l12 lab=b}
 C {devices/lab_pin.sym} -420 -500 0 0 {name=l13 lab=a}
 C {devices/lab_pin.sym} -380 -470 3 0 {name=l14 lab=VSS}
 C {devices/lab_pin.sym} -355 -500 2 0 {name=l15 lab=VSS}
-C {sky130_fd_pr/pfet_01v8.sym} -200 -650 0 0 {name=X3P model=pfet_01v8 spiceprefix=X W=10 L=0.15 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/pfet_01v8.sym} -200 -650 0 0 {name=X3P model=pfet_01v8 spiceprefix=X W=24 L=0.35 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -180 -650 -155 -650 {lab=VDD18}
 C {devices/lab_pin.sym} -180 -620 1 0 {name=l16 lab=OUT18}
 C {devices/lab_pin.sym} -220 -650 0 0 {name=l17 lab=b}
 C {devices/lab_pin.sym} -180 -680 3 0 {name=l18 lab=VDD18}
 C {devices/lab_pin.sym} -155 -650 2 0 {name=l19 lab=VDD18}
-C {sky130_fd_pr/nfet_01v8.sym} -200 -500 0 0 {name=X3N model=nfet_01v8 spiceprefix=X W=5 L=0.15 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/nfet_01v8.sym} -200 -500 0 0 {name=X3N model=nfet_01v8 spiceprefix=X W=12 L=0.35 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -180 -500 -155 -500 {lab=VSS}
 C {devices/lab_pin.sym} -180 -530 1 0 {name=l20 lab=OUT18}
 C {devices/lab_pin.sym} -220 -500 0 0 {name=l21 lab=b}

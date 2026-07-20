@@ -1,0 +1,27 @@
+* NGSPICE file created from comp_layout.ext - technology: sky130A
+
+.subckt comp_layout VDD on1 on2 VSS Q QB CLK INP INM
+X0 VDD n1b QB VDD sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X1 di1 INP tail VDD sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+X2 VDD Q QB VDD sky130_fd_pr__pfet_g5v0d10v5 ad=10.15 pd=74.06 as=2.9 ps=21.16 w=5 l=0.5
+X3 di1 on2 on1 VDD sky130_fd_pr__pfet_g5v0d10v5 ad=4.35 pd=31.74 as=1.45 ps=10.58 w=5 l=0.5
+X4 di2 INM tail VDD sky130_fd_pr__pfet_g5v0d10v5 ad=4.35 pd=31.74 as=5.8 ps=42.32 w=5 l=0.5 M=2
+X5 di2 on1 on2 VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X6 sb n1b QB VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X7 VSS Q sb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=14.5 pd=105.8 as=2.9 ps=21.16 w=5 l=0.5
+X8 VSS on2 on1 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X9 VSS on1 on2 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X10 VDD n2b Q VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X11 VDD QB Q VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X12 VSS QB sq VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X13 sq n2b Q VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X14 VSS CLK di1 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X15 VSS CLK di2 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X16 VSS CLK on1 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X17 VSS CLK on2 VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X18 VSS on2 n2b VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X19 VDD on2 n2b VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X20 VSS on1 n1b VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X21 VDD on1 n1b VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X22 tail CLK VDD VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5 M=2
+.ends

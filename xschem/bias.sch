@@ -88,7 +88,7 @@ C {devices/lab_pin.sym} -680 -770 1 0 {name=l47 lab=vbnc_i}
 C {devices/lab_pin.sym} -720 -800 0 0 {name=l48 lab=pb}
 C {devices/lab_pin.sym} -680 -830 3 0 {name=l49 lab=VDD}
 C {devices/lab_pin.sym} -655 -800 2 0 {name=l50 lab=VDD}
-C {sky130_fd_pr/res_high_po_1p41.sym} -700 -650 0 0 {name=RBNC model=res_high_po_1p41 spiceprefix=X L=324.89 mult=1}
+C {sky130_fd_pr/res_high_po_1p41.sym} -700 -650 0 0 {name=RBNC model=res_high_po_1p41 spiceprefix=X L=324.88 mult=1}
 C {devices/lab_pin.sym} -700 -620 3 0 {name=l51 lab=VSS}
 C {devices/lab_pin.sym} -700 -680 1 0 {name=l52 lab=vbnc_i}
 C {devices/lab_pin.sym} -720 -650 0 0 {name=l53 lab=VSS}
@@ -96,26 +96,20 @@ C {sky130_fd_pr/res_high_po_1p41.sym} -700 -500 0 0 {name=RNB1 model=res_high_po
 C {devices/lab_pin.sym} -700 -470 3 0 {name=l54 lab=VBNC}
 C {devices/lab_pin.sym} -700 -530 1 0 {name=l55 lab=vbnc_i}
 C {devices/lab_pin.sym} -720 -500 0 0 {name=l56 lab=VSS}
-C {sky130_fd_pr/cap_mim_m3_1.sym} -700 -350 0 0 {name=CBN model=cap_mim_m3_1 spiceprefix=X W=22.17 L=22.17 MF=1}
-C {devices/lab_pin.sym} -700 -380 1 0 {name=l57 lab=VBNC}
-C {devices/lab_pin.sym} -700 -320 3 0 {name=l58 lab=VSS}
 C {sky130_fd_pr/pfet_g5v0d10v5.sym} -500 -800 0 0 {name=XVP model=pfet_g5v0d10v5 spiceprefix=X W=5 L=1 nf=1 mult=2 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -480 -800 -455 -800 {lab=VDD}
-C {devices/lab_pin.sym} -480 -770 1 0 {name=l59 lab=vbpc_i}
-C {devices/lab_pin.sym} -520 -800 0 0 {name=l60 lab=pb}
-C {devices/lab_pin.sym} -480 -830 3 0 {name=l61 lab=VDD}
-C {devices/lab_pin.sym} -455 -800 2 0 {name=l62 lab=VDD}
+C {devices/lab_pin.sym} -480 -770 1 0 {name=l57 lab=vbpc_i}
+C {devices/lab_pin.sym} -520 -800 0 0 {name=l58 lab=pb}
+C {devices/lab_pin.sym} -480 -830 3 0 {name=l59 lab=VDD}
+C {devices/lab_pin.sym} -455 -800 2 0 {name=l60 lab=VDD}
 C {sky130_fd_pr/res_high_po_1p41.sym} -500 -650 0 0 {name=RBPC model=res_high_po_1p41 spiceprefix=X L=107.55 mult=1}
-C {devices/lab_pin.sym} -500 -620 3 0 {name=l63 lab=VSS}
-C {devices/lab_pin.sym} -500 -680 1 0 {name=l64 lab=vbpc_i}
-C {devices/lab_pin.sym} -520 -650 0 0 {name=l65 lab=VSS}
+C {devices/lab_pin.sym} -500 -620 3 0 {name=l61 lab=VSS}
+C {devices/lab_pin.sym} -500 -680 1 0 {name=l62 lab=vbpc_i}
+C {devices/lab_pin.sym} -520 -650 0 0 {name=l63 lab=VSS}
 C {sky130_fd_pr/res_high_po_1p41.sym} -500 -500 0 0 {name=RNB2 model=res_high_po_1p41 spiceprefix=X L=3.23 mult=1}
-C {devices/lab_pin.sym} -500 -470 3 0 {name=l66 lab=VBPC}
-C {devices/lab_pin.sym} -500 -530 1 0 {name=l67 lab=vbpc_i}
-C {devices/lab_pin.sym} -520 -500 0 0 {name=l68 lab=VSS}
-C {sky130_fd_pr/cap_mim_m3_1.sym} -500 -350 0 0 {name=CBP model=cap_mim_m3_1 spiceprefix=X W=22.17 L=22.17 MF=1}
-C {devices/lab_pin.sym} -500 -380 1 0 {name=l69 lab=VBPC}
-C {devices/lab_pin.sym} -500 -320 3 0 {name=l70 lab=VSS}
+C {devices/lab_pin.sym} -500 -470 3 0 {name=l64 lab=VBPC}
+C {devices/lab_pin.sym} -500 -530 1 0 {name=l65 lab=vbpc_i}
+C {devices/lab_pin.sym} -520 -500 0 0 {name=l66 lab=VSS}
 N -1380 -770 -1380 -530 {lab=nb}
 N -1230 -770 -1230 -530 {lab=pb}
 N -1080 -770 -1080 -680 {lab=nst}

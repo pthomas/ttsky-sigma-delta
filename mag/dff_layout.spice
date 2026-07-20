@@ -1,0 +1,24 @@
+* NGSPICE file created from dff_layout.ext - technology: sky130A
+
+.subckt dff_layout VDD VSS D QB Q CLK
+X0 si CLK mb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X1 si clkb mb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X2 mi clkb D VSS sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=1.45 ps=10.58 w=5 l=0.5
+X3 mi CLK D VDD sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=1.45 ps=10.58 w=5 l=0.5
+X4 VSS QB sfb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=8.7 pd=63.48 as=2.9 ps=21.16 w=5 l=0.5
+X5 VSS si QB VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X6 VDD QB sfb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=8.7 pd=63.48 as=2.9 ps=21.16 w=5 l=0.5
+X7 VDD si QB VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X8 VSS QB Q VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X9 VSS CLK clkb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X10 VDD QB Q VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X11 VDD CLK clkb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X12 si clkb sfb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5
+X13 si CLK sfb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5
+X14 VSS mb mfb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X15 VSS mi mb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X16 VDD mb mfb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X17 VDD mi mb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X18 mi CLK mfb VSS sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X19 mi clkb mfb VDD sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+.ends

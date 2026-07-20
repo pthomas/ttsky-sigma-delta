@@ -53,9 +53,10 @@ def m(w):
 def lvl_subckt(p):
     return f"""
 .subckt lvl CLK18 CLK33 CLKB33 VDD18 VDD33 VSS
-* 1.8 V complement (thin-oxide)
-XIN nb18 CLK18 VSS VSS {NF18} W=1 L=0.15 nf=1 m=2
-XIP nb18 CLK18 VDD18 VDD18 {PF18} W=2 L=0.15 nf=1 m=2
+* 1.8 V complement (thin-oxide; single wide fingers, L=0.35 --
+* L=0.15's 0.44um column pitch can't fit a DRC-legal strap via)
+XIN nb18 CLK18 VSS VSS {NF18} W=5 L=0.35 nf=1 m=1
+XIP nb18 CLK18 VDD18 VDD18 {PF18} W=10 L=0.35 nf=1 m=1
 * contention stage: strong 5V NMOS pulldowns vs weak cross-coupled PMOS
 XN1 n1 CLK18 VSS VSS {NF} W={WUNIT} L={p['L5']} nf=1 m={m(p['W_PD'])}
 XN2 n2 nb18  VSS VSS {NF} W={WUNIT} L={p['L5']} nf=1 m={m(p['W_PD'])}

@@ -1,0 +1,674 @@
+timestamp 1784510101
+version 8.3
+tech sky130A
+style ngspice()
+scale 1000 1 500000
+resistclasses 4400000 2200000 950000 3050000 120000 197000 114000 191000 120000 197000 114000 191000 48200 319800 2000000 48200 48200 12800 125 125 47 47 29 5
+use sky130_fd_pr__pfet_g5v0d10v5_C6KNXD UT 1 0 8485 0 1 5107
+use sky130_fd_pr__nfet_g5v0d10v5_TL5NXE U4 1 0 3525 0 1 758
+use sky130_fd_pr__nfet_g5v0d10v5_TL5NXE U3 1 0 975 0 1 758
+use sky130_fd_pr__pfet_g5v0d10v5_9889FF U2 1 0 4131 0 1 2913
+use sky130_fd_pr__pfet_g5v0d10v5_9889FF U1 1 0 1177 0 1 2913
+port "IN" 4 2000 6464 2040 6544 m1
+port "IREFP" 2 16600 6624 16640 6704 m1
+port "OUT" 1 2800 6784 2840 6864 m1
+port "VSS" 5 1700 7104 1740 7184 m1
+port "VDD" 3 700 6944 740 7024 m1
+node "IN" 3 607.725 2000 6464 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 41520 1172 23500 870 248320 6348 0 0 0 0 0 0
+node "IREFP" 2 871.185 16600 6624 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 50760 1326 21000 820 85600 2280 0 0 0 0 0 0
+node "OUT" 21 5443.25 2800 6784 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 415520 9972 483180 9470 1048080 26622 0 0 0 0 0 0
+node "o1" 27 6764.72 151 1008 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 521120 11972 737080 14548 1336400 33830 0 0 0 0 0 0
+node "tail" 50 10678.1 179 5357 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 536400 19680 2549240 43892 576720 14698 0 0 0 0 0 0
+node "VSS" 96 4377.37 1700 7104 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9248 544 154400 4680 701480 13988 1125120 28408 0 0 0 0 0 0
+node "VDD" 176 13220.9 700 6944 m1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 13872 816 1300400 30080 2281020 40414 798400 20380 0 0 0 0 0 0
+substrate "VSUBS" 0 0 -1073741817 -1073741817 space 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+cap "IN" "tail" 116.17
+cap "VDD" "IREFP" 4.80006
+cap "tail" "o1" 1515.45
+cap "VSS" "OUT" 280.512
+cap "IN" "VSS" 1925.17
+cap "VSS" "o1" 1139.16
+cap "VDD" "OUT" 3447.05
+cap "IN" "VDD" 145.246
+cap "VSS" "tail" 2158.91
+cap "VDD" "o1" 1851.35
+cap "IN" "OUT" 1.8912
+cap "VDD" "tail" 3388.61
+cap "tail" "IREFP" 39.9468
+cap "o1" "OUT" 3901.7
+cap "IN" "o1" 46.3365
+cap "VDD" "VSS" 1756.22
+cap "tail" "OUT" 664.485
+cap "U3/G" "U1/S1" 0.466282
+cap "U3/G" "U3/B" 109.416
+cap "U3/D0" "U3/S1" 437.007
+cap "U3/D0" "U1/D2" 0.10678
+cap "U3/G" "U3/D0" 454.572
+cap "U3/G" "U1/G" 27.5674
+cap "U1/S1" "U3/D0" -0.983936
+cap "U3/D0" "U3/B" 30.2355
+cap "U3/G" "U1/D4" 0.133687
+cap "U3/G" "U1/B" 21.1674
+cap "U3/G" "U1/D0" 0.56955
+cap "U3/D0" "U1/G" 3.9287
+cap "U3/D0" "U1/D4" 0.10678
+cap "U3/D0" "U1/B" 10.7279
+cap "U3/G" "U3/S1" 290.542
+cap "U3/G" "U1/D2" 0.133687
+cap "U1/D0" "U3/D0" 0.294565
+cap "U3/G" "U1/D6" 0.133687
+cap "U3/B" "U3/S1" -4.29217
+cap "U4/G" "U4/D0" 25.7089
+cap "U4/B" "U3/D0" 27.0065
+cap "U4/B" "U4/S1" 78.5026
+cap "U4/B" "U4/G" 203.351
+cap "U2/S1" "U3/D0" -0.0303277
+cap "U4/B" "U4/D0" 30.6696
+cap "U2/S1" "U4/G" 0.200817
+cap "U2/S1" "U4/D0" -0.0220723
+cap "U1/G" "U3/D0" 0.927901
+cap "U3/D0" "U2/B" 0.707768
+cap "U1/G" "U4/G" 2.67107
+cap "U4/G" "U2/B" 2.54197
+cap "U3/D0" "U4/S1" 250.802
+cap "U3/D0" "U4/G" 84.9149
+cap "U2/B" "U4/D0" -0.0387841
+cap "U4/S1" "U4/G" 301.799
+cap "U3/D0" "U4/D0" 39.8254
+cap "U4/S1" "U4/D0" 83.9426
+cap "U4/G" "U4/D0" 474.52
+cap "U2/D2" "U4/G" 0.0588496
+cap "U2/B" "U4/G" 24.4023
+cap "U4/B" "U4/S1" -2.33705
+cap "U2/G" "U4/D0" 0.011484
+cap "U2/S1" "U4/G" 0.938822
+cap "U4/S1" "U3/D4" 0.0188489
+cap "U4/S1" "U4/D0" 547.029
+cap "U4/B" "U4/D0" 3.08565
+cap "U2/G" "U4/G" 21.2351
+cap "U2/D6" "U4/G" 0.133687
+cap "U4/S1" "U4/G" 402.116
+cap "U2/D0" "U4/G" 0.654179
+cap "U2/B" "U4/D0" -0.172256
+cap "U4/B" "U4/G" 154.82
+cap "U2/D4" "U4/G" 0.074837
+cap "U2/S1" "U4/D0" -0.481083
+cap "U4/B" "U4/G" 3.51438
+cap "U4/B" "U4/D0" 8.4513
+cap "U4/D0" "U4/S1" 3.63999
+cap "U2/G" "U4/G" 0.497686
+cap "U2/S1" "U4/G" 0.0196551
+cap "U4/G" "U2/B" 0.400509
+cap "U4/D0" "U2/B" 1.84842
+cap "U2/G" "U4/D0" 1.52898
+cap "U2/S1" "U4/D0" -0.486177
+cap "U4/G" "U4/D0" 25.6485
+cap "U1/B" "U3/S1" -0.082654
+cap "U1/B" "U3/B" 55.4773
+cap "U1/S1" "U3/S1" 0.21356
+cap "U1/B" "U3/G" 4.79187
+cap "U1/B" "U1/S1" 39.5971
+cap "U1/B" "U3/D0" 66.3131
+cap "U1/S1" "U3/B" 1.72693
+cap "U3/B" "U3/G" 0.035434
+cap "U1/G" "U3/S1" 0.246588
+cap "U1/B" "U1/G" 68.4798
+cap "U3/B" "U3/D0" 19.1441
+cap "U1/G" "U3/B" 2.54548
+cap "U1/S1" "U3/G" 3.48221
+cap "U1/B" "U4/D0" -0.0221606
+cap "U1/S1" "U3/D0" 21.4413
+cap "U1/S1" "U1/G" 296.385
+cap "U1/G" "U3/D0" 102.497
+cap "U1/G" "U3/G" 27.5598
+cap "U1/B" "U1/D0" 0.0185622
+cap "U1/D0" "U3/B" 0.0412381
+cap "U1/D0" "U3/G" 0.446602
+cap "U1/D0" "U1/S1" 311.399
+cap "U1/D0" "U3/D0" 32.0254
+cap "U1/D0" "U1/G" -0.241447
+cap "U4/G" "U2/B" 9.80598
+cap "U1/D0" "U4/D0" 1.11195
+cap "U2/S1" "U4/B" 6.1632
+cap "U4/G" "U4/B" 100.742
+cap "U4/B" "U2/B" 71.4901
+cap "U1/D0" "U2/D0" 8.10262
+cap "U1/G" "U4/D0" 0.32465
+cap "U2/D0" "U1/G" 0.000969155
+cap "U2/S1" "U2/G" 0.0447148
+cap "U3/D0" "U4/B" 0.362055
+cap "U1/D0" "U2/S1" 300.647
+cap "U1/D0" "U4/G" 0.723267
+cap "U1/D0" "U2/B" 13.6897
+cap "U2/S1" "U1/G" 222.08
+cap "U1/G" "U2/B" 114.073
+cap "U2/S1" "U4/S1" 21.7967
+cap "U1/G" "U4/G" 18.2296
+cap "U4/S1" "U4/G" -0.591945
+cap "U4/S1" "U2/B" 38.3973
+cap "U1/D0" "U4/B" 21.5994
+cap "U1/G" "U4/B" 34.6992
+cap "U4/S1" "U4/B" 15.4926
+cap "U3/D0" "U1/G" 1.10863
+cap "U2/S1" "U4/D0" -0.00282781
+cap "U2/B" "U4/D0" 2.58339
+cap "U2/S1" "U2/D0" 0.0202091
+cap "U1/G" "U2/G" 1.60336
+cap "U1/D0" "U1/G" -0.781951
+cap "U4/B" "U4/D0" 5.37387
+cap "U1/D0" "U4/S1" 24.0161
+cap "U4/S1" "U1/G" 103.711
+cap "U2/S1" "U4/G" -3.69804
+cap "U2/S1" "U2/B" 81.2353
+cap "U4/B" "U2/D0" 0.6035
+cap "U4/G" "U2/D0" 17.5575
+cap "U2/S1" "U1/D8" 0.0202091
+cap "U4/B" "U2/G" 2.27293
+cap "U2/S1" "U2/D0" 383.031
+cap "U4/G" "U2/G" 84.6287
+cap "U1/D8" "U2/D0" 8.10262
+cap "U4/B" "U4/D0" 4.47656
+cap "U2/S1" "U2/G" 262.829
+cap "U4/B" "U2/B" 55.8243
+cap "U4/G" "U2/B" 52.4332
+cap "U1/D8" "U2/G" 0.000969155
+cap "U2/S1" "U4/D0" -0.537372
+cap "U2/G" "U2/D0" -0.940909
+cap "U2/S1" "U2/B" 83.5687
+cap "U2/D0" "U4/D0" 2.65448
+cap "U2/D0" "U2/B" 13.1073
+cap "U2/S1" "U1/G" 0.0447148
+cap "U2/G" "U4/D0" 0.884537
+cap "U4/S1" "U2/G" 0.19741
+cap "U2/G" "U2/B" 182.557
+cap "U4/B" "U4/G" 119.599
+cap "U2/B" "U4/D0" 3.79163
+cap "U4/B" "U2/S1" 0.332678
+cap "U2/G" "U1/G" 1.60336
+cap "U2/S1" "U4/G" 6.24537
+cap "U4/B" "U2/G" 1.34099
+cap "U2/G" "U2/S1" 217.514
+cap "U2/D0" "U2/S1" 213.638
+cap "U2/D0" "U2/G" -0.373152
+cap "U4/G" "U4/B" 24.1538
+cap "U4/G" "U2/S1" -1.94611
+cap "U2/B" "U4/B" 10.3838
+cap "U2/B" "U2/S1" 35.0908
+cap "U4/G" "U2/G" 5.26019
+cap "U2/B" "U2/G" -0.116288
+cap "U2/D0" "U2/B" 0.118371
+cap "U4/D0" "U2/S1" -0.480112
+cap "U4/D0" "U4/B" 0.340937
+cap "U4/G" "U2/B" 1.22849
+cap "U4/D0" "U2/G" 1.00552
+cap "U4/B" "U2/S1" 1.18986
+cap "U1/B" "o1" 51.3539
+cap "U1/B" "U1/G" -0.163495
+cap "U1/G" "o1" 109.661
+cap "U1/D0" "U1/S1" 401.808
+cap "U1/B" "U1/S1" 0.125903
+cap "U1/S1" "o1" 37.6522
+cap "U1/B" "VSS" 0.0651654
+cap "U1/S1" "U1/G" -1.60008
+cap "UT/B" "U1/D0" 11.6289
+cap "UT/D0" "U1/D0" 0.81357
+cap "UT/B" "U1/B" 28.2788
+cap "UT/D0" "U1/G" 0.216014
+cap "UT/B" "U1/G" 15.1174
+cap "UT/G" "U1/D0" 5.75872
+cap "UT/G" "U1/G" 28.8134
+cap "U1/D0" "UT/S1" -0.531652
+cap "U1/G" "UT/S1" 0.184546
+cap "U1/B" "U1/D0" 115.457
+cap "U1/D0" "o1" 40.605
+cap "U1/D0" "U1/G" 386.307
+cap "U2/S1" "VSS" 10.5503
+cap "U2/S1" "U1/D0" 229.634
+cap "UT/G" "U1/D0" 3.4086
+cap "U1/G" "U2/D0" 0.0598144
+cap "U1/G" "OUT" 0.289815
+cap "U1/G" "UT/D0" 0.0687418
+cap "U2/B" "U4/G" 1.84654
+cap "UT/B" "U2/B" 18.717
+cap "U2/B" "VSS" 62.9991
+cap "U2/S1" "VSS" 40.6184
+cap "U2/B" "U1/D0" 54.2912
+cap "U1/G" "U4/G" 0.188752
+cap "U1/G" "VSS" 49.6674
+cap "U1/G" "UT/B" 12.5654
+cap "U1/G" "U1/D0" 191.666
+cap "U2/B" "VSS" 25.3443
+cap "U1/G" "UT/S1" -1.46408
+cap "U1/G" "U2/G" 1.76492
+cap "UT/D0" "U1/D0" 0.101205
+cap "U1/D0" "OUT" 1.98756
+cap "U1/D0" "U2/D0" 10.7492
+cap "U1/G" "VSS" 104.958
+cap "U2/S1" "U2/B" 43.2955
+cap "U2/S1" "U1/G" 148.153
+cap "U1/D0" "U4/G" 1.24827
+cap "UT/B" "U1/D0" 5.59802
+cap "U1/G" "o1" -0.00169238
+cap "U1/G" "UT/G" 20.0909
+cap "U1/D0" "VSS" 37.3369
+cap "UT/S1" "U1/D0" -1.04247
+cap "U1/G" "U2/B" 132.359
+cap "U1/D0" "VSS" 33.04
+cap "U2/B" "OUT" 3.04113
+cap "U2/D0" "UT/B" 9.63928
+cap "U2/S1" "U2/G" -0.646766
+cap "UT/G" "U2/D0" 5.87203
+cap "U2/B" "U4/G" 51.8997
+cap "U2/S1" "U2/B" 0.177011
+cap "VSS" "U2/D0" 0.993408
+cap "U2/G" "UT/D4" 0.0836444
+cap "U1/D8" "U2/D0" 10.7492
+cap "OUT" "U2/D0" 4.74477
+cap "U2/G" "U2/B" 1.16016
+cap "U1/G" "U2/G" 1.61895
+cap "U2/G" "UT/B" 13.0182
+cap "U2/G" "UT/G" 25.1763
+cap "U4/G" "U2/D0" 24.3763
+cap "UT/S5" "U2/D0" -1.1753
+cap "U2/S1" "U2/D0" 304.805
+cap "U2/B" "UT/B" 24.9772
+cap "U2/G" "VSS" 0.18502
+cap "U1/D8" "U2/G" 0.000969155
+cap "U2/G" "OUT" 0.636689
+cap "U2/S1" "U4/G" 9.92429
+cap "UT/D4" "U2/D0" 0.20241
+cap "U2/G" "U2/D0" 342.03
+cap "U2/B" "OUT" 6.24915
+cap "U2/B" "U2/D0" 131.586
+cap "U2/G" "U4/G" 58.9644
+cap "U2/G" "UT/S5" 0.21804
+cap "U2/G" "U2/B" 152.11
+cap "UT/B" "U2/B" 22.0186
+cap "U2/G" "UT/D10" 0.232402
+cap "U2/G" "U2/S1" -3.03329
+cap "U2/D0" "U2/G" 223.621
+cap "U2/D0" "UT/B" 7.23076
+cap "U2/G" "UT/G" 24.7895
+cap "U2/G" "UT/S11" -0.549026
+cap "U2/S1" "U2/B" 2.84217e-14
+cap "U2/D0" "U2/B" 53.5325
+cap "U2/D0" "UT/D10" 0.20241
+cap "U2/D0" "U2/S1" 290.761
+cap "U2/G" "UT/B" 13.8258
+cap "U2/D0" "UT/G" 3.88738
+cap "U2/D0" "UT/S11" -0.336264
+cap "UT/B" "o1" 64.3711
+cap "U1/B" "UT/D0" 0.25232
+cap "UT/G" "UT/D0" 345.527
+cap "U1/S1" "UT/S1" 0.528746
+cap "UT/B" "UT/G" -0.0980971
+cap "U1/B" "UT/B" 28.2788
+cap "U1/D0" "UT/S1" 33.9813
+cap "o1" "UT/S1" 21.0773
+cap "U1/S1" "UT/G" 0.3684
+cap "UT/B" "VSS" 0.0651654
+cap "U1/G" "UT/S1" 4.18679
+cap "UT/B" "UT/D0" 72.741
+cap "U1/B" "UT/S1" 9.70556
+cap "UT/G" "UT/S1" 413.239
+cap "U1/D0" "UT/G" 139.612
+cap "UT/G" "o1" 98.2689
+cap "U1/S1" "UT/D0" 9.02638
+cap "U1/G" "UT/G" 28.8116
+cap "U1/S1" "UT/B" 0.125903
+cap "U1/B" "UT/G" 17.1055
+cap "UT/S1" "UT/D0" 474.593
+cap "U1/D0" "UT/D0" 12.9757
+cap "UT/B" "UT/S1" 43.3985
+cap "o1" "UT/D0" 52.0053
+cap "U1/D0" "UT/B" 42.0627
+cap "UT/D0" "UT/G" 340.292
+cap "UT/D0" "U2/D0" 14.0427
+cap "UT/S1" "UT/G" 546.084
+cap "U2/D0" "UT/S1" 6.57406
+cap "U1/B" "UT/B" 21.1359
+cap "UT/D0" "UT/S1" 597.821
+cap "VSS" "UT/B" 50.7492
+cap "U1/B" "UT/G" 16.1525
+cap "UT/B" "U2/S1" 41.3023
+cap "VSS" "UT/G" 290.169
+cap "U1/B" "UT/S1" 9.17809
+cap "U1/D0" "UT/G" 0.804923
+cap "VSS" "UT/D0" 92.2797
+cap "VSS" "UT/S1" 59.4885
+cap "U2/S1" "UT/G" 209.445
+cap "UT/S1" "U1/D0" -0.769125
+cap "U1/G" "UT/B" 24.2726
+cap "UT/D0" "U2/S1" 18.3013
+cap "U2/S1" "UT/S1" 40.6569
+cap "U1/G" "UT/G" 137.51
+cap "UT/B" "UT/G" -0.119896
+cap "UT/B" "U2/D0" 10.5589
+cap "U1/G" "UT/D0" 29.6463
+cap "U1/G" "UT/S1" 37.5759
+cap "UT/B" "UT/D0" 50.9906
+cap "UT/B" "UT/S1" 79.523
+cap "U2/D0" "UT/G" 56.0681
+cap "UT/D4" "UT/B" 51.1929
+cap "UT/B" "UT/S5" 51.29
+cap "UT/G" "U2/D0" 345.587
+cap "U2/B" "UT/G" 21.3972
+cap "UT/D4" "UT/S5" 587.912
+cap "UT/G" "U2/S1" 0.275186
+cap "o1" "UT/G" 109.739
+cap "UT/G" "UT/B" -0.119896
+cap "UT/D4" "UT/G" 335.734
+cap "UT/G" "UT/S5" 390.272
+cap "UT/B" "U2/D0" 58.8665
+cap "U2/B" "UT/B" 27.3961
+cap "UT/D4" "U2/D0" 65.2355
+cap "U2/B" "UT/S5" 12.7406
+cap "UT/S5" "U2/D0" 62.5349
+cap "U2/S1" "UT/S5" 0.303615
+cap "o1" "UT/B" 20.8383
+cap "o1" "UT/D4" 20.2493
+cap "o1" "UT/S5" 45.7851
+cap "UT/D10" "UT/S11" 536.405
+cap "U2/S1" "UT/G" 0.2456
+cap "UT/B" "UT/G" -0.108997
+cap "VDD" "UT/D10" -1.45023
+cap "UT/B" "U2/D0" 75.5605
+cap "UT/G" "UT/S11" 391.763
+cap "UT/D10" "UT/G" 355.063
+cap "UT/B" "U2/B" 24.4375
+cap "U2/D0" "UT/S11" 66.5709
+cap "UT/D10" "U2/D0" 61.4732
+cap "U2/B" "UT/S11" 10.5805
+cap "UT/G" "U2/D0" 472.049
+cap "UT/G" "U2/B" 18.6682
+cap "U2/S1" "UT/S11" 0.274833
+cap "UT/B" "UT/S11" 50.6591
+cap "UT/B" "UT/D10" 50.8533
+cap "UT/G" "UT/S15" 373.023
+cap "UT/G" "UT/D16" 340.331
+cap "UT/G" "UT/B" -0.130796
+cap "UT/S15" "UT/D16" 622.648
+cap "UT/B" "UT/S15" 51.5243
+cap "UT/B" "UT/D16" 47.1736
+cap "UT/S21" "UT/D22" 526.842
+cap "UT/B" "UT/G" -0.108997
+cap "UT/S21" "UT/B" 51.7916
+cap "UT/D22" "UT/B" 47.7587
+cap "UT/S21" "UT/G" 400.996
+cap "UT/D22" "UT/G" 335.7
+cap "UT/S27" "UT/G" 363.967
+cap "UT/D26" "UT/B" 102.011
+cap "UT/S27" "UT/D26" 621.861
+cap "UT/G" "UT/D26" 341.372
+cap "UT/S27" "UT/B" 95.0371
+cap "UT/G" "UT/B" 478.852
+cap "UT/B" "UT/S31" 50.772
+cap "UT/D32" "UT/G" 354.022
+cap "UT/B" "UT/D32" 50.9014
+cap "UT/B" "UT/G" -0.116263
+cap "UT/S31" "UT/D32" 537.193
+cap "UT/S31" "UT/G" 400.819
+cap "UT/B" "UT/D38" 50.9456
+cap "UT/B" "UT/G" -0.119896
+cap "UT/B" "UT/S37" 51.0427
+cap "UT/G" "UT/D38" 341.305
+cap "UT/S37" "UT/D38" 567.415
+cap "UT/G" "UT/S37" 396.61
+cap "UT/S43" "UT/B" 51.3349
+cap "UT/D42" "UT/G" 334.721
+cap "UT/G" "UT/B" -0.119896
+cap "UT/D42" "UT/B" 51.2379
+cap "UT/S43" "UT/G" 389.119
+cap "UT/D42" "UT/S43" 591.639
+cap "UT/G" "UT/D48" 355.068
+cap "UT/G" "UT/S49" 380.054
+cap "UT/S49" "UT/D48" 526.842
+cap "UT/G" "UT/B" -0.108997
+cap "UT/D48" "UT/B" 50.8533
+cap "UT/S49" "UT/B" 50.6591
+cap "UT/B" "UT/D54" 60.9117
+cap "UT/S53" "UT/B" 46.3433
+cap "UT/G" "UT/B" -0.119896
+cap "UT/S53" "UT/D54" 532.789
+cap "UT/S53" "UT/G" 327.788
+cap "UT/G" "UT/D54" 322.435
+cap "UT/D60" "UT/B" 8.88482
+cap "UT/S1" "UT/B" 28.0691
+cap "UT/G" "UT/B" -0.0980971
+cap "UT/G" "UT/S1" 65.6104
+cap "o1" "UT/D0" 0.577865
+cap "VSS" "UT/B" 0.0651654
+cap "UT/B" "UT/D0" 35.1484
+cap "UT/S1" "UT/D0" -2.11402
+cap "UT/G" "UT/D0" 85.437
+cap "UT/B" "o1" 53.6852
+cap "UT/S1" "o1" 1.46698
+cap "UT/G" "o1" 69.471
+cap "UT/B" "VSS" 53.1687
+cap "UT/G" "OUT" 18.0346
+cap "UT/D0" "IN" 0.164035
+cap "UT/S1" "VSS" 0.106827
+cap "UT/G" "UT/B" -0.119896
+cap "UT/S1" "UT/G" 91.8127
+cap "UT/D0" "OUT" -0.205557
+cap "UT/B" "o1" 0.742419
+cap "UT/B" "IN" 29.3726
+cap "UT/D0" "UT/B" 34.6602
+cap "UT/G" "VSS" 82.2162
+cap "UT/S1" "IN" 0.320218
+cap "UT/D0" "UT/S1" -2.13536
+cap "UT/B" "OUT" 11.6765
+cap "UT/D0" "VSS" 0.977308
+cap "UT/S1" "OUT" 0.0623891
+cap "UT/G" "IN" 41.4926
+cap "UT/G" "o1" 0.308433
+cap "UT/S1" "UT/B" 38.3524
+cap "UT/D0" "UT/G" 90.7259
+cap "UT/B" "UT/D4" -2.22045e-16
+cap "o1" "UT/S5" 0.498495
+cap "o1" "UT/B" 21.1328
+cap "OUT" "UT/S5" 0.649572
+cap "UT/B" "OUT" 74.8902
+cap "UT/S5" "UT/G" 8.60137
+cap "UT/B" "UT/G" -0.119896
+cap "o1" "UT/D4" 0.200452
+cap "UT/B" "VDD" 1.208
+cap "OUT" "UT/D4" -3.60079
+cap "UT/D4" "UT/G" 52.0405
+cap "o1" "OUT" -0.455564
+cap "o1" "UT/G" 36.5916
+cap "OUT" "UT/G" 121.38
+cap "UT/B" "UT/S5" -4.44089e-16
+cap "VDD" "UT/G" 0.905232
+cap "UT/D4" "UT/S5" -2.22045e-15
+cap "UT/S11" "OUT" 0.71729
+cap "UT/B" "OUT" 85.8089
+cap "UT/D10" "VDD" -1.71826
+cap "UT/G" "OUT" 101.58
+cap "UT/S11" "UT/B" -8.88178e-16
+cap "UT/G" "UT/S11" 7.62757
+cap "UT/G" "UT/B" -0.108997
+cap "UT/D10" "OUT" -3.02887
+cap "UT/D10" "UT/S11" -2.44249e-15
+cap "UT/D10" "UT/B" -4.44089e-16
+cap "VDD" "UT/B" 4.65342
+cap "UT/G" "UT/D10" 54.7332
+cap "UT/G" "VDD" 19.5714
+cap "UT/B" "UT/D16" -5.02344
+cap "UT/G" "UT/S15" 8.40523
+cap "UT/S15" "UT/D16" -2.22045e-15
+cap "UT/B" "UT/S15" -4.44089e-16
+cap "UT/G" "UT/D16" 52.8901
+cap "UT/B" "UT/G" 49.0503
+cap "UT/G" "UT/B" 49.1431
+cap "UT/S21" "UT/D22" -2.22045e-15
+cap "UT/S21" "UT/G" 8.80585
+cap "UT/D22" "UT/G" 51.9041
+cap "UT/D22" "UT/B" -3.62756
+cap "UT/S21" "UT/B" 0.00648366
+cap "UT/G" "UT/B" 63.1257
+cap "UT/S27" "UT/G" 7.9314
+cap "UT/D26" "UT/G" 52.8984
+cap "UT/S27" "UT/B" 0.555207
+cap "UT/D26" "UT/B" 0.147987
+cap "UT/S27" "UT/D26" -2.44249e-15
+cap "UT/S31" "UT/B" -8.88178e-16
+cap "UT/S31" "UT/D32" -2.44249e-15
+cap "UT/D32" "UT/B" -4.44089e-16
+cap "UT/G" "UT/S31" 8.1014
+cap "UT/G" "UT/B" -0.116263
+cap "UT/G" "UT/D32" 54.7249
+cap "UT/G" "UT/S37" 8.70596
+cap "UT/G" "UT/B" -0.119896
+cap "UT/B" "UT/S37" -4.44089e-16
+cap "UT/D38" "UT/S37" -2.66454e-15
+cap "UT/G" "UT/D38" 52.9121
+cap "UT/B" "UT/D38" -4.44089e-16
+cap "UT/B" "UT/G" -0.119896
+cap "UT/S43" "UT/D42" -2.66454e-15
+cap "UT/D42" "UT/B" -8.88178e-16
+cap "UT/D42" "UT/G" 51.8821
+cap "UT/S43" "UT/B" -4.44089e-16
+cap "UT/S43" "UT/G" 8.58235
+cap "UT/B" "UT/D48" -4.44089e-16
+cap "UT/D48" "UT/G" 54.7332
+cap "UT/B" "UT/S49" -8.88178e-16
+cap "UT/S49" "UT/G" 7.55034
+cap "UT/B" "UT/G" -0.108997
+cap "UT/D48" "UT/S49" -3.10862e-15
+cap "UT/D54" "UT/B" 0.597798
+cap "UT/S53" "UT/G" 5.16701
+cap "UT/B" "UT/G" 158.198
+cap "UT/S53" "UT/B" -4.44089e-16
+cap "UT/D54" "UT/G" 41.5832
+cap "UT/D54" "UT/S53" -2.22045e-15
+cap "UT/B" "UT/D60" 0.0101844
+cap "UT/B" "UT/G" 5.6346
+cap "o1" "UT/G" 5.65749
+cap "UT/B" "UT/D0" 0.271729
+cap "UT/B" "o1" 2.97899
+cap "UT/B" "VSS" 1.65315
+cap "UT/B" "UT/D0" 0.271729
+cap "VSS" "UT/D0" 0.0126803
+cap "VSS" "UT/G" 1.17948
+cap "o1" "UT/B" 0.684474
+cap "UT/G" "o1" 0.0611328
+merge "UT/a_8227_n500#" "UT/D62" -8010.34 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -207000 -13140 0 0 0 0 0 0 0 0 0 0
+merge "UT/D62" "UT/D60"
+merge "UT/D60" "UT/D58"
+merge "UT/D58" "UT/D56"
+merge "UT/D56" "UT/D54"
+merge "UT/D54" "UT/D52"
+merge "UT/D52" "UT/D50"
+merge "UT/D50" "UT/D48"
+merge "UT/D48" "UT/D46"
+merge "UT/D46" "UT/D44"
+merge "UT/D44" "UT/D42"
+merge "UT/D42" "UT/D40"
+merge "UT/D40" "UT/D38"
+merge "UT/D38" "UT/D36"
+merge "UT/D36" "UT/D34"
+merge "UT/D34" "UT/D32"
+merge "UT/D32" "UT/D30"
+merge "UT/D30" "UT/D28"
+merge "UT/D28" "UT/D26"
+merge "UT/D26" "UT/D24"
+merge "UT/D24" "UT/D22"
+merge "UT/D22" "UT/D20"
+merge "UT/D20" "UT/D18"
+merge "UT/D18" "UT/D16"
+merge "UT/D16" "UT/D14"
+merge "UT/D14" "UT/D12"
+merge "UT/D12" "UT/D10"
+merge "UT/D10" "UT/D8"
+merge "UT/D8" "UT/D6"
+merge "UT/D6" "UT/D4"
+merge "UT/D4" "UT/D2"
+merge "UT/D2" "UT/D0"
+merge "UT/D0" "U2/S11"
+merge "U2/S11" "U2/S9"
+merge "U2/S9" "U2/S7"
+merge "U2/S7" "U2/S5"
+merge "U2/S5" "U2/S3"
+merge "U2/S3" "U2/S1"
+merge "U2/S1" "U1/S11"
+merge "U1/S11" "U1/S9"
+merge "U1/S9" "U1/S7"
+merge "U1/S7" "U1/S5"
+merge "U1/S5" "U1/S3"
+merge "U1/S3" "U1/S1"
+merge "U1/S1" "tail"
+merge "UT/VSUBS" "U4/S5" -2988.48 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -4624 -408 -102000 -3232 -20000 -800 -707040 -17816 0 0 0 0 0 0
+merge "U4/S5" "U4/S3"
+merge "U4/S3" "U1/VSUBS"
+merge "U1/VSUBS" "U2/VSUBS"
+merge "U2/VSUBS" "U3/S5"
+merge "U3/S5" "U4/B"
+merge "U4/B" "VSUBS"
+merge "VSUBS" "U3/S3"
+merge "U3/S3" "U3/S1"
+merge "U3/S1" "U3/B"
+merge "U3/B" "U4/S1"
+merge "U4/S1" "VSS"
+merge "UT/S63" "UT/S61" -10452.5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -6936 -612 -708480 -20152 -10200 -504 -10200 -504 0 0 0 0 0 0
+merge "UT/S61" "UT/S59"
+merge "UT/S59" "UT/S57"
+merge "UT/S57" "UT/S55"
+merge "UT/S55" "UT/S53"
+merge "UT/S53" "UT/S51"
+merge "UT/S51" "UT/S49"
+merge "UT/S49" "UT/S47"
+merge "UT/S47" "UT/S45"
+merge "UT/S45" "UT/S43"
+merge "UT/S43" "UT/S41"
+merge "UT/S41" "UT/S39"
+merge "UT/S39" "UT/S37"
+merge "UT/S37" "UT/S35"
+merge "UT/S35" "UT/S33"
+merge "UT/S33" "UT/S31"
+merge "UT/S31" "UT/S29"
+merge "UT/S29" "UT/S27"
+merge "UT/S27" "UT/S25"
+merge "UT/S25" "UT/S23"
+merge "UT/S23" "UT/S21"
+merge "UT/S21" "UT/S19"
+merge "UT/S19" "UT/S17"
+merge "UT/S17" "UT/S15"
+merge "UT/S15" "UT/S13"
+merge "UT/S13" "UT/S11"
+merge "UT/S11" "UT/S9"
+merge "UT/S9" "UT/S7"
+merge "UT/S7" "UT/S5"
+merge "UT/S5" "UT/S3"
+merge "UT/S3" "UT/S1"
+merge "UT/S1" "UT/B"
+merge "UT/B" "U2/B"
+merge "U2/B" "U1/B"
+merge "U1/B" "VDD"
+merge "U1/a_919_n500#" "U1/D10" -5462.48 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -393872 -10368 -30000 -1200 -762960 -19284 0 0 0 0 0 0
+merge "U1/D10" "U1/D8"
+merge "U1/D8" "U1/D6"
+merge "U1/D6" "U1/D4"
+merge "U1/D4" "U1/D2"
+merge "U1/D2" "U1/D0"
+merge "U1/D0" "U4/G"
+merge "U4/G" "U3/a_745_n500#"
+merge "U3/a_745_n500#" "U3/D4"
+merge "U3/D4" "U3/D2"
+merge "U3/D2" "U3/D0"
+merge "U3/D0" "U3/G"
+merge "U3/G" "o1"
+merge "U1/G" "IN" -741.545 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -15836 -918 -10000 -400 -78320 -2028 0 0 0 0 0 0
+merge "UT/G" "IREFP" -888.217 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2436 -638 0 0 0 0 0 0 0 0 0 0
+merge "U2/a_919_n500#" "U2/D10" -4605.68 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -330436 -8530 -30000 -1200 -423760 -10804 0 0 0 0 0 0
+merge "U2/D10" "U2/D8"
+merge "U2/D8" "U2/G"
+merge "U2/G" "U2/D6"
+merge "U2/D6" "U2/D4"
+merge "U2/D4" "U2/D2"
+merge "U2/D2" "U2/D0"
+merge "U2/D0" "U4/a_745_n500#"
+merge "U4/a_745_n500#" "U4/D4"
+merge "U4/D4" "U4/D2"
+merge "U4/D2" "U4/D0"
+merge "U4/D0" "OUT"

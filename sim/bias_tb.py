@@ -58,11 +58,21 @@ LAYOUT = False   # --layout: emit real poly-R / MiM devices in the subckt
 REND, RPUM = 256.2, 230.06
 
 
-def r_len(r):
-    """Drawn length of a res_high_po_1p41 for target R (ngspice-model
-    calibrated; R must exceed REND -- no sub-260-ohm poly Rs)."""
+def res_geom(r):
+    """(nx, segment_l, total_drawn_l) of a res_high_po_1p41 snake for
+    target R (ngspice-model calibrated; R must exceed REND -- no
+    sub-260-ohm poly Rs). Segment length lands on the 0.005 um grid so
+    the golden L and the drawn layout agree by construction."""
     assert r > REND + 50, f"target {r} below realizable minimum"
-    return round((r - REND) / RPUM, 2)
+    ltot = (r - REND) / RPUM
+    nx = max(1, round(ltot / 20))          # ~20 um segments
+    seg = round(ltot / nx / 0.005) * 0.005
+    return nx, round(seg, 3), round(nx * seg, 3)
+
+
+def r_len(r):
+    """Drawn total length for target R (see res_geom)."""
+    return res_geom(r)[2]
 
 
 def c_side(c):
@@ -107,16 +117,12 @@ def bias_subckt(p, layout=None):
         rbpc = r_card("RBPC", "vbpc_i", "VSS", p["R_BPC"])
         rnb1 = r_card("RNB1", "vbnc_i", "VBNC", 1e3)
         rnb2 = r_card("RNB2", "vbpc_i", "VBPC", 1e3)
-        cbn = c_card("CBN", "VBNC", "VSS", 1e-12)
-        cbp = c_card("CBP", "VBPC", "VSS", 1e-12)
     else:
         rb = f"RB rs VSS {p['RB']}"
         rbnc = f"RBNC vbnc_i VSS {p['R_BNC']}"
         rbpc = f"RBPC vbpc_i VSS {p['R_BPC']}"
         rnb1 = "RNB1 vbnc_i VBNC 1k"
         rnb2 = "RNB2 vbpc_i VBPC 1k"
-        cbn = "CBN VBNC VSS 1p"
-        cbp = "CBP VBPC VSS 1p"
     return f"""
 .subckt bias IREFP IREFN VBNC VBPC VDD VSS
 * constant-gm core: M1 diode vs K-wide degenerated M2, PMOS mirror top
@@ -150,10 +156,21 @@ XVP vbpc_i pb VDD VDD {PF} W={WUNIT} L={p['L_P']} nf=1 m={m(p['W_P'])}
 {rbpc}
 {rnb1}
 {rnb2}
-{cbn}
-{cbp}
+* VBNC/VBPC 1 pF MiM filter caps live OUTSIDE this subckt (top-level
+* cells, same class as the reference decaps -- MiM plates route on
+* m3/m4, above this block's m1/m2/m3 router)
 .ends
 """
+
+
+def bias_caps(vbnc="vbnc", vbpc="vbpc", layout=None):
+    """The top-level VBNC/VBPC filter caps (TB + top assembly)."""
+    if layout is None:
+        layout = LAYOUT
+    if layout:
+        return (c_card("CBN", vbnc, "0", 1e-12) + "\n"
+                + c_card("CBP", vbpc, "0", 1e-12))
+    return f"CBN {vbnc} 0 1p\nCBP {vbpc} 0 1p"
 
 
 def ota_golden():
@@ -182,6 +199,7 @@ VDD vdd 0 {vdd}
 XDP irefp irefp vdd vdd {PF} W={WUNIT} L={OTA_S['L_TAIL']} nf=1 m={m(OTA_S['W_TAIL'])}
 XDN irefn irefn 0 0 {NF} W={WUNIT} L={OTA_S['L_SINK']} nf=1 m={m(OTA_S['W_SINK'])}
 XB irefp irefn vbnc vbpc vdd 0 bias
+{bias_caps()}
 .control
 op
 wrdata bias_op.csv i(VDD) v(vbnc) v(vbpc) v(irefp) v(irefn) v(xb.nb) v(xb.rs)
@@ -213,6 +231,7 @@ VDD vdd 0 PWL(0 0 1u 3.3 20u 3.3)
 XDP irefp irefp vdd vdd {PF} W={WUNIT} L={OTA_S['L_TAIL']} nf=1 m={m(OTA_S['W_TAIL'])}
 XDN irefn irefn 0 0 {NF} W={WUNIT} L={OTA_S['L_SINK']} nf=1 m={m(OTA_S['W_SINK'])}
 XB irefp irefn vbnc vbpc vdd 0 bias
+{bias_caps()}
 .tran 10n 20u uic
 .control
 run
@@ -242,6 +261,7 @@ LFB outa inma 1e6
 CFB inma vcma 1e6
 CLA outa 0 {OTA_S['CL']}
 XB irefpa irefna vbnca vbpca vdda 0 bias
+{bias_caps("vbnca", "vbpca")}
 XA ina inma outa vdda 0 irefpa irefna vbnca vbpca ota
 .control
 op

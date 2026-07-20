@@ -139,14 +139,12 @@ def block_bias():
             WUNIT, p["L_P"], m(p["W_P"])),
         res("RBNC", -700, -650, "vbnc_i", "VSS", "VSS", r_len(p["R_BNC"])),
         res("RNB1", -700, -500, "vbnc_i", "VBNC", "VSS", r_len(1e3)),
-        cap("CBN", -700, -350, "VBNC", "VSS", c_side(1e-12),
-            c_side(1e-12)),
         fet("XVP", -500, -800, PF, "vbpc_i", "pb", "VDD", "VDD",
             WUNIT, p["L_P"], m(p["W_P"])),
         res("RBPC", -500, -650, "vbpc_i", "VSS", "VSS", r_len(p["R_BPC"])),
         res("RNB2", -500, -500, "vbpc_i", "VBPC", "VSS", r_len(1e3)),
-        cap("CBP", -500, -350, "VBPC", "VSS", c_side(1e-12),
-            c_side(1e-12)),
+        # VBNC/VBPC 1 pF MiM filter caps are top-level cells (see
+        # bias_tb.bias_caps)
     ]
     wires = [
         # mirror columns: PMOS drain down onto NMOS drain
@@ -219,9 +217,9 @@ def block_lvl():
     p = LSIZES
     devs = [
         fet("XIP", -1000, -650, PF18, "nb18", "CLK18", "VDD18", "VDD18",
-            2, 0.15, 2),
+            10, 0.35, 1),
         fet("XIN", -1000, -500, NF18, "nb18", "CLK18", "VSS", "VSS",
-            1, 0.15, 2),
+            5, 0.35, 1),
         fet("XP1", -800, -650, PF, "n1", "n2", "VDD33", "VDD33",
             WUNIT, p["L_XC"], m(p["W_XC"])),
         fet("XP2", -600, -650, PF, "n2", "n1", "VDD33", "VDD33",

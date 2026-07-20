@@ -134,18 +134,15 @@ context a fresh session needs:
    (ALL MATCH). buf tail is now a real mirror off the OTA IREFP diode
    line (mult 64). RNB isolation Rs 100→1k (poly end-resistance floor).
    CI support-blocks job runs the layout variant + blockcheck.
-3. **Block layouts** (order: comp, dff, bias, buf, lvl, odrv). Refactor
-   gen_ota_layout.py/route_ota.py into a shared library (parametrize:
-   golden file+subckt name, device-name regex, placement rows, cellname).
-   Router facts a fresh session must know: strap ys at ty+-1.5; riser
-   slots on a 1 um grid with progressive widening; ALWAYS regen placement
-   before re-routing (route saves into the same .mag — guard exists);
-   DRC truth = fresh process + `select top cell; expand`; never
-   `writeall force` after load (magscale halving gotcha — save only the
-   painted cell). bias needs new poly R cells (RB 4.6k, 75k, 25k + the
-   ladder) via the gen_layout_cells.py pattern; buffers need decap MiM
-   cells (cint pattern); lvl/odrv are mixed 01v8+g5v0 cells (gencells
-   exist for both flavors; both rails in one cell).
+3. **Block layouts — DONE 2026-07-19.** tools/lay_lib.py (golden-driven
+   place/strap/route/DRC/LVS library) + tools/gen_block_layouts.py (row
+   plans). ALL SIX CLEAN: DRC 0 fresh-process, devices matched, netgen
+   LVS match — comp 67x22, dff 58x22, bias 86x113, buf 85x33, lvl
+   38x26, odrv 9x55 um. Empirical router rules in DESIGN.md (thin-oxide
+   L=0.35 mandatory, G-tap m1 flag, res via1-on-end-m1, same-net tap
+   merging, go-wide floorplans, grid-snapped via centers). Bias/ladder
+   R cells + MiM decaps for top level still to generate at assembly
+   (cint/gen_layout_cells pattern).
 4. **Top assembly** (tools/asm_top.py): place blocks + rin/rdac/cint/
    sw_nmos x3 + decaps in the frame (tt_frame/build_frame.tcl pattern,
    `getcell child 0um 0um` to anchor ORIGINS); top nets: ua[0]->RIN->sum;

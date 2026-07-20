@@ -636,3 +636,34 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   bias branch); buf re-ACCEPTed (Zout 759 ohm, 3.1-3.2 mW, bit-dep
   <= 2.4 mV). Reopen if: any SIZES dict changes (regen + blockcheck
   re-proves), or a block gains pins at layout.
+- **2026-07-19 - ALL SIX SUPPORT-BLOCK LAYOUTS DRC-CLEAN + LVS-CLEAN
+  (tools/lay_lib.py + tools/gen_block_layouts.py).** The OTA place/route
+  scripts generalized into a golden-driven library: build() places
+  gencells from the golden netlist (fets: w = golden finger, nf =
+  golden mult; poly Rs: snake per res_geom), route() straps/taps/
+  risers/tracks, fresh-process DRC (select top cell; expand), a
+  net-name structural compare, and netgen LVS vs spice/golden/<b>.spice.
+  Results (DRC 0, all devices matched, LVS "match uniquely"):
+  comp 67x22, dff 58x22, bias 86x113, buf 85x33, lvl 38x26,
+  odrv 9x55 um. Hard-won router facts, all empirical:
+  (1) thin-oxide L=0.15 is UNBUILDABLE under the strap scheme - the
+  0.44 um S/D column pitch cannot host a 0.5 um via pad plus 0.14
+  spacing; lvl/odrv thin devices moved to L=0.35 with W scaled 2.33x
+  (both TBs re-ACCEPT; w=1 fingers also banned, single wide fingers
+  instead). (2) The gencell G-contact m1 is a mosaic of sub-via-sized
+  rects hemmed in by column m1: no legal via fits it and it cannot be
+  widened sideways; the fix is an upward m1 flag (no wider than the
+  mosaic) with the via in the flag. (3) res gencells already lift
+  their ends to m1 (1.25x2.0 viali regions): tap = via1 centered on
+  that m1, nothing else -- painting mcon/li there abuts the subcell
+  contact (illegal) or shorts into the substrate rail below the
+  ports. (4) Same-net taps sharing a y line MUST merge into one m2
+  bar + one riser: supply taps are ~70% of all taps and unmerged they
+  exhaust the 1-per-um riser slot budget. (5) Small dense blocks go
+  WIDE (2 rows), not tall - riser slots are an x resource. (6) All
+  via centers snap to the 0.005 grid: off-grid centers shave 0.26 um
+  vias to 0.255 at paint time (four separate one-error hunts). (7) m2
+  jog/merge bars are full pad height (0.5) - thinner bars bridging
+  pads leave sub-0.14 same-net notches. Reopen if: any SIZES change
+  (regen goldens -> blockcheck -> re-run gen_block_layouts), or a new
+  device flavor (cap, other res widths) enters a block.

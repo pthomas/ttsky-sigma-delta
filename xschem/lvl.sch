@@ -12,13 +12,13 @@ C {devices/opin.sym} -1160 -900 0 0 {name=pp2 lab=CLKB33}
 C {devices/iopin.sym} -1040 -900 0 0 {name=pp3 lab=VDD18}
 C {devices/iopin.sym} -920 -900 0 0 {name=pp4 lab=VDD33}
 C {devices/iopin.sym} -800 -900 0 0 {name=pp5 lab=VSS}
-C {sky130_fd_pr/pfet_01v8.sym} -1000 -650 0 0 {name=XIP model=pfet_01v8 spiceprefix=X W=2 L=0.15 nf=1 mult=2 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/pfet_01v8.sym} -1000 -650 0 0 {name=XIP model=pfet_01v8 spiceprefix=X W=10 L=0.35 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -980 -650 -955 -650 {lab=VDD18}
 C {devices/lab_pin.sym} -980 -620 1 0 {name=l0 lab=nb18}
 C {devices/lab_pin.sym} -1020 -650 0 0 {name=l1 lab=CLK18}
 C {devices/lab_pin.sym} -980 -680 3 0 {name=l2 lab=VDD18}
 C {devices/lab_pin.sym} -955 -650 2 0 {name=l3 lab=VDD18}
-C {sky130_fd_pr/nfet_01v8.sym} -1000 -500 0 0 {name=XIN model=nfet_01v8 spiceprefix=X W=1 L=0.15 nf=1 mult=2 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/nfet_01v8.sym} -1000 -500 0 0 {name=XIN model=nfet_01v8 spiceprefix=X W=5 L=0.35 nf=1 mult=1 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -980 -500 -955 -500 {lab=VSS}
 C {devices/lab_pin.sym} -980 -530 1 0 {name=l4 lab=nb18}
 C {devices/lab_pin.sym} -1020 -500 0 0 {name=l5 lab=CLK18}

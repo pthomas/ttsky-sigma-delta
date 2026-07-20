@@ -1,0 +1,10 @@
+* NGSPICE file created from odrv_layout.ext - technology: sky130A
+
+.subckt odrv_layout VSS VDD18 OUT18 IN33
+X0 VSS b OUT18 VSS sky130_fd_pr__nfet_01v8 ad=3.48 pd=24.58 as=3.48 ps=24.58 w=12 l=0.35
+X1 VSS a b VSS sky130_fd_pr__nfet_01v8 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.35
+X2 VSS IN33 a VSS sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X3 VDD18 b OUT18 VDD18 sky130_fd_pr__pfet_01v8 ad=6.96 pd=48.58 as=6.96 ps=48.58 w=24 l=0.35
+X4 VDD18 a b VDD18 sky130_fd_pr__pfet_01v8 ad=2.9 pd=20.58 as=2.9 ps=20.58 w=10 l=0.35
+X5 a IN33 VDD18 VDD18 sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+.ends
