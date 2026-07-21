@@ -2,13 +2,15 @@
 
 # Continuous-Time Sigma-Delta ADC (sky130, TinyTapeout)
 
+**📖 Design document & results: <https://pthomas1.gitlab.io/sigma-delta/>**
+
 A first-order continuous-time sigma-delta modulator analog-to-digital
 converter, designed entirely as code: generated schematics, generated
 layout, tiered verification, and a continuously rebuilt design document.
 
-- **Living design document** (CI-generated, start here): the GitLab Pages
-  site of this repo — every number on it was produced by the pipeline
-  that published it.
+- **Living design document** (CI-generated, start here):
+  <https://pthomas1.gitlab.io/sigma-delta/> — every number on it was
+  produced by the pipeline that published it.
 - **TinyTapeout submission**: this repo doubles as the TT project
   ([docs/info.md](docs/info.md), `info.yaml`, `gds/`, `lef/`); the frame
   is rebuilt from `mag/` with `make tt`.
