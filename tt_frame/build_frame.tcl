@@ -38,9 +38,12 @@ getcell sd_top child 0um 0um
 #   VGND  x 256.0-258.0  (lane 255.3-270.4)
 #   VAPWR x 310.0-312.0  (lane 309.3-319.2)
 proc draw_power_stripe {name x1 x2} {
+    # the label must cover the FULL stripe: precheck requires each
+    # power port's LEF geometry to reach within 10um of both the top
+    # and bottom tile edges (a mid-stripe label patch fails with
+    # "Port too far from bottom/top edge")
     box ${x1}um 5um ${x2}um 220.76um
     paint met4
-    box ${x1}um 100um ${x2}um 104um
     label $name FreeSans 0.25u -met4
     port make
     port use [expr {$name eq "VGND" ? "ground" : "power"}]
