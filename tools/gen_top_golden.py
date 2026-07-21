@@ -55,10 +55,16 @@ PASSIVES = [
                         "B": "VGND"}),
 ]
 
+# NOTE the DFF takes the comparator's COMPLEMENT output (cqb): the
+# dff cell's Q/QB node names are swapped internally (Q = NOT D by
+# construction -- found 2026-07-20 when the first closed-loop PEX
+# transient latched at the rail from positive DAC feedback; every
+# block-level artifact was self-consistent so LVS never saw it).
+# Feeding D from cqb restores q33 = comparator decision.
 INSTANCES = [
     "XOTA vcm sum UA1 VAPWR VGND irefp irefn vbnc vbpc ota",
     "XCOMP UA1 vcm clk33 cq cqb con1 con2 VAPWR VGND comp",
-    "XDFF cq clk33 q33 qb33 VAPWR VGND dff",
+    "XDFF cqb clk33 q33 qb33 VAPWR VGND dff",
     "XBIAS irefp irefn vbnc vbpc VAPWR VGND bias",
     "XBUFP lad_p vrefp irefp VAPWR VGND buf",
     "XBUFC lad_c vcm irefp VAPWR VGND buf",

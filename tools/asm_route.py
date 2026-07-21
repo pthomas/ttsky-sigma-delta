@@ -121,7 +121,7 @@ def compute_terms_and_bb():
         cap_seeds.append((f"{inst}.C2", 'v',
                           (min(x for x, _ in c2s) - 0.3, yb2 - 0.3,
                            max(x for x, _ in c2s) + 0.3, bbx[1] + 0.6)))
-        yb1 = bbx[3] + 1.2
+        yb1 = bbx[3] + 1.7
         terms[f"{inst}.C1"] = (c1s[0][0], yb1)
         # C1: m4 bus at yb1 + m4 stubs from bbox top up to the bus
         cap_seeds.append((f"{inst}.C1", 'v',
@@ -388,7 +388,7 @@ NETS = {
  "UA1": ["ota.OUT", "cint.C1", "comp.INP"],
  "clk33": ["comp.CLK", "dff.CLK", "sm.G", "lvl.CLK33"],
  "clkb33": ["lvl.CLKB33", "st2.G", "sb2.G"],
- "cq": ["comp.Q", "dff.D"],
+ "cq": ["comp.QB", "dff.D"],
  "q33": ["dff.Q", "odrvq.IN33", "st1.G"],
  "qb33": ["dff.QB", "odrvb.IN33", "sb1.G"],
  "dac": ["rdac.R1", "sm.D", "st2.S", "sb2.S"],

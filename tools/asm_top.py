@@ -80,7 +80,7 @@ BLOCKS = {"ota", "bias", "bufn", "bufc", "bufp", "odrvq", "odrvb",
 BPORTS = {
     "ota": ["INP", "INM", "OUT", "VDD", "VSS", "IREFP", "IREFN",
             "VBNC", "VBPC"],
-    "comp": ["INP", "INM", "CLK", "Q", "VDD", "VSS"],
+    "comp": ["INP", "INM", "CLK", "QB", "VDD", "VSS"],
     "dff": ["D", "CLK", "Q", "QB", "VDD", "VSS"],
     "bias": ["IREFP", "IREFN", "VBNC", "VBPC", "VDD", "VSS"],
     "bufn": ["IN", "OUT", "IREFP", "VDD", "VSS"],
@@ -326,7 +326,7 @@ def main():
         # C1 (top plate, met4 at the mimcc): met4 stubs up (the C1
         # contacts sit in the inter-unit gaps, clear of the plates) to
         # a met4 bus above the cell
-        yb1 = bbx[3] + 1.2
+        yb1 = bbx[3] + 1.7
         cur[0] = term_to_net.get(f"{inst}.C1", f"{inst}.C1")
         cur_capself[0] = inst
         for (x, y) in c1s:
