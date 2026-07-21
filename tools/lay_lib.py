@@ -154,16 +154,55 @@ def build(block, rows, gap=3.0):
     return wtot, y
 
 
+def mag_units(cell):
+    """Coordinate units per um in this .mag file. Magic only writes
+    `magscale 1 2` (units of 0.005 um -> 200/um) when the cell needs
+    the half-lambda grid; cells whose geometry happens to land on the
+    0.01 grid are written WITHOUT it at 100/um (e.g. cflt, w=22.2).
+    Every parser of .mag coordinates must use this per-file value --
+    assuming 200 everywhere silently misplaces such cells' children
+    by half their coordinates (DESIGN.md 2026-07-20)."""
+    head = open(f"mag/{cell}.mag").read(300)
+    mm = re.search(r"^magscale (\d+) (\d+)", head, re.M)
+    if mm:
+        return 100 * int(mm.group(2)) / int(mm.group(1))
+    return 100
+
+
 def parse_parent(cell):
     txt = open(f"mag/{cell}.mag").read()
+    uu = mag_units(cell)
     inst = {}
     for mm in re.finditer(r"^use (\S+)\s+(\S+).*?\ntransform (-?\d+) (-?\d+) "
                           r"(-?\d+) (-?\d+) (-?\d+) (-?\d+)",
                           txt, re.M | re.S):
         c, name = mm.group(1), mm.group(2)
         a, b, tx, cc, d, ty = map(int, mm.groups()[2:])
-        inst[name] = (c, tx / U, ty / U)
+        inst[name] = (c, tx / uu, ty / uu)
     return inst
+
+
+def cell_layer_rects(cell, layer, depth=1):
+    """All <layer> rects of a cell in cell coordinates, including
+    subcells to `depth` levels (translation-only transforms, which is
+    all these layouts use). Used by the top-level assembly to build a
+    PRECISE per-instance obstacle map -- e.g. blocks carry hundreds of
+    internal metal3 riser pads a top wire must keep 0.3 um from, while
+    the poly-resistor/switch passives carry no metal3 at all."""
+    txt = open(f"mag/{cell}.mag").read()
+    uu = mag_units(cell)
+    out = []
+    mm = re.search(rf"<< {layer} >>\n((?:rect [^\n]+\n)+)", txt)
+    if mm:
+        for r in re.finditer(r"rect (-?\d+) (-?\d+) (-?\d+) (-?\d+)",
+                             mm.group(1)):
+            out.append(tuple(int(v) / uu for v in r.groups()))
+    if depth > 0:
+        for name, (ccell, ctx, cty) in parse_parent(cell).items():
+            for (x1, y1, x2, y2) in cell_layer_rects(ccell, layer,
+                                                     depth - 1):
+                out.append((x1 + ctx, y1 + cty, x2 + ctx, y2 + cty))
+    return out
 
 
 def subcell_layer_bbox(cell, layer, px, py, win=0.5):
@@ -173,11 +212,12 @@ def subcell_layer_bbox(cell, layer, px, py, win=0.5):
     S/D column m1 or guard rings). Used to center tap vias on the
     gencell's own contact pads."""
     txt = open(f"mag/{cell}.mag").read()
+    uu = mag_units(cell)
     mm = re.search(rf"<< {layer} >>\n(.*?)\n<<", txt, re.S)
     bb = None
     for r in re.finditer(r"rect (-?\d+) (-?\d+) (-?\d+) (-?\d+)",
                          mm.group(1)):
-        x1, y1, x2, y2 = (int(v) / U for v in r.groups())
+        x1, y1, x2, y2 = (int(v) / uu for v in r.groups())
         # rects near the port AND vertically local to it -- the S/D
         # column m1 overlaps the pad region in x but extends far down
         # the finger, and the guard ring far up; both must not drag

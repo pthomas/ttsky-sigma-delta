@@ -764,3 +764,78 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   tools/asm_top.py` and folding the fix into build_wires() in
   asm_route.py. Re-run: `python3 tools/asm_route.py && python3
   tools/asm_top.py`.
+
+- **2026-07-20 (later): assembly wiring v2 -- geometry-precise router,
+  clean audit, first full sd_top paint + DRC/LVS.** Review of the v1
+  commit found two REAL connectivity bugs in asm_route's NETS (lad_p
+  was missing rlp.R1 -- broken reference ladder -- and vcm was missing
+  cdec1.C1, its decap top plate), plus a far-reaching coordinate-scale
+  bug: .mag files carry a PER-FILE unit scale (`magscale 1 2` = 200
+  units/um; absent = 100/um -- magic only writes it when the geometry
+  needs the half-lambda grid), and every parser assumed 200. cflt.mag
+  (w=22.2 lands on the 0.01 grid) was the one cell written without it,
+  so cflt1/cflt2's child cap sat 6.09/5.65um off in every parser --
+  their C1/C2 straps were painted into empty space (LVS would have
+  caught the open; the obstacle map was wrong too). lay_lib.mag_units()
+  now resolves the scale per file for parse_parent /
+  subcell_layer_bbox / cell_layer_rects / block_ports.
+  The v1 bbox-blanket obstacle model was replaced with real geometry
+  (lay_lib.cell_layer_rects): met3 obstacles = every instance's actual
+  m3 rects dilated 0.65 (blocks are full of internal m3 riser pads;
+  cap bottom plates are m3 wall to wall; the poly-R/switch passives
+  carry NONE -- opening the whole resistor/switch region, where the v1
+  congestion lived). Blocks carry no m4, so met4 crossing is free;
+  caps stay blanket-masked for m4. The asm_top audit now checks
+  painted m3 against per-instance real m3 (0.3 rule) with two narrow
+  exemptions: a port's own landing (every BLOCK port turns out to have
+  a pre-built m3 riser landing at exactly the port position -- our
+  stack lands on it, same net) and a cap's own C1/C2 straps.
+  Terminal-clearance is enforced by seeding the router's per-net
+  ownership map: each terminal's own cell (both layers), its painted
+  pad footprint dilated (own layer), each BLOCK port's whole potential
+  escape column (nearest-port-wins for the +-1 cells, since adjacent
+  ports sit 1.0um apart), and the cap C1/C2 bus+stub rects. BLOCK
+  ports are v-entry-forced (Router.route v_start/v_end): their 0.8um-
+  pitch track rows cannot host per-port horizontal pieces, but their
+  staggered x positions give vertical escape columns a clean 0.4um gap.
+  Exact-vs-grid alignment ("mixed alignment") was the stubborn failure
+  class: a run riding its terminal's exact coordinate sits 0.6um from
+  a neighbor's grid-aligned run (ports are 1.0 apart). The resolution
+  that finally converged (fixup/attach in asm_route): escapes RIDE the
+  exact coordinate to just past the home block's edge (so in-block
+  everything is exact-aligned at 0.4um gaps), then jog onto the grid
+  at a VALIDATED integer row/column (jogok checks both layers' masks
+  and owners on every cell the jog piece touches, including one cell
+  beyond the exact side; candidates staggered by cell parity); when no
+  validated site exists before the router's first corner, the wire
+  turns AT the exact coordinate and the now-collinear grid corner is
+  PRUNED -- keeping it would extend paint 0.4um backwards and eat the
+  neighboring escape's whole clearance (a "switchback" alternative
+  tried first made things worse and is gone). Terminal-to-terminal
+  straight legs stay exact when the two ride budgets cover the span
+  (the stacked buf supply columns), else they grid-ride the middle
+  with validated jogs (the VGND switch-B row hops). Three hand patches
+  survive (HAND_PATCHES, pre-committed so auto routing avoids them):
+  lvl.VDD33 (from bias.VDD via the y=172 street -- dff.VDD's column
+  would sit 0.6 from VGND's dff.VSS column), vcm->cdec1.C1 (y=151
+  street), VGND lvl.VSS + dff.VSS->bias.VSS (the dff/bias supply-port
+  corridor needs both nets exact-aligned end to end).
+  RESULT: audit fully clean (0 conflicts, was 86 + false negatives),
+  sd_top painted end-to-end for the first time. Ground truth: DRC 104
+  errors in exactly four classes -- (1) via3-pair spacing at small
+  jogs (42 boxes; merge sub-0.7um via3 pairs into one elongated cut
+  rect), (2) "can't abut between subcells" (336; our terminal via
+  stacks re-paint vias on ports that already carry them -- skip the
+  stack where the port pre-lifts to m3, e.g. bias/buf, paint it where
+  it doesn't, e.g. ota), (3) met3 spacing 0.3 (24 residual), (4)
+  capm.11 MiM-to-unrelated-m3 1.34um (69; the router's cap m3 dilation
+  is 0.65 but the rule wants 1.34+0.3 -- and the C2 stub scheme may
+  need to use the cap's own leads instead of painting m3 over the
+  plate). LVS: "Netlists match uniquely with port and property
+  errors" -- the MODULATOR TOPOLOGY IS CORRECT; remaining: the UA0
+  label never became a pin (its leg to rin.R1 extracts as a
+  no-connect -- inspect the label leg's landing + `port make`), and
+  RBNC/RBPC length properties differ 2-3% (snake-corner folding vs
+  drawn golden length; same known effect as the standalone res cells,
+  needs either golden-side folding or netgen tolerance). Re-run:
+  `python3 tools/asm_route.py && python3 tools/asm_top.py`.

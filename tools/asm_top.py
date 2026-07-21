@@ -30,7 +30,8 @@ from collections import defaultdict
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools import lay_lib
 from tools.lay_lib import (magic_run, parse_parent, parse_ports,
-                           subcell_layer_bbox, U, VIA, PAD, PDK_ROOT)
+                           subcell_layer_bbox, mag_units, U, VIA, PAD,
+                           PDK_ROOT)
 
 MW = 0.6      # signal wire width
 SW = 2.0      # supply trunk width
@@ -143,11 +144,12 @@ def overlap_check(pl):
 def block_ports(cell):
     """port label -> (x, y) from the routed block's flabel lines."""
     ports = {}
+    uu = mag_units(cell)
     for mm in re.finditer(
             r"flabel metal1 (-?\d+) (-?\d+) (-?\d+) (-?\d+) \d+ \S+ "
             r"\d+ \d+ \d+ \d+ (\S+)\n", open(f"mag/{cell}.mag").read()):
-        x = (int(mm.group(1)) + int(mm.group(3))) / 2 / U
-        y = (int(mm.group(2)) + int(mm.group(4))) / 2 / U
+        x = (int(mm.group(1)) + int(mm.group(3))) / 2 / uu
+        y = (int(mm.group(2)) + int(mm.group(4))) / 2 / uu
         ports[mm.group(5)] = (x, y)
     return ports
 
@@ -164,12 +166,14 @@ def main():
            "addpath ."]
     audit = []
     cur = [None]
-    # a cap's own C1 stub inherently overlaps its own cap bbox (m4) --
-    # exempt just THAT entry from the forbid_m4 check via this flag,
-    # independent of `cur[0]` (which must hold the real net name so the
-    # NEAR/CROSS check recognizes it as the same net as the wire it
-    # connects to, not a name-mangled alias of it)
-    cur_capself = [False]
+    # while painting a cap's own C1/C2 straps this holds that cap's
+    # instance name (else None): the C1 m4 stubs inherently overlap
+    # their own cap bbox, and the C2 m3 stubs inherently run within
+    # 0.3 of their own bottom plate (they CONTACT it) -- both are the
+    # connection itself, exempt from the m4-over-cap / m3-vs-internal
+    # checks for that one instance only. Kept separate from `cur[0]`,
+    # which must hold the real net name for the NEAR/CROSS check.
+    cur_capself = [None]
 
     # map every block/passive terminal to the top-level net name that
     # actually connects to it (from tools/asm_wires.py), so terminal-tap
@@ -260,7 +264,7 @@ def main():
         for port, sign in (("D", -1), ("S", 1)):
             px, py = ports[port][0]
             px, py = ox + ctx + px, oy + cty + py
-            vx = px + sign * 0.4
+            vx = px + sign * 0.55
             cur[0] = term_to_net.get(f"{inst}.{port}", f"{inst}.{port}")
             paint(min(px, vx) - 0.2, py - 0.2, max(px, vx) + 0.2, py + 0.2,
                   ["m1"])
@@ -304,6 +308,7 @@ def main():
         # C2 (bottom plate, met3 at the vias): met3 stubs down to a bus
         yb2 = bbx[1] - 1.2
         cur[0] = term_to_net.get(f"{inst}.C2", f"{inst}.C2")
+        cur_capself[0] = inst
         for (x, y) in c2s:
             paint(x - 0.3, yb2 - 0.3, x + 0.3, y + 0.3, ["m3"])
         paint(min(x for x, _ in c2s) - 0.3, yb2 - 0.3,
@@ -314,12 +319,12 @@ def main():
         # a met4 bus above the cell
         yb1 = bbx[3] + 1.2
         cur[0] = term_to_net.get(f"{inst}.C1", f"{inst}.C1")
-        cur_capself[0] = True
+        cur_capself[0] = inst
         for (x, y) in c1s:
             paint(x - 0.3, y - 0.3, x + 0.3, yb1 + 0.3, ["m4"])
         paint(min(x for x, _ in c1s) - 0.3, yb1 - 0.3,
               max(x for x, _ in c1s) + 0.3, yb1 + 0.3, ["m4"])
-        cur_capself[0] = False
+        cur_capself[0] = None
         terms[f"{inst}.C1"] = (c1s[0][0], yb1, "m4")
 
     if report:
@@ -330,16 +335,18 @@ def main():
 
     # ---- wires ---------------------------------------------------------
     from tools.asm_wires import WIRES as W, TRUNKS, LABELS
-    # (inst, bbox) so the M3-OVER-CELL check can tell a wire legitimately
-    # entering ITS OWN destination block/cap (own port inside that exact
-    # bbox) from one actually crossing through a foreign one
-    forbid_m3 = [(b, pl[b][3]) for b in BLOCKS] + [(c, pl[c][3]) for c in CAPS]
+    from tools.lay_lib import cell_layer_rects
+    # painted m3 must keep the 0.3 met3.2 spacing rule to every placed
+    # instance's REAL internal m3 (blocks: riser pads; caps: bottom
+    # plate; the poly-R/switch passives carry none) -- this replaces
+    # the old bbox-blanket check, which both over-flagged legal runs
+    # over passives and under-checked entry stubs near internal m3
+    inst_m3 = []
+    for inst, (cell, ox, oy, _) in pl.items():
+        for (rx1, ry1, rx2, ry2) in cell_layer_rects(cell, "metal3"):
+            inst_m3.append((inst, (rx1 + ox, ry1 + oy, rx2 + ox, ry2 + oy)))
     forbid_m4 = [(c, pl[c][3]) for c in CAPS]
-    # inst -> set of net names that legitimately terminate inside it
-    own_nets = {}
-    for term, net in term_to_net.items():
-        own_nets.setdefault(term.split(".")[0], set()).add(net)
-    cur_capself[0] = False
+    cur_capself[0] = None
 
     for net, x, y1, y2 in TRUNKS:
         cur[0] = net
@@ -385,22 +392,46 @@ def main():
                     paint(x - VIA / 2, y - VIA / 2, x + VIA / 2,
                           y + VIA / 2, ["via3"], pads=["m3", "m4"])
 
-    # audit: m3 segments must avoid block/cap bboxes; same-layer
-    # different-net spacing >= 0.3
+    # audit: painted m3 keeps 0.3 to every instance's real internal m3;
+    # m4 stays off cap bboxes; same-layer different-net spacing >= 0.3.
+    # Exception: every block port has its own pre-built m3 riser landing
+    # (column + pad ring at exactly the port position) -- painted m3 of
+    # the SAME net within the port's landing zone is the connection
+    # itself, and the internal rects that touch that zone (the riser
+    # ring and its feed column) are same-net structure, not obstacles.
+    port_zone = {}   # net -> list of (x1,y1,x2,y2) landing boxes
+    for tname, (tx, ty, _) in terms.items():
+        tn = term_to_net.get(tname)
+        if tn:
+            port_zone.setdefault(tn, []).append(
+                (tx - 0.35, ty - 0.35, tx + 0.35, ty + 0.35))
+
+    def own_landing(n, fr):
+        for (zx1, zy1, zx2, zy2) in port_zone.get(n, ()):
+            if fr[0] < zx2 and zx1 < fr[2] and fr[1] < zy2 and zy1 < fr[3]:
+                return True
+        return False
+
     bad = 0
-    for (l, x1, y1, x2, y2, n, capself) in audit:
-        if l == "m3" and (x2 - x1) > 2.0:    # long horizontal runs
-            for (inst, (fx1, fy1, fx2, fy2)) in forbid_m3:
-                if n in own_nets.get(inst, ()):
+    m3_hits = 0
+    for (l, x1, y1, x2, y2, n, capinst) in audit:
+        if l == "m3":
+            for (finst, fr) in inst_m3:
+                if finst == capinst:
                     continue
-                if x1 < fx2 and fx1 < x2 and y1 < fy2 and fy1 < y2:
-                    print(f"M3-OVER-CELL: {n} ({x1:.1f},{y1:.1f})-"
-                          f"({x2:.1f},{y2:.1f})")
+                (fx1, fy1, fx2, fy2) = fr
+                if x1 < fx2 + 0.2995 and fx1 - 0.2995 < x2 \
+                        and y1 < fy2 + 0.2995 and fy1 - 0.2995 < y2:
+                    if own_landing(n, fr):
+                        continue
+                    if m3_hits < 40:
+                        print(f"M3-NEAR-CELL-M3: {n} ({x1:.1f},{y1:.1f})"
+                              f"-({x2:.1f},{y2:.1f}) vs internal "
+                              f"({fx1:.2f},{fy1:.2f})-({fx2:.2f},{fy2:.2f})")
+                    m3_hits += 1
                     bad += 1
-        if l == "m4" and not capself:
+        if l == "m4" and not capinst:
             for (inst, (fx1, fy1, fx2, fy2)) in forbid_m4:
-                if n in own_nets.get(inst, ()):
-                    continue
                 if x1 < fx2 and fx1 < x2 and y1 < fy2 and fy1 < y2:
                     print(f"M4-OVER-CAP: {n} ({x1:.1f},{y1:.1f})-"
                           f"({x2:.1f},{y2:.1f})")
@@ -413,8 +444,8 @@ def main():
             l2, a2, b2, c2, d2, n2, _ = audit[j]
             if l1 != l2 or n1 == n2 or n1 is None or n2 is None:
                 continue
-            if a1 < c2 + 0.3 and a2 < c1 + 0.3 \
-                    and b1 < d2 + 0.3 and b2 < d1 + 0.3:
+            if a1 < c2 + 0.2995 and a2 < c1 + 0.2995 \
+                    and b1 < d2 + 0.2995 and b2 < d1 + 0.2995:
                 print(f"NEAR/CROSS {l1}: {n1} ({a1:.1f},{b1:.1f})-"
                       f"({c1:.1f},{d1:.1f}) vs {n2} ({a2:.1f},{b2:.1f})"
                       f"-({c2:.1f},{d2:.1f})")

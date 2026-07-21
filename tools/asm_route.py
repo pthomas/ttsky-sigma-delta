@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 """Route tools/asm_wires.py from tools/asm_top.py's PLACE floorplan.
 
-A grid-based maze router (1um cells) that enforces the same DRC rules
-tools/asm_top.py's own audit checks: horizontal runs (met3) must avoid
-BLOCK+CAP bboxes, vertical runs (met4) must avoid CAP bboxes only (the
-docstring rule: "blocks contain no met4, so met4 may cross them
-freely"). Different nets are kept off each other's already-routed grid
-cells on the same layer so the real painted metal (0.3um half-width
-each side of the centerline) keeps the sky130A met3.2/met4.2 0.3um
-spacing rule. See DESIGN.md 2026-07-20 for the debugging history
-(precision pitfalls, self-overlap exemptions, congestion order
-sensitivity) -- read it before changing this file.
+A grid-based maze router (1um cells). Obstacle model (2026-07-20 v2,
+geometry-precise -- see DESIGN.md):
+
+- Horizontal moves paint met3. Forbidden within 0.65um (0.3 spacing +
+  0.3 wire half-width + slack) of any placed instance's REAL metal3
+  geometry (lay_lib.cell_layer_rects): the blocks carry hundreds of
+  internal m3 riser pads, the MiM caps' bottom plates are m3 across
+  their whole footprint, and the poly-resistor/switch passives carry
+  no m3 at all -- so the resistor/switch region is open to crossing,
+  which is where most of the congestion lived under the old
+  bbox-blanket model.
+- Vertical moves paint met4. Forbidden over cap bboxes only (caps
+  carry top-plate m4 pickups; blocks/passives have no m4).
+- Every terminal's painted via-pad footprint and the cap C1/C2
+  bus+stub geometry are pre-seeded into the per-net ownership map, so
+  a foreign net keeps real clearance from pads it cannot see as
+  wires -- this kills the collinear-terminal near-short class (all
+  switch D/S taps share y=110.29, all resistor ends share y=105.9).
+- Different nets keep off each other's committed cells per layer.
 
 Usage: python3 tools/asm_route.py   (needs mag/*.mag + mag/asm_bbox.json
 already built by tools/asm_top.py --report)
-Writes tools/asm_wires.py.
-
-Known residual: this run leaves a couple dozen NEAR/CROSS spacing
-near-misses in a few congested corridors (the switch row, the y~189-190
-band around the caps, the y~173 dff/odrvq band, the vbpc bus vs
-UO0/UO1). Topology/connectivity is correct (all nets routed, no
-BLOCK/CAP crossings) -- what's left is tightening a handful of parallel
-runs by ~0.5-1um each. Iterate with `python3 tools/asm_top.py` and feed
-the NEAR/CROSS output back into ORDER/hand patches below.
+Writes tools/asm_wires.py. Verify with `python3 tools/asm_top.py`.
 """
 
 import heapq
@@ -33,7 +34,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.asm_top import (PLACE, BLOCKS, BPORTS, RESC, SWS, CAPS,
                            placements, block_ports)
-from tools.lay_lib import parse_parent, parse_ports, subcell_layer_bbox, U
+from tools.lay_lib import (parse_parent, parse_ports, subcell_layer_bbox,
+                           cell_layer_rects, U)
 
 BLOCK_NAMES = ["ota", "comp", "dff", "bias", "bufn", "bufc", "bufp",
                "lvl", "odrvq", "odrvb"]
@@ -86,7 +88,7 @@ def compute_terms_and_bb():
         for port, sign in (("D", -1), ("S", 1)):
             px, py = ports[port][0]
             px, py = ox + ctx + px, oy + cty + py
-            terms[f"{inst}.{port}"] = (px + sign * 0.4, py)
+            terms[f"{inst}.{port}"] = (px + sign * 0.55, py)
         gx_, gy_ = ports["G"][0]
         gb = subcell_layer_bbox(ccell, "metal1", gx_, gy_)
         cx = round((ctx + (gb[0] + gb[2]) / 2) * U) / U + ox
@@ -95,6 +97,10 @@ def compute_terms_and_bb():
         bx, by = ports["B"][0]
         terms[f"{inst}.B"] = (ox + ctx + bx, oy + cty + by)
 
+    # cap C1/C2 bus + stub geometry (mirrors asm_top.py's CAPS loop) --
+    # returned as (termname, kind, rect) seeds so foreign nets keep
+    # clear of the whole painted structure, not just the terminal point
+    cap_seeds = []
     for inst in sorted(CAPS):
         cell, ox, oy, bbx = pl[inst]
         children = parse_parent(cell)
@@ -110,10 +116,27 @@ def compute_terms_and_bb():
                         c2s.append((x, y))
         yb2 = bbx[1] - 1.2
         terms[f"{inst}.C2"] = (c2s[0][0], yb2)
+        # C2: m3 bus at yb2 + m3 stubs from each via down past the
+        # bbox bottom edge (the in-bbox part is masked anyway)
+        cap_seeds.append((f"{inst}.C2", 'h',
+                          (min(x for x, _ in c2s) - 0.3, yb2 - 0.3,
+                           max(x for x, _ in c2s) + 0.3, bbx[1])))
         yb1 = bbx[3] + 1.2
         terms[f"{inst}.C1"] = (c1s[0][0], yb1)
+        # C1: m4 bus at yb1 + m4 stubs from bbox top up to the bus
+        cap_seeds.append((f"{inst}.C1", 'v',
+                          (min(x for x, _ in c1s) - 0.3, bbx[3],
+                           max(x for x, _ in c1s) + 0.3, yb1 + 0.3)))
 
-    return terms, abs_bb
+    # precise m3 obstacle map: every placed instance's REAL metal3
+    # rects in absolute coordinates (blocks: internal riser pads; caps:
+    # bottom plate = whole footprint; passives: none)
+    m3_obs = []
+    for inst, (cell, ox, oy, _) in pl.items():
+        for (x1, y1, x2, y2) in cell_layer_rects(cell, "metal3"):
+            m3_obs.append((x1 + ox, y1 + oy, x2 + ox, y2 + oy))
+
+    return terms, abs_bb, m3_obs, cap_seeds
 
 
 # ---------------------------------------------------------------------
@@ -124,12 +147,10 @@ GRID = 1.0
 XMIN, XMAX = -10, 320
 YMIN, YMAX = -10, 222
 # Wires paint MW/2=0.3um beyond their routed centerline (tools/asm_top.py
-# paint()); a centerline the router treats as "clear" must keep the
-# full bbox at least that far away, or the painted metal itself would
-# clip the block/cap even though the grid CENTER point never touched
-# it. Expand (not shrink) the forbidden zones by that half-width plus
-# a hair of slack.
-MARGIN = -0.35
+# paint()) and must then keep the met3.2/met4.2 0.3um spacing rule to
+# any foreign shape: a centerline is only "clear" if the obstacle is
+# at least 0.3+0.3 away, plus a hair of slack.
+DILATE = 0.65
 
 
 def gx(v):
@@ -147,17 +168,12 @@ IY0 = gx(YMIN)
 
 
 class Router:
-    def __init__(self, abs_bb):
-        def rects(names):
-            out = []
-            for n in names:
-                x1, y1, x2, y2 = abs_bb[n]
-                out.append((x1 + MARGIN, y1 + MARGIN, x2 - MARGIN, y2 - MARGIN))
-            return out
-
-        def build_mask(rlist):
+    def __init__(self, abs_bb, m3_obs):
+        def build_mask(rlist, dilate):
             mask = bytearray(NX * NY)
             for (x1, y1, x2, y2) in rlist:
+                x1, y1, x2, y2 = (x1 - dilate, y1 - dilate,
+                                  x2 + dilate, y2 + dilate)
                 i1, i2 = max(0, gx(x1) - IX0), min(NX - 1, gx(x2) - IX0)
                 j1, j2 = max(0, gx(y1) - IY0), min(NY - 1, gx(y2) - IY0)
                 for i in range(i1, i2 + 1):
@@ -167,14 +183,81 @@ class Router:
             return mask
 
         self.abs_bb = abs_bb
-        self.m3_mask = build_mask(rects(BLOCK_NAMES + CAP_NAMES))
-        self.m4_mask = build_mask(rects(CAP_NAMES))
+        # h-moves (met3): keep off every instance's REAL m3 geometry
+        self.m3_mask = build_mask(m3_obs, DILATE)
+        # v-moves (met4): blanket over cap bboxes (top-plate m4 pickups
+        # plus mim-cap-adjacent rules; caps are compact, blanket is
+        # cheap and safe)
+        self.m4_mask = build_mask([abs_bb[n] for n in CAP_NAMES], DILATE)
         # owner net name per cell, separately for h-corridor (m3) and
         # v-corridor (m4) use -- a cell owned by net X is only an
         # obstacle for a DIFFERENT net's move of the same kind;
         # crossing layers is always free.
         self.m3_owner = [None] * (NX * NY)
         self.m4_owner = [None] * (NX * NY)
+
+    def seed_rect(self, net, kind, rect):
+        """Own all cells within DILATE of `rect` on `kind` for `net`
+        (first owner wins; existing owners are left alone)."""
+        x1, y1, x2, y2 = rect
+        i1 = max(0, gx(x1 - DILATE) - IX0)
+        i2 = min(NX - 1, gx(x2 + DILATE) - IX0)
+        j1 = max(0, gx(y1 - DILATE) - IY0)
+        j2 = min(NY - 1, gx(y2 + DILATE) - IY0)
+        for i in range(i1, i2 + 1):
+            for j in range(j1, j2 + 1):
+                self._mark(i, j, kind, net)
+
+    def seed_terminals(self, term_net, terms, m4_terms, block_home):
+        """Three-pass terminal seeding. Pass 1: each terminal's own
+        grid cell, both kinds, so its net can always reach it. Pass 2:
+        the painted via-pad footprint (exact +-0.25) dilated, on the
+        terminal's own layer kind, so foreign runs keep real spacing
+        from pads that sit off-grid (the collinear switch/resistor
+        rows). Pass 3: for BLOCK ports, the whole potential escape
+        column (own cell +-1, full block height +-2) on the v kind --
+        escapes ride the exact staggered port x through the block
+        (see attach), and a foreign grid-aligned column one cell over
+        would sit only ~0.6um from that exact-riding metal. First
+        owner wins throughout, so the passes must run in this order.
+        `block_home`: member -> block bbox for its BLOCK-port terminals."""
+        for member, net in term_net.items():
+            x, y = terms[member]
+            i, j = gx(x) - IX0, gx(y) - IY0
+            self._mark(i, j, 'h', net)
+            self._mark(i, j, 'v', net)
+        for member, net in term_net.items():
+            x, y = terms[member]
+            kind = 'v' if member in m4_terms else 'h'
+            self.seed_rect(net, kind, (x - 0.25, y - 0.25,
+                                       x + 0.25, y + 0.25))
+        # group ports per block: adjacent ports are only 1.0um apart,
+        # so their +-1 cell zones overlap -- each contested cell goes
+        # to the NEAREST port's net (their exact-riding escapes are
+        # mutually compatible at 0.4um; the zone only needs to keep
+        # THIRD-party grid columns 2 cells away)
+        per_block = {}
+        for member, net in term_net.items():
+            if member in block_home:
+                per_block.setdefault(id(block_home[member]), (
+                    block_home[member], []))[1].append(
+                        (terms[member][0], net))
+        for _, (bbox, plist) in per_block.items():
+            (bx1, by1, bx2, by2) = bbox
+            cells = {}
+            for (px, net) in plist:
+                ci = gx(px)
+                for i in (ci - 1, ci, ci + 1):
+                    d = abs(px - ux(i))
+                    if i not in cells or d < cells[i][0]:
+                        cells[i] = (d, net)
+            for i, (_, net) in cells.items():
+                ii = i - IX0
+                if not (0 <= ii < NX):
+                    continue
+                for j in range(max(0, gx(by1) - IY0 - 2),
+                               min(NY - 1, gx(by2) - IY0 + 2) + 1):
+                    self._mark(ii, j, 'v', net)
 
     def _mark(self, i, j, kind, net, r=0, perp=0):
         owner = self.m3_owner if kind == 'h' else self.m4_owner
@@ -187,20 +270,6 @@ class Router:
                     idx = ni * NY + nj
                     if owner[idx] is None:
                         owner[idx] = net
-
-    def reserve_terminals(self, term_net, terms):
-        """Pre-seed every terminal's own cell with its own net, on both
-        layers, before any pathfinding -- otherwise another net's
-        merely-passing-through waypoint can land exactly on a foreign
-        terminal's rounded grid cell (unowned at that point), and the
-        REAL painted geometry there (vias, wire half-width) clashes
-        even though the two nets' path centerlines never conflicted
-        during search."""
-        for member, net in term_net.items():
-            x, y = terms[member]
-            i, j = gx(x) - IX0, gx(y) - IY0
-            self._mark(i, j, 'h', net, r=0)
-            self._mark(i, j, 'v', net, r=0)
 
     def commit(self, path, net, perp=0):
         for k in range(len(path) - 1):
@@ -218,7 +287,13 @@ class Router:
                 raise ValueError(f"non-manhattan commit segment "
                                  f"{path[k]}-{path[k+1]}")
 
-    def route(self, start, end, net=None):
+    def route(self, start, end, net=None, v_start=False, v_end=False):
+        """v_start/v_end: force the first/last move at that terminal to
+        be vertical. Used for BLOCK ports: they sit on 0.8um-pitch
+        staggered track rows where any two adjacent ports' horizontal
+        wire pieces (0.6 wide) would violate the 0.3 spacing rule, but
+        their staggered x positions give vertical escape columns a
+        clean 0.4um gap."""
         sx, sy = start
         ex, ey = end
         si = (gx(sx) - IX0, gx(sy) - IY0)
@@ -252,7 +327,21 @@ class Router:
             for di, dj, nd, kind in ((1, 0, 'E', 'h'), (-1, 0, 'W', 'h'),
                                       (0, 1, 'N', 'v'), (0, -1, 'S', 'v')):
                 ni, nj = i + di, j + dj
+                if v_start and at_start and kind != 'v':
+                    continue
+                if v_end and (ni, nj) == ei and kind != 'v':
+                    continue
                 if not clear(ni, nj, kind, at_start):
+                    continue
+                # the painted segment occupies the SOURCE cell too --
+                # a bend must not turn onto a layer another net owns
+                # at the current cell (e.g. arrive horizontally on a
+                # cell inside a foreign port's protected v-column,
+                # then leave vertically)
+                sidx = i * NY + j
+                sown = (self.m3_owner if kind == 'h'
+                        else self.m4_owner)[sidx]
+                if sown is not None and sown != net:
                     continue
                 bend = 0 if direction in (None, nd) else 4
                 nnode = (ni, nj)
@@ -289,7 +378,7 @@ class Router:
 
 NETS = {
  "sum": ["rin.R2", "rdac.R2", "cint.C2", "ota.INM"],
- "vcm": ["ota.INP", "comp.INM", "sm.S", "bufc.OUT"],
+ "vcm": ["ota.INP", "comp.INM", "sm.S", "bufc.OUT", "cdec1.C1"],
  "UA1": ["ota.OUT", "cint.C1", "comp.INP"],
  "clk33": ["comp.CLK", "dff.CLK", "sm.G", "lvl.CLK33"],
  "clkb33": ["lvl.CLKB33", "st2.G", "sb2.G"],
@@ -301,7 +390,7 @@ NETS = {
  "xb": ["sb1.S", "sb2.D"],
  "vrefp": ["st1.D", "bufp.OUT", "cdec3.C1"],
  "vrefn": ["sb1.D", "bufn.OUT", "cdec2.C1"],
- "lad_p": ["rlt.R2", "bufp.IN"],
+ "lad_p": ["rlt.R2", "rlp.R1", "bufp.IN"],
  "lad_c": ["rlp.R2", "rlc.R1", "bufc.IN"],
  "lad_n": ["rlc.R2", "rlb.R1", "bufn.IN"],
  "irefp": ["ota.IREFP", "bias.IREFP", "bufp.IREFP", "bufc.IREFP", "bufn.IREFP"],
@@ -322,7 +411,7 @@ NETS = {
 # corridors (the y~151 gap past cdec1/cint, the y~189 gap past
 # cdec2/cdec3, etc). This order was tuned empirically -- see DESIGN.md
 # 2026-07-20 for which reorderings fixed which failures.
-ORDER = ["xt", "xb", "dac", "VDPWR", "clkb33", "UA1", "clk33", "vcm",
+ORDER = ["xt", "xb", "dac", "clk33", "VDPWR", "clkb33", "UA1", "vcm",
          "cq", "VGND", "VAPWR", "q33", "qb33",
          "irefp", "irefn", "vbnc", "vbpc", "sum",
          "vrefp", "vrefn", "lad_p", "lad_c", "lad_n"]
@@ -337,12 +426,68 @@ PASSTHRU = {"UA0": "rin.R1", "UO0": "odrvq.OUT18", "UO1": "odrvb.OUT18",
 
 # a handful of legs the auto-router can't currently thread through
 # (see the module docstring); routed by hand instead and skipped here
-SKIP_OK = {("VAPWR", "lvl.VDD33")}
+SKIP_OK = {("VAPWR", "lvl.VDD33"), ("vcm", "cdec1.C1"),
+           ("VGND", "lvl.VSS"), ("VGND", "bias.VSS")}
+
+# the hand routes for the SKIP_OK legs, in asm_wires polyline form.
+# These are pre-committed into the router grid before any auto routing
+# so the auto-routed nets keep clear of them.
+#
+# VAPWR -> lvl.VDD33: sits inside lvl's own bbox behind the congested
+# cdec1-vs-lvl/comp escape corridor VDPWR/VGND already fill. Tap it
+# from bias.VDD instead (dff.VDD was tried first, but its x=145.4
+# column sat only 0.6um from VGND's x=146 dff.VSS column -- the two
+# dff supply ports are 1.0um apart): m4 column up at x=149.9 (2.3um
+# clear of q33's x=147 column), across dff (blocks carry no m4) into
+# the y=172 street (above dff's 170.65 top, below odrvb's 175 bottom
+# -- a y=187 crossing would run through odrvb's internal m3), west to
+# x=127 (clear of lvl's east edge at 125.95), north to y=187 in the
+# lvl/cdec3 gap, west above lvl, then the m4 drop onto the port.
+#
+# vcm -> cdec1.C1 (the vcm reference decap's top-plate m4 bus at
+# y=150.6): the auto route from sm.S grabbed the y=152 corridor and
+# cascaded VGND's lvl.VSS leg into failure. Instead: ride vcm's
+# existing x~61 column up to y=126 (below cint), cross to the x=71
+# street between cint and cdec1, up to y=151 (0.4um clear of clkb33's
+# y=150 run and clk33's y=152 run), east to the bus x, and drop onto
+# the bus through the terminal's own via3.
+#
+# VGND -> lvl.VSS: the port sits 1.4um inside lvl's bbox and its only
+# northern entry rows (y186-188) are all claimed by cq (whichever
+# order cq routes in, y188 is its cheapest corridor). Enter through
+# the comp/lvl street instead: comp.VSS column up over comp (m4) to
+# y=190 (clear: VDPWR is y189, VAPWR patch starts x104), east to the
+# x=82 street, down to the port's own y, and a short m3 entry stub
+# east into lvl -- legitimate, it's reaching lvl's own VSS port.
+HAND_PATCHES = {
+    "VAPWR": [[("T", "bias", "VDD"), (149.9, 172), (127, 172),
+               (127, 187), (103.9, 187), ("T", "lvl", "VDD33")]],
+    "vcm": [[("T", "sm", "S"), (61.345, 126), (71, 126), (71, 151),
+             (117.19, 151), ("T", "cdec1", "C1")]],
+    "VGND": [[("T", "comp", "VSS"), (29.4, 190), (82, 190),
+              (82, 182.77), ("T", "lvl", "VSS")],
+             # dff.VSS -> bias.VSS: their ports sit 1.0um from dff.VDD
+             # / bias.VDD, whose VAPWR leg must ride the same
+             # dff-to-bias corridor -- both nets must stay
+             # exact-aligned the whole way (0.4um apart) because any
+             # grid-riding stretch of one sits 0.6um from the other's
+             # exact ride. Ride x=146.4 from dff.VSS down into bias,
+             # one 0.5um jog at y=132.9 (clear of bias' internal m3
+             # columns at x145.1-145.5 ending y132.25 and x146.6-147.0
+             # ending y129.05), then straight down x=146.9 to the port.
+             [("T", "dff", "VSS"), (146.4, 132.9), (146.9, 132.9),
+              ("T", "bias", "VSS")]],
+}
 
 
-def plan(rt, terms):
+def plan(rt, terms, cap_seeds):
     result = {}
     labels_out = []
+
+    def vport(member):
+        # BLOCK ports live on 0.8um-pitch staggered track rows --
+        # force vertical entry/exit there (see Router.route)
+        return member.split(".")[0] in BLOCKS
 
     def do_net(name, members):
         pts_all = []
@@ -353,17 +498,18 @@ def plan(rt, terms):
         placed.append((m0, (x0, y0)))
         for m in members[1:]:
             cur = terms[m]
+            if (name, m) in SKIP_OK:
+                print(f"--- {name}: skipping {m}{cur} (hand-patched)")
+                continue
             path = None
             frm = None
             for pm, pxy in sorted(placed, key=lambda p:
                                   abs(p[1][0] - cur[0]) + abs(p[1][1] - cur[1])):
-                path = rt.route(pxy, cur, net=name)
+                path = rt.route(pxy, cur, net=name,
+                                v_start=vport(pm), v_end=vport(m))
                 if path is not None:
                     frm = pm
                     break
-            if path is None and (name, m) in SKIP_OK:
-                print(f"--- {name}: skipping {m}{cur} (hand-patched)")
-                continue
             if path is None:
                 print(f"*** {name}: NO PATH (any) -> {m}{cur}")
                 result[name] = None
@@ -378,8 +524,10 @@ def plan(rt, terms):
     def do_label(name, fromterm):
         lx, ly = LABELS_REQ[name]
         x, y = terms[fromterm]
-        ly2 = ly - 3 if ly > y else ly + 3
-        p = rt.route((x, y), (lx, ly2), net=name)
+        # 4um standoff: the final jog row must clear the vbpc bus that
+        # rides y=215.8 across the top edge (3um put it at y=215)
+        ly2 = ly - 4 if ly > y else ly + 4
+        p = rt.route((x, y), (lx, ly2), net=name, v_start=vport(fromterm))
         if p is None:
             print(f"*** {name}: label leg failed")
             return
@@ -394,7 +542,21 @@ def plan(rt, terms):
             term_net[m] = name
     for net, term in PASSTHRU.items():
         term_net[term] = net
-    rt.reserve_terminals(term_net, terms)
+    m4_terms = {t for t in term_net
+                if t.split(".")[0] in CAP_NAMES and t.endswith(".C1")}
+    block_home = {t: rt.abs_bb[t.split(".")[0]] for t in term_net
+                  if t.split(".")[0] in BLOCKS}
+    rt.seed_terminals(term_net, terms, m4_terms, block_home)
+    for termname, kind, rect in cap_seeds:
+        rt.seed_rect(term_net[termname], kind, rect)
+
+    # pre-commit the hand-patched routes so auto routing avoids them
+    for net, polys in HAND_PATCHES.items():
+        for poly in polys:
+            pts = [terms[f"{p[1]}.{p[2]}"]
+                   if isinstance(p, tuple) and p and p[0] == "T" else p
+                   for p in poly]
+            rt.commit([(round(x), round(y)) for x, y in pts], net)
 
     for net, term in PASSTHRU.items():
         x, y = terms[term]
@@ -425,38 +587,146 @@ def exact(terms, member):
     return ("T", inst, port), (x, y)
 
 
-def snapped(exact_pt, other_grid, anchor_grid):
-    ox, oy = anchor_grid
-    nx, ny = other_grid
-    if abs(oy - ny) < 1e-6:
-        return (other_grid[0], exact_pt[1])
-    return (exact_pt[0], other_grid[1])
+RIDE = 2.0   # default exact-coordinate ride length at a terminal (um)
 
 
-def fixup(path, start_exact, end_exact):
+def attach(exact, a, b, ride=RIDE, jogok=None):
+    """Points joining the exact terminal coordinate to the on-grid
+    corner `b`, where a->b is the terminal-adjacent grid segment
+    (a = the terminal's own rounded cell). The wire RIDES the exact
+    coordinate for `ride` um before jogging onto the grid line: near
+    the terminal the exact track is the safe one (neighboring foreign
+    terminals -- the 0.8um port staircase, the switch row, the sibling
+    ports of the same block -- sit at fixed real offsets from it),
+    while far from the terminal the grid line is the safe one (every
+    other net's runs are grid-aligned). For BLOCK ports the caller
+    passes ride = distance to the block edge + 1, so the whole
+    in-block stretch stays exact-aligned. `jogok(i, j)`: cell test for
+    the jog site (the jog paints via3 pads on BOTH layers, so it must
+    not land on another net's crossing run); the jog slides further
+    along the ride until it passes."""
+    import math
+    ex, ey = exact
+
+    def first_int(v, d):
+        return math.ceil(v) if d > 0 else math.floor(v)
+
+    if abs(a[1] - b[1]) < 1e-6:      # horizontal segment
+        gy = a[1]
+        if abs(ey - gy) < 1e-9:
+            return [exact, b]
+        d = 1 if b[0] > ex else -1
+        # jog candidates on integer columns (a fractional jog can sit
+        # <0.9um from the next column's run even when its own cell is
+        # clear), staggered by the terminal ROW's parity so adjacent
+        # terminals -- whose escapes both pass validation because jogs
+        # are not committed to the ownership grid -- still land their
+        # jog pieces on different columns
+        # the jog piece spans from the grid line to the exact
+        # coordinate (plus paint/pad width) -- validate every cell
+        # that span touches, including one beyond the exact side
+        ecells = sorted({gx(ey), gx(2 * ey - gy)})
+        xj = first_int(ex + d * ride, d) + d * (gx(ey) % 2)
+        ok = False
+        while (b[0] - xj) * d > 0.5:
+            if jogok is None or all(jogok(xj, cy)
+                                    for cy in ecells + [gx(gy)]):
+                ok = True
+                break
+            xj += d
+        if not ok:
+            # no validated jog site before the corner: turn AT the
+            # exact coordinate instead. The corner grid point is
+            # collinear with the continuing run and gets pruned by
+            # fixup, so the neighboring escape's clearance is the full
+            # terminal stagger (0.4um), not eaten by a backtracking
+            # jog piece.
+            return [exact, (b[0], ey), b]
+        return [exact, (xj, ey), (xj, gy), b]
+    gx_ = a[0]                       # vertical segment
+    if abs(ex - gx_) < 1e-9:
+        return [exact, b]
+    d = 1 if b[1] > ey else -1
+    ecells = sorted({gx(ex), gx(2 * ex - gx_)})
+    yj = first_int(ey + d * ride, d) + d * (gx(ex) % 2)
+    ok = False
+    while (b[1] - yj) * d > 0.5:
+        if jogok is None or all(jogok(cx, yj)
+                                for cx in ecells + [gx(gx_)]):
+            ok = True
+            break
+        yj += d
+    if not ok:
+        return [exact, (ex, b[1]), b]
+    return [exact, (ex, yj), (gx_, yj), b]
+
+
+def fixup(path, start_exact, end_exact, ride_s=RIDE, ride_e=RIDE,
+          jogok=None):
+    """Replace the path's grid endpoints with the exact terminal
+    coordinates via bounded exact-rides (see attach). All resulting
+    off-grid geometry stays within the ride length of a terminal;
+    painted jog blobs are >= 0.36 um^2 (> the 0.24 met3.6/met4.4a
+    minimum)."""
     pts = [tuple(p) for p in path]
     if end_exact is None:
         end_exact = pts[-1]
-    if len(pts) == 2:
+    if len(pts) < 2:
+        out = [start_exact, end_exact]
+    elif len(pts) == 2:
+        # single straight segment terminal-to-terminal. When the whole
+        # run fits within the two exact-ride budgets, keep it straight
+        # at the exact coordinate (e.g. the stacked buf blocks' supply
+        # columns, whose rides span the blocks). Otherwise a long run
+        # at an off-grid coordinate (e.g. the VGND switch-B row hops at
+        # y+0.325) leans into the neighboring grid cells' clearance the
+        # whole way -- grid-ride the middle like any other run, with
+        # validated jogs at both ends.
         sx, sy = start_exact
         ex, ey = end_exact
-        if abs(sx - ex) < 1e-6 or abs(sy - ey) < 1e-6:
-            return [start_exact, end_exact]
-        was_h = abs(path[0][1] - path[1][1]) < 1e-6
-        corner = (ex, sy) if was_h else (sx, ey)
-        return [start_exact, corner, end_exact]
-    mid = pts[1:-1]
-    p1 = snapped(start_exact, pts[1], pts[0])
-    pn1 = snapped(end_exact, pts[-2], pts[-1])
-    out = [start_exact, p1] + mid[1:-1] + [pn1, end_exact]
+        horiz = abs(pts[0][1] - pts[1][1]) < 1e-6
+        span = abs(ex - sx) if horiz else abs(ey - sy)
+        gridc = pts[0][1] if horiz else pts[0][0]
+        offs = abs(sy - gridc) if horiz else abs(sx - gridc)
+        aligned = abs((sy - ey) if horiz else (sx - ex)) < 1e-9
+        if aligned and (span <= ride_s + ride_e + 2 or offs <= 0.16):
+            out = [start_exact, end_exact]
+        elif span <= ride_s + ride_e + 2:
+            if horiz:
+                mx = (sx + ex) / 2
+                out = [start_exact, (mx, sy), (mx, ey), end_exact]
+            else:
+                my = (sy + ey) / 2
+                out = [start_exact, (sx, my), (ex, my), end_exact]
+        else:
+            head = attach(start_exact, pts[0], pts[1], ride_s, jogok)
+            tail = attach(end_exact, pts[1], pts[0], ride_e, jogok)
+            out = head[:-1] + list(reversed(tail))[1:]
+    else:
+        head = attach(start_exact, pts[0], pts[1], ride_s, jogok)
+        tail = attach(end_exact, pts[-1], pts[-2], ride_e, jogok)
+        out = head + pts[2:-2] + list(reversed(tail))
     dedup = [out[0]]
     for p in out[1:]:
         if p != dedup[-1]:
             dedup.append(p)
-    fixed = [dedup[0]]
-    for k in range(1, len(dedup)):
+    # prune collinear interior points: a router corner made collinear
+    # by a turn-at-exact is a BACKTRACK (e.g. exact x15.4 turning east
+    # through grid corner x15 -- keeping it would extend the painted
+    # run 0.4um the wrong way and eat the neighboring escape's whole
+    # clearance)
+    pruned = [dedup[0]]
+    for k in range(1, len(dedup) - 1):
+        p, q, r = pruned[-1], dedup[k], dedup[k + 1]
+        if (abs(p[0] - q[0]) < 1e-6 and abs(q[0] - r[0]) < 1e-6) or \
+           (abs(p[1] - q[1]) < 1e-6 and abs(q[1] - r[1]) < 1e-6):
+            continue
+        pruned.append(q)
+    pruned.append(dedup[-1])
+    fixed = [pruned[0]]
+    for k in range(1, len(pruned)):
         x0, y0 = fixed[-1]
-        x1, y1 = dedup[k]
+        x1, y1 = pruned[k]
         if abs(x0 - x1) < 1e-6 or abs(y0 - y1) < 1e-6:
             fixed.append((x1, y1))
         else:
@@ -465,68 +735,56 @@ def fixup(path, start_exact, end_exact):
     return fixed
 
 
-def clip_entry(terms, abs_bb, poly, end):
-    """The router's last grid step may land on a terminal's own
-    (masked) cell -- fine at grid resolution, but once that corner is
-    replaced by the exact off-grid coordinate, a long straight run
-    leading up to it can dip >2um into that block's bbox and trip
-    asm_top.py's M3-OVER-CELL check. Insert one extra corner right at
-    the block's own edge (offset by the paint half-width too) so only
-    a short stub -- however deep the port sits -- legitimately enters."""
-    idx = 0 if end == 'start' else -1
-    p = poly[idx]
-    if not (isinstance(p, tuple) and p and p[0] == "T"):
-        return poly
-    inst = p[1]
-    if inst not in abs_bb or inst not in (BLOCK_NAMES + CAP_NAMES):
-        return poly
-    bx1, by1, bx2, by2 = abs_bb[inst]
-    nb = 1 if end == 'start' else -2
-    if not (-len(poly) <= nb < len(poly)):
-        return poly
-    neighbor = poly[nb]
-    if isinstance(neighbor, tuple) and neighbor and neighbor[0] == "T":
-        return poly
-    tx, ty = terms[f"{p[1]}.{p[2]}"]
-    nx, ny = neighbor
-    if abs(ty - ny) > 1e-6 or not (by1 - 0.01 <= ty <= by2 + 0.01):
-        return poly
-    if bx1 <= nx <= bx2:
-        return poly
-    edge = bx1 - 0.35 if nx < tx else bx2 + 0.35
-    if end == 'start':
-        return [poly[0], (edge, ty)] + poly[1:]
-    return poly[:-1] + [(edge, ty), poly[-1]]
 
+def build_wires(terms, abs_bb, result, rt):
+    def ride_of(member, a, b):
+        """Exact-ride length for this terminal's escape: BLOCK ports
+        ride to just past the block edge in the escape direction so
+        the whole in-block stretch stays on the staggered exact x."""
+        inst = member.split(".")[0]
+        if inst not in BLOCKS:
+            return RIDE
+        (bx1, by1, bx2, by2) = abs_bb[inst]
+        x, y = terms[member]
+        if abs(a[1] - b[1]) < 1e-6:      # horizontal escape
+            edge = bx2 if b[0] > a[0] else bx1
+            return abs(edge - x) + 1.0
+        edge = by2 if b[1] > a[1] else by1
+        return abs(edge - y) + 1.0
 
-def build_wires(terms, abs_bb, result):
+    def jogok_for(net):
+        def ok(ci, cj):
+            i, j = int(round(ci)) - IX0, int(round(cj)) - IY0
+            if not (0 <= i < NX and 0 <= j < NY):
+                return False
+            idx = i * NY + j
+            if rt.m3_mask[idx] or rt.m4_mask[idx]:
+                return False
+            return (rt.m3_owner[idx] in (None, net)
+                    and rt.m4_owner[idx] in (None, net))
+        return ok
+
     nets_out = {}
     for name, legs in result.items():
         polylines = []
+        jok = jogok_for(name)
         for leg in legs:
             if leg[0] == 'T':
                 continue
             kind, frm, to, path = leg
             tfrom, xyfrom = exact(terms, frm)
             tto, xyto = (None, None) if to is None else exact(terms, to)
-            fixed = fixup(path, xyfrom, xyto)
+            rs = ride_of(frm, path[0], path[1]) if len(path) > 1 else RIDE
+            re_ = (ride_of(to, path[-1], path[-2])
+                   if to is not None and len(path) > 1 else RIDE)
+            fixed = fixup(path, xyfrom, xyto, rs, re_, jok)
             poly = [tfrom] + fixed[1:-1] + ([tto] if tto else [fixed[-1]])
-            poly = clip_entry(terms, abs_bb, poly, 'start')
-            if tto:
-                poly = clip_entry(terms, abs_bb, poly, 'end')
             polylines.append(poly)
         nets_out[name] = polylines
 
-    # hand patch: lvl.VDD33 sits inside lvl's own bbox behind the same
-    # congested cdec1-vs-lvl/comp escape corridor VDPWR/VGND already
-    # fill. Tap it from ABOVE instead into the existing y=214 VAPWR
-    # bus. The straight-down column at x=103.9 crosses cdec3
-    # (x74-131.65, y191-211.4) though, so detour the long vertical run
-    # over to x=136 (clear of every cap and of q33's own x=134 column)
-    # and only cross back to x=103.9 in the y<191 gap below cdec3.
-    nets_out.setdefault("VAPWR", []).append(
-        [(135.6, 214), (136, 214), (136, 190), (103.9, 190),
-         ("T", "lvl", "VDD33")])
+    # append the hand-patched routes (see HAND_PATCHES for rationale)
+    for net, polys in HAND_PATCHES.items():
+        nets_out.setdefault(net, []).extend(polys)
     return nets_out
 
 
@@ -570,10 +828,10 @@ def write_asm_wires(nets_out, labels_out, path="tools/asm_wires.py"):
 
 
 def main():
-    terms, abs_bb = compute_terms_and_bb()
-    rt = Router(abs_bb)
-    result, labels_out = plan(rt, terms)
-    nets_out = build_wires(terms, abs_bb, result)
+    terms, abs_bb, m3_obs, cap_seeds = compute_terms_and_bb()
+    rt = Router(abs_bb, m3_obs)
+    result, labels_out = plan(rt, terms, cap_seeds)
+    nets_out = build_wires(terms, abs_bb, result, rt)
     write_asm_wires(nets_out, labels_out)
     print(f"wrote tools/asm_wires.py ({len(nets_out)} nets, "
           f"{len(labels_out)} labels)")
