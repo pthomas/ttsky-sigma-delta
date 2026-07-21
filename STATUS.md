@@ -175,12 +175,17 @@ context a fresh session needs:
    geometry() generalizes (flatten per block cell); the three.js viewer
    JS is reusable (parametrize the json path). User explicitly wants:
    sub-page = schematic + 3D per component; combined geometry once.
-7. **TT final**: make tt with the assembled top, info.yaml pinout update
-   (clk 50MHz, uo[0]/uo[1] = Q/QB live, ua[0]=VIN, ua[1]=monitor),
-   analog_pins stays 2, push (single `git push` feeds GitLab + GitHub
-   mirror via dual push-urls already in .git/config), precheck green =
-   "TT ready" — then TELL THE USER explicitly.
-
+7. **TT final -- READY 2026-07-21.** `make tt` builds the frame
+   (tt_frame/build_frame.tcl: sd_top at origin in the 2x2 template,
+   def-pin hookups by coordinate, three full-height power stripes with
+   full-stripe port labels -- precheck requires port geometry within
+   10um of both tile edges), frame DRC 0, GDS+LEF exported. info.yaml:
+   2x2 tiles, pinout complete. Pushed (GitLab + GitHub mirror);
+   GitHub Actions gds/precheck/viewer ALL GREEN on ttsky26c
+   (run 29825237808). Remaining USER action: submit the GitHub repo
+   on the Tiny Tapeout shuttle page before the 2026-09-07 deadline.
+   Open (non-gating): report sub-pages (STATUS item 6), v2
+   decision-path improvement (DESIGN.md 2026-07-20 night entry).
 Standing context: user handles repo creation/settings; Pages
 unique-domain toggle still pending on user side (then add the clean URL
 to README); CI locked to push-only pipelines; support-blocks CI job
