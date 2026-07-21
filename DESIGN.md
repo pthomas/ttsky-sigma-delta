@@ -926,3 +926,28 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   MODULATES (ones density 0.482, integrator 0-1.33 V); fast-path SNDR
   33.7 dB on the coarse 512-bit window vs the 35 dB gate and the
   38-39 dB tier-1 reference -- 2048-bit run pending (STATUS item 5).
+
+- **2026-07-20 (night): extracted-top SNDR gap diagnosed -- unshaped
+  decision-path noise, loop healthy.** Matched-window comparison
+  (4096 bits, bin 5, identical estimator): tier-1 39.1 dB, extracted
+  34.7 dB. Sub-band analysis of the two bitstreams shows the entire
+  excess is a FLAT noise floor (PEX in-band low/mid/high 22.7/23.4/
+  25.4 dB-rel vs tier-1's properly shaped 9.7/17.6/20.8): +13 dB over
+  tier-1 at the low-frequency end, white across the band. Both sims
+  are deterministic (no transient noise), so this is not device
+  noise: it is a decision-path mechanism -- errors injected at or
+  after the quantizer, which the loop cannot shape. Candidate
+  mechanisms, unresolved between: comparator soft decisions under the
+  extracted clk33 edge rate (block-level worst decision was 1.18 ns
+  with clean 100 ps edges; the in-chip clock tree is level-shifter +
+  ~130 um of wire), and DAC pulse ISI from real switch edges. The
+  LOOP is healthy: integrator post-settle mean 0.964 V, ripple
+  0.65-1.33 V (no clipping, 0 % below the OTA floor), harmonics
+  <= -45 dBc, ones density 0.484. Fast path delivers 5.5 ENOB
+  extracted vs the 6-7 target and the 35 dB acceptance floor misses
+  by 0.3 dB. v1-ship recommendation: accept with this entry as the
+  record (the v1 mission is proving the flow; the mechanism is
+  characterized and attackable in a v2 pass -- stronger lvl driver /
+  local clk33 buffering at the comparator, comparator decision-time
+  margin, DAC switch edge shaping). Decision needs user sign-off
+  since the fast-path ENOB target is grazed.

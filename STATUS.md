@@ -156,24 +156,17 @@ context a fresh session needs:
    six-fix endgame in DESIGN.md 2026-07-20 entries -- READ THEM before
    touching the router. Caps moved: cdec2/cdec3 now at y=193, cdec3 at
    x=78 (corridor capacity); CLK pin at (75,218).
-5. **Extracted acceptance -- IN PROGRESS 2026-07-20.** make pextop &&
-   make topaccept (tools/pex_top.py + sim/top_tb.py). First closed-loop
-   run caught a REAL polarity bug (DFF Q/QB swapped by construction --
-   see DESIGN.md/commit 5f7bdc8; fixed by feeding dff.D from comp.QB).
-   With the fix the extracted loop MODULATES: 512 bits, ones density
-   0.482, integrator regulating 0-1.33 V. Fast-path SNDR: 33.7 dB at
-   512 bits, 34.5 dB at 2048 bits -- vs the 35 dB gate and the tier-1
-   reference of 38-39 dB. NOT estimator variance: ~4 dB real
-   degradation. Leads, in order: (1) the integrator (UA1) swings
-   0-1.33 V, CENTER ~0.67 V not the design 0.9 -- check whether the
-   floor touches persist after settle (OTA output clips below ~0.31 V
-   -> distortion) and where the DC shift comes from; (2) buffer
-   offsets: vrefn reads 0.445 (+45 mV), vrefp 1.389 (-11 mV) -> DAC
-   references asymmetric about vcm 0.896 by ~21 mV; (3) rerun with
-   AMP reduced (0.2) to separate clipping from noise; (4) comparator
-   decision timing at the extracted clk33 slew. Diagnostic pattern
-   that works: probe PEX internals as v(xdut.<cell>_0/<node>) -- see
-   spice/top_diag*.spice recipes in the git history of this session.
+5. **Extracted acceptance -- DIAGNOSED 2026-07-20, awaiting accept
+   decision.** Loop modulates on extracted silicon: 4096-bit matched
+   window gives 34.7 dB fast-path SNDR (5.5 ENOB) vs tier-1's 39.1 and
+   the 35 dB gate. Root cause characterized (DESIGN.md night entry):
+   a FLAT unshaped noise floor from the decision path (comparator
+   under real clock slew / DAC pulse ISI) -- the loop itself is
+   healthy (no clipping, harmonics <= -45 dBc). Also fixed en route:
+   the DFF polarity bug (commit 5f7bdc8). Recommendation: accept for
+   v1 (0.3 dB under an aspirational floor, flow-proving mission),
+   attack the decision path in v2. USER SIGN-OFF NEEDED. make pextop
+   && make topaccept reproduces (sim/top_tb.py --bits/--sigbin).
 6. **Report sub-pages**: public/blocks/<name>.html per component
    (schematic SVG + its own 3D geometry json + metrics from its
    reports/results/<b>.json); main page: ONE combined top-level 3D
