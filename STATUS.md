@@ -161,12 +161,19 @@ context a fresh session needs:
    run caught a REAL polarity bug (DFF Q/QB swapped by construction --
    see DESIGN.md/commit 5f7bdc8; fixed by feeding dff.D from comp.QB).
    With the fix the extracted loop MODULATES: 512 bits, ones density
-   0.482, integrator regulating 0-1.33 V. Fast-path SNDR 33.7 dB vs
-   the 35 dB gate -- 1.3 dB short on a coarse 10-bin window (tier-1
-   reference at 4096 bits was 38-39 dB). A 2048-bit run was launched
-   (check reports/results/top_pex.json / scratchpad top_tb_2048.log);
-   if it clears ~35+, accept; if not, check integrator clipping
-   (swing floor near 0 V during startup) and comparator timing.
+   0.482, integrator regulating 0-1.33 V. Fast-path SNDR: 33.7 dB at
+   512 bits, 34.5 dB at 2048 bits -- vs the 35 dB gate and the tier-1
+   reference of 38-39 dB. NOT estimator variance: ~4 dB real
+   degradation. Leads, in order: (1) the integrator (UA1) swings
+   0-1.33 V, CENTER ~0.67 V not the design 0.9 -- check whether the
+   floor touches persist after settle (OTA output clips below ~0.31 V
+   -> distortion) and where the DC shift comes from; (2) buffer
+   offsets: vrefn reads 0.445 (+45 mV), vrefp 1.389 (-11 mV) -> DAC
+   references asymmetric about vcm 0.896 by ~21 mV; (3) rerun with
+   AMP reduced (0.2) to separate clipping from noise; (4) comparator
+   decision timing at the extracted clk33 slew. Diagnostic pattern
+   that works: probe PEX internals as v(xdut.<cell>_0/<node>) -- see
+   spice/top_diag*.spice recipes in the git history of this session.
 6. **Report sub-pages**: public/blocks/<name>.html per component
    (schematic SVG + its own 3D geometry json + metrics from its
    reports/results/<b>.json); main page: ONE combined top-level 3D
