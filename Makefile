@@ -90,6 +90,19 @@ blockcheck:
 	  xschem --netlist --spice -q -x xschem/$${b}_top.sch || exit 1; done
 	python3 tools/xcheck_blocks.py
 
+asm:
+	mkdir -p spice
+	python3 tools/gen_golden.py
+	python3 tools/gen_top_golden.py
+	python3 tools/asm_route.py
+	python3 tools/asm_top.py
+
+pextop:
+	python3 tools/pex_top.py
+
+topaccept:
+	python3 sim/top_tb.py
+
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 
@@ -99,4 +112,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck snr view clean
+.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept snr view clean
