@@ -888,3 +888,41 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   layout-vs-schematic verified as one cell (sd_top, ~315x218um core).
   Next (STATUS items 4-7): PEX + transient acceptance, report pages,
   and TT frame integration (make tt / info.yaml / precheck).
+
+- **2026-07-20 (evening): DFF Q/QB swapped by construction -- caught by
+  the FIRST closed-loop simulation, invisible to every earlier check.**
+  The first extracted-top transient latched at the positive rail. The
+  diagnosis chain (probing PEX-internal nodes as v(xdut.<cell>/<node>))
+  cleared every suspect in turn: vcm 0.896 V, refs 0.445/1.389 V,
+  ladder tap 0.401 V, bias diode line up, both clock phases swinging
+  rail to rail, comparator deciding correctly -- and then found dff.Q
+  frozen at its power-up state with D=1 and CLK toggling. Root cause
+  is in sim/dff_tb.py's dff_subckt itself: the output chain is
+  D -> mi -> inv -> mb -> si -> inv -> "QB" -> inv -> "Q", i.e. the
+  node NAMED QB carries D's polarity and the node named Q carries the
+  complement. The retimer inverts. With q33 = NOT(decision), the DAC
+  feedback is positive and the loop rails -- permanently.
+  WHY NOTHING CAUGHT IT: the golden netlist, generated schematic, and
+  layout all derive from the same dff_subckt, so equivalence checks
+  and LVS were self-consistently blind; the block testbench verified
+  clk-to-Q timing and mid-cycle stability, not output SENSE; and
+  tier 1 used a behavioral (non-inverting) DFF. Polarity is a LOOP
+  property -- it only closes when the real comparator, real DFF, and
+  real DAC are wired together, which happened for the first time in
+  the extracted-top run. LESSON (add to the do-not-relearn list):
+  every block testbench for a block with complementary outputs must
+  assert output POLARITY against the behavioral model, not just
+  timing; and the golden-top netlist should get at least one short
+  closed-loop behavioral-hybrid sim before layout, where a sign flip
+  costs minutes instead of a layout iteration.
+  FIX (commit 5f7bdc8): the verified DFF cell is untouched; its D
+  input now takes the comparator's COMPLEMENT output (cqb), so
+  q33 = NOT(NOT(decision)) = decision. One net change in
+  gen_top_golden INSTANCES + asm_top BPORTS (comp taps QB instead of
+  Q) + asm_route NETS. The rerouted hookup exposed one capm.11
+  residual (UA1's via3 m3 pad 1.15 um above cint's plate), fixed by
+  raising all cap C1 buses from +1.2 to +1.7 um. Re-verified DRC 0 +
+  "Circuits match uniquely". First corrected-polarity run: the loop
+  MODULATES (ones density 0.482, integrator 0-1.33 V); fast-path SNDR
+  33.7 dB on the coarse 512-bit window vs the 35 dB gate and the
+  38-39 dB tier-1 reference -- 2048-bit run pending (STATUS item 5).
