@@ -165,7 +165,8 @@ context a fresh session needs:
    healthy (no clipping, harmonics <= -45 dBc). Also fixed en route:
    the DFF polarity bug (commit 5f7bdc8). Recommendation: accept for
    v1 (0.3 dB under an aspirational floor, flow-proving mission),
-   attack the decision path in v2. USER SIGN-OFF NEEDED. make pextop
+   attack the decision path in v2. USER SIGNED OFF 2026-07-21 (both
+   the 34.7 dB v1 accept and the 2x2/4-tile purchase). make pextop
    && make topaccept reproduces (sim/top_tb.py --bits/--sigbin).
 6. **Report sub-pages**: public/blocks/<name>.html per component
    (schematic SVG + its own 3D geometry json + metrics from its
