@@ -156,8 +156,17 @@ context a fresh session needs:
    six-fix endgame in DESIGN.md 2026-07-20 entries -- READ THEM before
    touching the router. Caps moved: cdec2/cdec3 now at y=193, cdec3 at
    x=78 (corridor capacity); CLK pin at (75,218).
-5. **Extracted acceptance**: PEX the top, shortened modulator transient
-   (>=512 bits), fast-path SNDR sanity (>=35 dB floor).
+5. **Extracted acceptance -- IN PROGRESS 2026-07-20.** make pextop &&
+   make topaccept (tools/pex_top.py + sim/top_tb.py). First closed-loop
+   run caught a REAL polarity bug (DFF Q/QB swapped by construction --
+   see DESIGN.md/commit 5f7bdc8; fixed by feeding dff.D from comp.QB).
+   With the fix the extracted loop MODULATES: 512 bits, ones density
+   0.482, integrator regulating 0-1.33 V. Fast-path SNDR 33.7 dB vs
+   the 35 dB gate -- 1.3 dB short on a coarse 10-bin window (tier-1
+   reference at 4096 bits was 38-39 dB). A 2048-bit run was launched
+   (check reports/results/top_pex.json / scratchpad top_tb_2048.log);
+   if it clears ~35+, accept; if not, check integrator clipping
+   (swing floor near 0 V during startup) and comparator timing.
 6. **Report sub-pages**: public/blocks/<name>.html per component
    (schematic SVG + its own 3D geometry json + metrics from its
    reports/results/<b>.json); main page: ONE combined top-level 3D
