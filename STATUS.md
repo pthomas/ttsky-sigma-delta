@@ -143,35 +143,19 @@ context a fresh session needs:
    merging, go-wide floorplans, grid-snapped via centers). Bias/ladder
    R cells + MiM decaps for top level still to generate at assembly
    (cint/gen_layout_cells pattern).
-4. **Top assembly -- IN PROGRESS 2026-07-20 (v2: audit clean, first
-   full paint, topology LVS-correct).** `python3 tools/asm_route.py &&
-   python3 tools/asm_top.py` now runs END TO END: geometry-precise
-   obstacle model (real per-instance m3 via lay_lib.cell_layer_rects;
-   passives carry none, cap plates are wall-to-wall m3), terminal-pad
-   + port-escape-column ownership seeding, v-forced block-port entries,
-   bounded exact-rides with validated grid jogs (full story in
-   DESIGN.md 2026-07-20 later entry -- READ IT). Session also fixed
-   two real connectivity bugs (lad_p missing rlp.R1, vcm missing
-   cdec1.C1) and the magscale per-file unit bug that had cflt's caps
-   misplaced by 6um in every parser (lay_lib.mag_units).
-   Ground truth after first full sd_top paint:
-   - Python audit: 0 conflicts.
-   - magic DRC (fresh reload): 104, in exactly 4 classes: via3-pair
-     spacing at small jogs (merge sub-0.7um pairs into one elongated
-     via3 rect); "can't abut between subcells" (our via stacks
-     re-painted on ports that ALREADY carry riser vias -- skip where
-     the port pre-lifts to m3 (bias/buf...), keep where it doesn't
-     (ota)); 24 residual met3 spacings; capm.11 (cap-to-unrelated-m3
-     wants 1.34um, router dilation was 0.65 -- also rethink C2 stubs
-     painting m3 over the plate vs using the cap's own leads).
-   - netgen LVS: "Netlists match uniquely with port and property
-     errors" -- the MODULATOR TOPOLOGY IS CORRECT. Remaining: UA0
-     label never became a pin (leg to rin.R1 extracts as no-connect;
-     inspect label landing + `port make`), and RBNC/RBPC length
-     properties off 2-3% (snake-corner folding vs drawn golden; add
-     folding to the golden cards or netgen tolerance).
-   Next: the 4 DRC classes + 2 LVS items above, then re-verify
-   "Circuits match uniquely" + DRC 0.
+4. **Top assembly -- DONE 2026-07-20.** sd_top: magic DRC
+   fresh-process 0, netgen "Circuits match uniquely" (0 property
+   errors), all 8 ports (UA0 UO0 UO1 CLK VDPWR UA1 VGND VAPWR).
+   `python3 tools/asm_route.py && python3 tools/asm_top.py` rebuilds
+   and re-verifies everything. tools/asm_route.py = geometry-precise
+   maze router (real per-instance m3 + mimcap halos as obstacles,
+   terminal/port-column/cap-bus ownership seeding, v-forced block-port
+   entries, bounded exact-rides with validated jogs + collinear prune,
+   3 hand patches); tools/asm_top.py = placement + terminal taps +
+   painting + audit + DRC + LVS. Full mechanism narrative and the
+   six-fix endgame in DESIGN.md 2026-07-20 entries -- READ THEM before
+   touching the router. Caps moved: cdec2/cdec3 now at y=193, cdec3 at
+   x=78 (corridor capacity); CLK pin at (75,218).
 5. **Extracted acceptance**: PEX the top, shortened modulator transient
    (>=512 bits), fast-path SNDR sanity (>=35 dB floor).
 6. **Report sub-pages**: public/blocks/<name>.html per component

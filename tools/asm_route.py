@@ -114,13 +114,13 @@ def compute_terms_and_bb():
                         c1s.append((x, y))
                     elif pn.startswith("C2"):
                         c2s.append((x, y))
-        yb2 = bbx[1] - 1.2
+        yb2 = bbx[1] - 1.6
         terms[f"{inst}.C2"] = (c2s[0][0], yb2)
-        # C2: m3 bus at yb2 + m3 stubs from each via down past the
-        # bbox bottom edge (the in-bbox part is masked anyway)
-        cap_seeds.append((f"{inst}.C2", 'h',
+        # C2: met4 bus at yb2 + met4 stubs up into the cell's own
+        # via3-strip m4 (all-met4 scheme, see asm_top's CAPS loop)
+        cap_seeds.append((f"{inst}.C2", 'v',
                           (min(x for x, _ in c2s) - 0.3, yb2 - 0.3,
-                           max(x for x, _ in c2s) + 0.3, bbx[1])))
+                           max(x for x, _ in c2s) + 0.3, bbx[1] + 0.6)))
         yb1 = bbx[3] + 1.2
         terms[f"{inst}.C1"] = (c1s[0][0], yb1)
         # C1: m4 bus at yb1 + m4 stubs from bbox top up to the bus
@@ -130,11 +130,17 @@ def compute_terms_and_bb():
 
     # precise m3 obstacle map: every placed instance's REAL metal3
     # rects in absolute coordinates (blocks: internal riser pads; caps:
-    # bottom plate = whole footprint; passives: none)
+    # bottom plate = whole footprint; passives: none). The MiM top
+    # plates (mimcap) additionally repel unrelated metal3 by 1.34um
+    # (capm.11) -- pre-expand those rects so the router's uniform
+    # DILATE (0.65) yields the required 1.34 + wire half-width.
     m3_obs = []
     for inst, (cell, ox, oy, _) in pl.items():
         for (x1, y1, x2, y2) in cell_layer_rects(cell, "metal3"):
             m3_obs.append((x1 + ox, y1 + oy, x2 + ox, y2 + oy))
+        for (x1, y1, x2, y2) in cell_layer_rects(cell, "mimcap"):
+            m3_obs.append((x1 + ox - 1.05, y1 + oy - 1.05,
+                           x2 + ox + 1.05, y2 + oy + 1.05))
 
     return terms, abs_bb, m3_obs, cap_seeds
 
@@ -397,11 +403,11 @@ NETS = {
  "irefn": ["ota.IREFN", "bias.IREFN"],
  "vbnc": ["ota.VBNC", "bias.VBNC", "cflt1.C1"],
  "vbpc": ["ota.VBPC", "bias.VBPC", "cflt2.C1"],
- "VGND": ["ota.VSS", "comp.VSS", "dff.VSS", "bias.VSS", "bufn.VSS",
-          "bufc.VSS", "bufp.VSS", "lvl.VSS", "odrvq.VSS", "odrvb.VSS",
-          "rin.B", "rdac.B", "rlt.B", "rlp.B", "rlc.B", "rlb.B", "rlb.R2",
-          "sm.B", "st1.B", "st2.B", "sb1.B", "sb2.B", "cdec1.C2",
-          "cdec2.C2", "cdec3.C2", "cflt1.C2", "cflt2.C2"],
+ "VGND": ["ota.VSS", "comp.VSS", "cdec2.C2", "lvl.VSS", "dff.VSS",
+          "bias.VSS", "bufn.VSS", "bufc.VSS", "bufp.VSS", "odrvq.VSS",
+          "odrvb.VSS", "rin.B", "rdac.B", "rlt.B", "rlp.B", "rlc.B",
+          "rlb.B", "rlb.R2", "sm.B", "st1.B", "st2.B", "sb1.B", "sb2.B",
+          "cdec1.C2", "cdec3.C2", "cflt1.C2", "cflt2.C2"],
  "VAPWR": ["ota.VDD", "lvl.VDD33", "comp.VDD", "dff.VDD", "bias.VDD",
            "bufn.VDD", "bufc.VDD", "bufp.VDD", "rlt.R1"],
  "VDPWR": ["lvl.VDD18", "odrvq.VDD18", "odrvb.VDD18"],
@@ -418,7 +424,7 @@ ORDER = ["xt", "xb", "dac", "clk33", "VDPWR", "clkb33", "UA1", "vcm",
 
 LABELS_REQ = {
     "UA0": (5, 106), "UA1": (5, 150), "UO0": (235, 218),
-    "UO1": (170, 218), "CLK": (91, 218), "VGND": (138, 218),
+    "UO1": (170, 218), "CLK": (75, 218), "VGND": (138, 218),
     "VAPWR": (233, 218), "VDPWR": (134, 218),
 }
 PASSTHRU = {"UA0": "rin.R1", "UO0": "odrvq.OUT18", "UO1": "odrvb.OUT18",
@@ -427,7 +433,7 @@ PASSTHRU = {"UA0": "rin.R1", "UO0": "odrvq.OUT18", "UO1": "odrvb.OUT18",
 # a handful of legs the auto-router can't currently thread through
 # (see the module docstring); routed by hand instead and skipped here
 SKIP_OK = {("VAPWR", "lvl.VDD33"), ("vcm", "cdec1.C1"),
-           ("VGND", "lvl.VSS"), ("VGND", "bias.VSS")}
+           ("VGND", "bias.VSS"), ("VGND", "lvl.VSS")}
 
 # the hand routes for the SKIP_OK legs, in asm_wires polyline form.
 # These are pre-committed into the router grid before any auto routing
@@ -462,9 +468,18 @@ SKIP_OK = {("VAPWR", "lvl.VDD33"), ("vcm", "cdec1.C1"),
 HAND_PATCHES = {
     "VAPWR": [[("T", "bias", "VDD"), (149.9, 172), (127, 172),
                (127, 187), (103.9, 187), ("T", "lvl", "VDD33")]],
-    "vcm": [[("T", "sm", "S"), (61.345, 126), (71, 126), (71, 151),
-             (117.19, 151), ("T", "cdec1", "C1")]],
-    "VGND": [[("T", "comp", "VSS"), (29.4, 190), (82, 190),
+    # vcm -> cdec1.C1: the capm.11 halo killed the old y=151 approach
+    # (unrelated m3 must keep 1.34um from the cap top plates). The C1
+    # bus is met4, so approach on met4 instead: east under the caps at
+    # y=126, north up the cdec1/dff street at x=136, west at y=188
+    # (row 187 belongs to the VAPWR patch), then drop the met4 column
+    # straight THROUGH lvl (blocks carry no m4) onto the bus.
+    "vcm": [[("T", "sm", "S"), (61.345, 126), (138, 126), (138, 188),
+             (117.19, 188), ("T", "cdec1", "C1")]],
+    "VGND": [# comp.VSS -> lvl.VSS: enter through the comp/lvl street
+             # (the port sits 1.4um inside lvl; the m3 entry stub is
+             # reaching lvl's own VSS port)
+             [("T", "comp", "VSS"), (29.4, 189), (82, 189),
               (82, 182.77), ("T", "lvl", "VSS")],
              # dff.VSS -> bias.VSS: their ports sit 1.0um from dff.VDD
              # / bias.VDD, whose VAPWR leg must ride the same
@@ -514,7 +529,13 @@ def plan(rt, terms, cap_seeds):
                 print(f"*** {name}: NO PATH (any) -> {m}{cur}")
                 result[name] = None
                 return False
-            rt.commit(path, name)
+            # cap-terminal legs ride the off-grid bus line for their
+            # whole last segment (ride_of returns 1e6) -- the painted
+            # metal leans up to half a cell off the committed row, so
+            # own the neighboring rows too or a foreign jog validates
+            # right against the lean
+            rt.commit(path, name,
+                      perp=1 if m.split(".")[0] in CAP_NAMES else 0)
             pts_all.append(("PATH", frm, m, path))
             placed.append((m, cur))
         result[name] = pts_all
@@ -524,14 +545,16 @@ def plan(rt, terms, cap_seeds):
     def do_label(name, fromterm):
         lx, ly = LABELS_REQ[name]
         x, y = terms[fromterm]
-        # 4um standoff: the final jog row must clear the vbpc bus that
-        # rides y=215.8 across the top edge (3um put it at y=215)
-        ly2 = ly - 4 if ly > y else ly + 4
-        p = rt.route((x, y), (lx, ly2), net=name, v_start=vport(fromterm))
+        # v_end: the final move must be vertical so the wire arrives
+        # at the label point on met4 -- the label layer. (An earlier
+        # standoff-and-append scheme made a switchback that the
+        # collinear prune collapsed into a horizontal m3 arrival,
+        # leaving the m4 label floating: UA0/VGND had no LVS pins.)
+        p = rt.route((x, y), (lx, ly), net=name,
+                     v_start=vport(fromterm), v_end=True)
         if p is None:
             print(f"*** {name}: label leg failed")
             return
-        p = p + [(lx, ly)]
         rt.commit(p, name)
         result[name].append(("LABELPATH", fromterm, None, p))
         labels_out.append((name, lx, ly))
@@ -542,8 +565,8 @@ def plan(rt, terms, cap_seeds):
             term_net[m] = name
     for net, term in PASSTHRU.items():
         term_net[term] = net
-    m4_terms = {t for t in term_net
-                if t.split(".")[0] in CAP_NAMES and t.endswith(".C1")}
+    m4_terms = {t for t in term_net if t.split(".")[0] in CAP_NAMES
+                and (t.endswith(".C1") or t.endswith(".C2"))}
     block_home = {t: rt.abs_bb[t.split(".")[0]] for t in term_net
                   if t.split(".")[0] in BLOCKS}
     rt.seed_terminals(term_net, terms, m4_terms, block_home)
@@ -740,8 +763,13 @@ def build_wires(terms, abs_bb, result, rt):
     def ride_of(member, a, b):
         """Exact-ride length for this terminal's escape: BLOCK ports
         ride to just past the block edge in the escape direction so
-        the whole in-block stretch stays on the staggered exact x."""
+        the whole in-block stretch stays on the staggered exact x;
+        cap C1/C2 bus terminals ride the whole terminal-adjacent
+        segment so the approach lands exactly on the bus line instead
+        of running parallel to it a fraction of a grid cell away."""
         inst = member.split(".")[0]
+        if inst in CAPS:
+            return 1e6
         if inst not in BLOCKS:
             return RIDE
         (bx1, by1, bx2, by2) = abs_bb[inst]

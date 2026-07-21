@@ -64,8 +64,8 @@ PLACE.update({
     "cdec1": ("cdec", 74, 129),
     "comp":  ("comp_layout", 12, 153),
     "lvl":   ("lvl_layout", 85, 153),
-    "cdec2": ("cdec", 12, 191),
-    "cdec3": ("cdec", 74, 191),
+    "cdec2": ("cdec", 12, 193),
+    "cdec3": ("cdec", 78, 193),
     "dff":   ("dff_layout", 142, 140),
     "odrvb": ("odrv_layout", 142, 175),
     "cflt1": ("cflt", 178, 175),
@@ -218,13 +218,16 @@ def main():
               ["via2"], pads=["m2", "m3"])
         terms[name] = (x, y, "m3")
 
+    # block ports come pre-lifted: every port carries its own
+    # via1/via2/m3 riser landing at exactly the label position (found
+    # the hard way -- painting our own stack on top abuts the
+    # subcell's contacts, 336 DRC boxes). Just record the m3 landing.
     for inst in sorted(BLOCKS):
         cell, ox, oy, _ = pl[inst]
         bp = block_ports(cell)
         for port in BPORTS[inst]:
             px, py = bp[port]
-            cur[0] = term_to_net.get(f"{inst}.{port}", f"{inst}.{port}")
-            stack_m1_to_m3(f"{inst}.{port}", ox + px, oy + py)
+            terms[f"{inst}.{port}"] = (ox + px, oy + py, "m3")
 
     for inst in sorted(RESC):
         cell, ox, oy, _ = pl[inst]
@@ -305,15 +308,21 @@ def main():
                         c1s.append((x, y))
                     elif pn.startswith("C2"):
                         c2s.append((x, y))
-        # C2 (bottom plate, met3 at the vias): met3 stubs down to a bus
-        yb2 = bbx[1] - 1.2
+        # C2 (bottom plate): the cell lifts it to met4 through
+        # full-height via3 strips beside each unit's capm -- strap
+        # those strip tops with met4 stubs down to a met4 bus BELOW
+        # the cap. All-met4 keeps foreign-adjacent metal3 out of the
+        # capm.11 1.34um halo entirely. Bus sits 1.6um below the bbox
+        # so even the bus clears the halo of the capm bottom edge.
+        yb2 = bbx[1] - 1.6
         cur[0] = term_to_net.get(f"{inst}.C2", f"{inst}.C2")
         cur_capself[0] = inst
         for (x, y) in c2s:
-            paint(x - 0.3, yb2 - 0.3, x + 0.3, y + 0.3, ["m3"])
+            paint(x - 0.3, yb2 - 0.3, x + 0.3, bbx[1] + 0.6, ["m4"])
         paint(min(x for x, _ in c2s) - 0.3, yb2 - 0.3,
-              max(x for x, _ in c2s) + 0.3, yb2 + 0.3, ["m3"])
-        terms[f"{inst}.C2"] = (c2s[0][0], yb2, "m3")
+              max(x for x, _ in c2s) + 0.3, yb2 + 0.3, ["m4"])
+        cur_capself[0] = None
+        terms[f"{inst}.C2"] = (c2s[0][0], yb2, "m4")
         # C1 (top plate, met4 at the mimcc): met4 stubs up (the C1
         # contacts sit in the inter-unit gaps, clear of the plates) to
         # a met4 bus above the cell
@@ -374,7 +383,12 @@ def main():
                     sys.exit(f"{net}: non-manhattan segment "
                              f"({x1},{y1})-({x2},{y2})")
             # via3 wherever the polyline changes direction or meets a
-            # terminal whose layer differs from the segment layer
+            # terminal whose layer differs from the segment layer.
+            # Adjacent bends closer than 0.7um (the exact-to-grid jog
+            # pieces are <=0.5) merge into ONE elongated via3 rect --
+            # two separate paint regions that close violate the 0.08um
+            # painted-contact spacing rule (via3.2 - 2*via3.4).
+            v3pts = []
             for i, (x, y, l) in enumerate(pts):
                 segs = []
                 if i > 0:
@@ -389,8 +403,25 @@ def main():
                 if l == "m4" and segs and "h" in segs:
                     need34 = True
                 if need34:
-                    paint(x - VIA / 2, y - VIA / 2, x + VIA / 2,
-                          y + VIA / 2, ["via3"], pads=["m3", "m4"])
+                    v3pts.append((x, y))
+            clusters = []
+            for (x, y) in v3pts:
+                for c in clusters:
+                    if any(abs(x - cx) < 0.7 and abs(y - cy) < 0.7
+                           for (cx, cy) in c):
+                        c.append((x, y))
+                        break
+                else:
+                    clusters.append([(x, y)])
+            for c in clusters:
+                x1 = min(x for x, _ in c) - VIA / 2
+                y1 = min(y for _, y in c) - VIA / 2
+                x2 = max(x for x, _ in c) + VIA / 2
+                y2 = max(y for _, y in c) + VIA / 2
+                paint(x1, y1, x2, y2, ["via3"])
+                p = (PAD - VIA) / 2
+                paint(x1 - p, y1 - p, x2 + p, y2 + p, ["m3"])
+                paint(x1 - p, y1 - p, x2 + p, y2 + p, ["m4"])
 
     # audit: painted m3 keeps 0.3 to every instance's real internal m3;
     # m4 stays off cap bboxes; same-layer different-net spacing >= 0.3.
@@ -454,8 +485,8 @@ def main():
         sys.exit(f"{bad} wiring conflicts -- fix tools/asm_wires.py")
 
     for net, x, y in LABELS:
-        tcl.append(f"box {x:.3f}um {y - 0.2:.3f}um {x + 0.4:.3f}um "
-                   f"{y + 0.2:.3f}um")
+        tcl.append(f"box {x - 0.2:.3f}um {y - 0.2:.3f}um "
+                   f"{x + 0.2:.3f}um {y + 0.2:.3f}um")
         tcl.append(f"label {net} FreeSans 0.5um 0 0 0 c m4")
         tcl.append("port make")
 
@@ -479,7 +510,7 @@ def main():
     r = subprocess.run(
         ["netgen", "-batch", "lvs", "mag/sd_top.spice sd_top",
          "spice/golden/top.spice sd_top",
-         f"{PDK_ROOT}/sky130A/libs.tech/netgen/sky130A_setup.tcl",
+         "tools/netgen_setup.tcl",
          "spice/lvs_top.out"],
         capture_output=True, text=True,
         env={**os.environ, "PDK_ROOT": PDK_ROOT})

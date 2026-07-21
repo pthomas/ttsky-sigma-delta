@@ -1,6 +1,6 @@
 * NGSPICE file created from sd_top.ext - technology: sky130A
 
-.subckt sd_top UO0 UO1 CLK VDPWR UA1 VGND VAPWR
+.subckt sd_top UA0 UO0 UO1 CLK VDPWR UA1 VGND VAPWR
 X0 buf_layout_2/IN VAPWR VGND sky130_fd_pr__res_high_po_1p41 l=824.88
 X1 dff_layout_0/si dff_layout_0/CLK dff_layout_0/mb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
 X2 dff_layout_0/si dff_layout_0/clkb dff_layout_0/mb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
@@ -65,7 +65,7 @@ X60 VGND buf_layout_0/IN VGND sky130_fd_pr__res_high_po_1p41 l=172.78
 X61 ota_layout_0/VBNC VGND sky130_fd_pr__cap_mim_m3_1 l=22.2 w=22.2
 X62 ota_layout_0/VBPC VGND sky130_fd_pr__cap_mim_m3_1 l=22.2 w=22.2
 X63 buf_layout_0/IN buf_layout_1/IN VGND sky130_fd_pr__res_high_po_1p41 l=216.23
-X64 ota_layout_0/INM rin_0/X0/R1 VGND sky130_fd_pr__res_high_po_1p41 l=176.85001
+X64 ota_layout_0/INM UA0 VGND sky130_fd_pr__res_high_po_1p41 l=176.85001
 X65 buf_layout_0/tail buf_layout_0/IN buf_layout_0/o1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=1.45 ps=10.58 w=5 l=0.5 M=12
 X66 buf_layout_0/tail buf_layout_0/OUT buf_layout_0/OUT VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=66.7 pd=486.67999 as=10.15 ps=74.06 w=5 l=0.5 M=12
 X67 buf_layout_0/o1 buf_layout_0/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=6
