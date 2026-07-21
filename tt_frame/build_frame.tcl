@@ -1,85 +1,84 @@
-# Build the TinyTapeout 1x2 (3.3V) analog frame for tt_um_pthomas_sigma_delta
+# Build the TinyTapeout 2x2 (3.3V) analog frame for tt_um_pthomas_sigma_delta
 # Based on TinyTapeout's magic_init_project.tcl (Apache-2.0, (c) Tiny Tapeout LTD)
-# Extended to place the sigma-delta blocks from the design repo
-# (https://gitlab.com/pthomas1/sigma-delta) inside the frame.
+# Extended to place the assembled sigma-delta modulator (sd_top) from the
+# design repo (https://gitlab.com/pthomas1/sigma-delta) inside the frame.
 #
-# Run: PDK_ROOT=... magic -dnull -noconsole \
+# sd_top was assembled in FRAME coordinates: its die matches the 2x2
+# template (319.24 x 225.76 um) and its signal pin labels sit at the
+# def's exact pin positions (ua[0] 136.62/0.5, ua[1] 117.30/0.5,
+# uo_out[0] 78.66/225.26, uo_out[1] 75.90/225.26, clk 128.34/225.26,
+# all met4) -- `def read` places the template pin geometry, sd_top's
+# label legs arrive vertically at the same coordinates, and the
+# overlapping met4 connects them. Power comes from three full-height
+# met4 stripes drawn in lanes verified met4-free against the assembled
+# design (tools/asm_route.py lane scan, DESIGN.md 2026-07-20), each
+# tied to its net by a short met3 spur + via3 onto an existing run.
+#
+# Run: PDK_ROOT=... SIGMA_DELTA_MAG=<repo>/mag magic -dnull -noconsole \
 #        -rcfile $PDK_ROOT/sky130A/libs.tech/magic/sky130A.magicrc \
 #        build_frame.tcl        (from the tt_frame/ directory)
 
 set TOP_LEVEL_CELL     tt_um_pthomas_sigma_delta
-set TEMPLATE_FILE      tt_analog_1x2_3v3.def
-set POWER_STRIPE_WIDTH 2um                 ;# minimum width is 1.2um
+set TEMPLATE_FILE      tt_analog_2x2_3v3.def
 set DESIGN_MAG         $env(SIGMA_DELTA_MAG)   ;# path to design repo mag/
-
-set POWER_STRIPES {
-    VDPWR 1um
-    VGND  4um
-    VAPWR 7um
-}
 
 # Read in the pin positions
 def read $TEMPLATE_FILE
 cellname rename tt_um_template $TOP_LEVEL_CELL
 load $TOP_LEVEL_CELL
 
-# Draw the power stripes
-proc draw_power_stripe {name x} {
-    global POWER_STRIPE_WIDTH
-    box $x 5um $x 220.76um
-    box width $POWER_STRIPE_WIDTH
+# Place the assembled modulator at the origin (frame coordinates)
+addpath $DESIGN_MAG
+box 0um 0um 0um 0um
+getcell sd_top child 0um 0um
+
+# --- power stripes -----------------------------------------------------
+# Full-height vertical met4, >= 1.2um wide, in met4-free lanes:
+#   VDPWR x 221.0-223.0  (lane 219.7-229.7)
+#   VGND  x 256.0-258.0  (lane 255.3-270.4)
+#   VAPWR x 310.0-312.0  (lane 309.3-319.2)
+proc draw_power_stripe {name x1 x2} {
+    box ${x1}um 5um ${x2}um 220.76um
     paint met4
+    box ${x1}um 100um ${x2}um 104um
     label $name FreeSans 0.25u -met4
     port make
     port use [expr {$name eq "VGND" ? "ground" : "power"}]
     port class bidirectional
     port connections n s e w
 }
-foreach {name x} $POWER_STRIPES {
-    puts "Drawing power stripe $name at $x"
-    draw_power_stripe $name $x
-}
+draw_power_stripe VDPWR 221.0 223.0
+draw_power_stripe VGND  256.0 258.0
+draw_power_stripe VAPWR 310.0 312.0
 
-# Place the OTA (119 x 73 um core + routing bus): clear of the power
-# stripes (x < 10um) and the top/bottom 10um pad-ring keepouts
-addpath $DESIGN_MAG
-box 10um 120um 10um 120um
-getcell ota_layout child 0um 0um
-
-# --- v0 analog pin wiring: ua[0] -> OTA INP, ua[1] -> OTA OUT ----------
-# Precheck requires declared analog pins to carry adjacent metal (and
-# VAPWR requires >= 1 analog pin). Both pads route on met4 stubs at the
-# bottom edge, rise on met3 at the right of the OTA footprint, run west
-# in a corridor above all OTA metal (OTA m3 tops out at y=207.4), and
-# drop onto the INP/OUT nets' own met3 riser tops (slot x from
-# mag/ota_layout.mag labels: INP slot 0 -> x 9.8-10.2, riser top y
-# 197.01; OUT slot 25 -> x 34.8-35.2, riser top y 199.41). Regenerate
-# these coordinates if the OTA floorplan changes.
-proc wire {x1 y1 x2 y2 layer} {
+# --- stripe-to-design spurs -------------------------------------------
+# Each stripe ties to its net through a met3 spur landing on an
+# existing sd_top run of the same net, with a via3 under the stripe.
+proc spur {x1 y1 x2 y2} {
     box ${x1}um ${y1}um ${x2}um ${y2}um
-    paint $layer
+    paint met3
 }
-# The two paths interleave (INP at x10, OUT at x35, both pads at the
-# bottom right): INP takes the OUTER right-edge vertical and the UPPER
-# corridor, OUT the inner vertical and lower corridor, each corridor
-# stopping short of the other's vertical -- no met3 crossings.
-# ua[0] (pad met4 at x 136.17-137.07, y 0-1) -> INP
-wire 136.17 0    143.5  1.4   met4   ;# jog east from pad
-wire 142.6  0.3  143.4  1.1   via3   ;# up to met3
-wire 142.5  0.2  143.5  212.3 met3   ;# outer rise to upper corridor
-wire 9.7    211.7 143.5 212.3 met3   ;# upper corridor west
-wire 9.8    196.5 10.2  212.3 met3   ;# drop onto INP riser top
-# ua[1] (pad met4 at x 116.85-117.75, y 0-1) -> OUT
-wire 116.85 0    117.75 3.6   met4   ;# stub north from pad
-wire 116.85 2.2  141.3  3.6   met4   ;# jog east (above ua[0]'s jog)
-wire 140.4  2.4  141.2  3.2   via3
-wire 140.3  2.3  141.3  210.3 met3   ;# inner rise to lower corridor
-wire 34.7   209.7 141.3 210.3 met3   ;# lower corridor west
-wire 34.8   199.0 35.2  210.3 met3   ;# drop onto OUT riser top
+proc via3_at {x y} {
+    set h 0.17
+    box [expr {$x-$h}]um [expr {$y-$h}]um [expr {$x+$h}]um [expr {$y+$h}]um
+    paint via3
+    set p 0.25
+    box [expr {$x-$p}]um [expr {$y-$p}]um [expr {$x+$p}]um [expr {$y+$p}]um
+    paint met3
+    paint met4
+}
+# VDPWR: extend the y=210 odrv supply run (ends x~219.4) under the stripe
+spur 219.1 209.7 222.6 210.3
+via3_at 222.0 210.0
+# VGND: the bufn.VSS -> rlp.B run crosses the stripe lane at y=62
+via3_at 257.0 62.0
+# VAPWR: extend the y=9 bufn.VDD -> rlt.R1 run (x240-286.5) east
+spur 286.0 8.7 311.6 9.3
+via3_at 311.0 9.0
 
 # Save; the GDS/LEF export runs in a SECOND magic process (export.tcl):
 # after getcell, magic's notion of the current cell is unreliable and
-# lef write kept exporting the OTA instead of the frame
+# lef write kept exporting the wrong cell
 save ${TOP_LEVEL_CELL}.mag
 puts "FRAME BUILD DONE"
 quit -noprompt

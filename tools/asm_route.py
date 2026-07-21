@@ -151,7 +151,7 @@ def compute_terms_and_bb():
 
 GRID = 1.0
 XMIN, XMAX = -10, 320
-YMIN, YMAX = -10, 222
+YMIN, YMAX = -10, 228
 # Wires paint MW/2=0.3um beyond their routed centerline (tools/asm_top.py
 # paint()) and must then keep the met3.2/met4.2 0.3um spacing rule to
 # any foreign shape: a centerline is only "clear" if the obstacle is
@@ -422,9 +422,16 @@ ORDER = ["xt", "xb", "dac", "clk33", "VDPWR", "clkb33", "UA1", "vcm",
          "irefp", "irefn", "vbnc", "vbpc", "sum",
          "vrefp", "vrefn", "lad_p", "lad_c", "lad_n"]
 
+# signal pins at the EXACT tt_analog_2x2_3v3.def positions (met4
+# pin geometry there is placed by `def read` in the frame build, so a
+# wire arriving vertically at these coordinates lands on the frame
+# pin): ua[0] / ua[1] on the bottom edge, uo_out[0] / uo_out[1] / clk
+# on the top edge. Supply labels stay project-internal at the top --
+# the frame script connects them to its own full-height met4 stripes.
 LABELS_REQ = {
-    "UA0": (5, 106), "UA1": (5, 150), "UO0": (235, 218),
-    "UO1": (170, 218), "CLK": (75, 218), "VGND": (138, 218),
+    "UA0": (136.62, 0.5), "UA1": (117.30, 0.5),
+    "UO0": (78.66, 225.26), "UO1": (75.90, 225.26),
+    "CLK": (128.34, 225.26), "VGND": (138, 218),
     "VAPWR": (233, 218), "VDPWR": (134, 218),
 }
 PASSTHRU = {"UA0": "rin.R1", "UO0": "odrvq.OUT18", "UO1": "odrvb.OUT18",

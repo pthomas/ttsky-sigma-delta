@@ -8,7 +8,7 @@ project:
   clock_hz:     50000000       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x2"          # Valid values for analog projects: 1x2, 2x2
+  tiles: "2x2"          # Valid values for analog projects: 1x2, 2x2
 
   # How many analog pins does your project use?
   analog_pins: 2        # Valid values: 0 to 6
@@ -35,8 +35,8 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: "Q - modulator bitstream"
-  uo[1]: "QB - complementary bitstream"
+  uo[0]: "Q - modulator bitstream (1.8 V domain, retimed)"
+  uo[1]: "QB - complementary bitstream (pseudo-LVDS pair with uo[0])"
   uo[2]: ""
   uo[3]: ""
   uo[4]: ""
@@ -55,8 +55,8 @@ pinout:
   uio[7]: ""
 
   # Analog pins - make sure to also set "analog_pins" above, else the pins won't be connected
-  ua[0]: "VIN - analog input (v0: wired to the OTA non-inverting input)"
-  ua[1]: "AOUT - analog monitor (v0: wired to the OTA output)"
+  ua[0]: "VIN - analog input, 0.4-1.4 V around the 0.9 V common mode (through the 40k input resistor)"
+  ua[1]: "INT - integrator output monitor (OTA output, high impedance)"
   ua[2]: ""
   ua[3]: ""
   ua[4]: ""

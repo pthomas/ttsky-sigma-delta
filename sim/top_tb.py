@@ -34,13 +34,12 @@ PDK_LIB = os.environ.get(
     "/sky130A/libs.tech/ngspice/sky130.lib.spice"
 
 NSETTLE = 64
-SIG_BIN = 3          # odd bin inside the fast band (NFFT=512 -> 10 bins)
 GATE_DB = 35.0
 
 
-def deck(nfft, corner="tt"):
+def deck(nfft, sig_bin, corner="tt"):
     tstop = (nfft + NSETTLE) * P.TS
-    fin = SIG_BIN * P.FS / nfft
+    fin = sig_bin * P.FS / nfft
     return f"""* sd_top PEX acceptance ({corner}, {nfft} bits)
 .lib {PDK_LIB} {corner}
 .include sd_top_pex.spice
@@ -70,8 +69,13 @@ def main():
     nfft = 512
     if "--bits" in sys.argv:
         nfft = int(sys.argv[sys.argv.index("--bits") + 1])
+    # odd bin inside the fast band (NFFT=512 -> 10 bins); use 5 with
+    # --bits 4096 for the exact tier-1 comparison window
+    sig_bin = 3
+    if "--sigbin" in sys.argv:
+        sig_bin = int(sys.argv[sys.argv.index("--sigbin") + 1])
     os.makedirs("spice", exist_ok=True)
-    open("spice/top_tb.spice", "w").write(deck(nfft))
+    open("spice/top_tb.spice", "w").write(deck(nfft, sig_bin))
     r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
                        capture_output=True, text=True)
     if r.returncode or not os.path.exists("spice/top_tb.csv"):
@@ -83,7 +87,7 @@ def main():
     ts = (k + 0.5) * P.TS
     bits = np.where(np.interp(ts, t, uo0) > 0.9, 1.0, -1.0)
     ones = (bits > 0).mean()
-    s = sndr(bits, P.OSR_FAST, SIG_BIN)
+    s = sndr(bits, P.OSR_FAST, sig_bin)
     swing = (float(ua1.min()), float(ua1.max()))
     print(f"sd_top PEX: {nfft} bits, ones density {ones:.3f}, "
           f"integrator {swing[0]:.2f}-{swing[1]:.2f} V")
@@ -92,7 +96,8 @@ def main():
     ok = s >= GATE_DB and 0.2 < ones < 0.8
     print("ACCEPT" if ok else "REJECT")
     os.makedirs("reports/results", exist_ok=True)
-    json.dump(dict(ok=bool(ok), nfft=nfft, sndr_fast_db=round(s, 1),
+    json.dump(dict(ok=bool(ok), nfft=nfft, sig_bin=sig_bin,
+                   sndr_fast_db=round(s, 1),
                    ones_density=round(ones, 3),
                    ua1_swing=[round(v, 3) for v in swing]),
               open("reports/results/top_pex.json", "w"), indent=1)
