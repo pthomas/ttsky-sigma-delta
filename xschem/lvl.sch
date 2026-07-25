@@ -48,7 +48,7 @@ C {devices/lab_pin.sym} -580 -530 1 0 {name=l20 lab=n2}
 C {devices/lab_pin.sym} -620 -500 0 0 {name=l21 lab=nb18}
 C {devices/lab_pin.sym} -580 -470 3 0 {name=l22 lab=VSS}
 C {devices/lab_pin.sym} -555 -500 2 0 {name=l23 lab=VSS}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} -400 -650 0 0 {name=XB1P model=pfet_g5v0d10v5 spiceprefix=X W=5 L=0.5 nf=1 mult=2 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} -400 -650 0 0 {name=XB1P model=pfet_g5v0d10v5 spiceprefix=X W=5 L=0.5 nf=1 mult=4 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -380 -650 -355 -650 {lab=VDD33}
 C {devices/lab_pin.sym} -380 -620 1 0 {name=l24 lab=CLK33}
 C {devices/lab_pin.sym} -420 -650 0 0 {name=l25 lab=n1}
@@ -60,7 +60,7 @@ C {devices/lab_pin.sym} -380 -530 1 0 {name=l28 lab=CLK33}
 C {devices/lab_pin.sym} -420 -500 0 0 {name=l29 lab=n1}
 C {devices/lab_pin.sym} -380 -470 3 0 {name=l30 lab=VSS}
 C {devices/lab_pin.sym} -355 -500 2 0 {name=l31 lab=VSS}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} -200 -650 0 0 {name=XB2P model=pfet_g5v0d10v5 spiceprefix=X W=5 L=0.5 nf=1 mult=2 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} -200 -650 0 0 {name=XB2P model=pfet_g5v0d10v5 spiceprefix=X W=5 L=0.5 nf=1 mult=4 ad=0 as=0 pd=0 ps=0 nrd=0 nrs=0}
 N -180 -650 -155 -650 {lab=VDD33}
 C {devices/lab_pin.sym} -180 -620 1 0 {name=l32 lab=CLKB33}
 C {devices/lab_pin.sym} -220 -650 0 0 {name=l33 lab=n2}

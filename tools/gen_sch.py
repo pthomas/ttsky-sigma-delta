@@ -232,11 +232,11 @@ def block_lvl():
         fet("XN2", -600, -500, NF, "n2", "nb18", "VSS", "VSS",
             WUNIT, p["L5"], m(p["W_PD"])),
         fet("XB1P", -400, -650, PF, "CLK33", "n1", "VDD33", "VDD33",
-            WUNIT, p["L5"], m(p["W_BUF"])),
+            WUNIT, p["L5"], m(p["W_BP"])),
         fet("XB1N", -400, -500, NF, "CLK33", "n1", "VSS", "VSS",
             WUNIT, p["L5"], m(p["W_BUF"])),
         fet("XB2P", -200, -650, PF, "CLKB33", "n2", "VDD33", "VDD33",
-            WUNIT, p["L5"], m(p["W_BUF"])),
+            WUNIT, p["L5"], m(p["W_BP"])),
         fet("XB2N", -200, -500, NF, "CLKB33", "n2", "VSS", "VSS",
             WUNIT, p["L5"], m(p["W_BUF"])),
     ]
