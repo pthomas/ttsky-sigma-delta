@@ -170,6 +170,8 @@ assembly-verify:
   script:
     - set -o pipefail
     - python3 tools/asm_route.py
+    # the LVS reference is a build product, not a committed file
+    - python3 tools/gen_top_golden.py
     - python3 tools/asm_top.py | tee asm.log
     - 'grep -Fq "DRC errors (fresh reload): 0" asm.log'
     - 'grep -Fq "sd_top: LVS match" asm.log'
