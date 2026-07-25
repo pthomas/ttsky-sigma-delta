@@ -37,9 +37,28 @@ NSETTLE = 64
 GATE_DB = 35.0
 
 
-def deck(nfft, sig_bin, corner="tt"):
+def deck(nfft, sig_bin, corner="tt", idealclk33=False,
+         idealrefs=False):
     tstop = (nfft + NSETTLE) * P.TS
     fin = sig_bin * P.FS / nfft
+    # Diagnostic (--idealclk33): overpower the level shifter's output
+    # net (extracted name dff_layout_0/CLK) with an ideal fast-edge
+    # 3.3 V clock. Isolates the decision-path-noise mechanism: if SNDR
+    # recovers, the on-chip clk33 slew (comparator aperture + S_MID
+    # gate) is the culprit; if not, look at the q33/clkb33-driven DAC
+    # switches. The 0.4 ns delay approximates the level shifter's own
+    # propagation so the RZ window barely moves.
+    force = (f"VCLKI xdut.dff_layout_0/clk 0 PULSE(0 3.3 0.4n 0.1n "
+             f"0.1n {P.TS/2*1e9:.1f}n {P.TS*1e9:.1f}n)\n"
+             if idealclk33 else "")
+    # Diagnostic (--idealrefs): pin the three references to ideal DC
+    # sources (extracted net names: bufp/bufc/bufn outputs). If SNDR
+    # recovers, the mechanism is data-dependent reference droop
+    # through the buffers' ~750 ohm output impedance.
+    if idealrefs:
+        force += (f"VRP xdut.buf_layout_2/out 0 {P.VREFP:g}\n"
+                  f"VCMF xdut.ota_layout_0/inp 0 {P.VCM:g}\n"
+                  f"VRN xdut.buf_layout_0/out 0 {P.VREFN:g}\n")
     return f"""* sd_top PEX acceptance ({corner}, {nfft} bits)
 .lib {PDK_LIB} {corner}
 .include sd_top_pex.spice
@@ -55,7 +74,7 @@ CU0 uo0 0 1p
 CU1 uo1 0 1p
 CA1 ua1 0 50f
 XDUT ua0 uo0 uo1 clk vdpwr ua1 vgnd vapwr sd_top
-.tran {P.TSTEP*1e9:g}n {tstop*1e9:.1f}n
+{force}.tran {P.TSTEP*1e9:g}n {tstop*1e9:.1f}n
 .control
 set num_threads=8
 run
@@ -74,8 +93,19 @@ def main():
     sig_bin = 3
     if "--sigbin" in sys.argv:
         sig_bin = int(sys.argv[sys.argv.index("--sigbin") + 1])
+    corner = "tt"
+    if "--corner" in sys.argv:
+        corner = sys.argv[sys.argv.index("--corner") + 1]
+    ideal = "--idealclk33" in sys.argv
+    irefs = "--idealrefs" in sys.argv
+    tag = ""
+    if "--tag" in sys.argv:
+        tag = "_" + sys.argv[sys.argv.index("--tag") + 1]
+    elif corner != "tt":
+        tag = "_" + corner
     os.makedirs("spice", exist_ok=True)
-    open("spice/top_tb.spice", "w").write(deck(nfft, sig_bin))
+    open("spice/top_tb.spice", "w").write(
+        deck(nfft, sig_bin, corner, ideal, irefs))
     r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
                        capture_output=True, text=True)
     if r.returncode or not os.path.exists("spice/top_tb.csv"):
@@ -97,10 +127,10 @@ def main():
     print("ACCEPT" if ok else "REJECT")
     os.makedirs("reports/results", exist_ok=True)
     json.dump(dict(ok=bool(ok), nfft=nfft, sig_bin=sig_bin,
-                   sndr_fast_db=round(s, 1),
+                   corner=corner, sndr_fast_db=round(s, 1),
                    ones_density=round(ones, 3),
                    ua1_swing=[round(v, 3) for v in swing]),
-              open("reports/results/top_pex.json", "w"), indent=1)
+              open(f"reports/results/top_pex{tag}.json", "w"), indent=1)
     sys.exit(0 if ok else 1)
 
 

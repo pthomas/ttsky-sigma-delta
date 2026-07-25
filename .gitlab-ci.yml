@@ -12,6 +12,17 @@
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Two pipeline flavors:
+#   push     -- everything that feeds the generated design document
+#               (fast; the Pages site rebuilds from these artifacts)
+#   schedule -- nightly heavy verification that does NOT inform the
+#               manual: full assembly/frame regression + extracted-top
+#               process-corner acceptance
+.push:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
 
 # shell executor may not source /etc/profile.d -- set PDK_ROOT explicitly
 variables:
@@ -24,6 +35,7 @@ stages:
   - pages
 
 snr:
+  extends: .push
   stage: smoke
   script:
     - make clean
@@ -36,6 +48,7 @@ snr:
     expire_in: 30 days
 
 fet-char:
+  extends: .push
   stage: smoke
   script:
     - make char
@@ -44,6 +57,7 @@ fet-char:
     expire_in: 30 days
 
 dac-report:
+  extends: .push
   stage: reports
   script:
     - make report
@@ -52,6 +66,7 @@ dac-report:
     expire_in: 30 days
 
 ota-specs:
+  extends: .push
   stage: reports
   script:
     - make specs
@@ -67,6 +82,7 @@ ota-specs:
 #   layout_report = fresh-process DRC (must be 0) + netgen LVS (must match)
 #                   + GDS export + 3D geometry for the pages viewer
 layout-verify:
+  extends: .push
   stage: layout
   script:
     - make xcheck
@@ -85,6 +101,7 @@ layout-verify:
 # offset Monte Carlo are dev-bench runs -- their page rows only appear on
 # builds that ran them)
 comparator:
+  extends: .push
   stage: layout
   script:
     - python3 sim/comp_tb.py --quick
@@ -98,6 +115,7 @@ comparator:
 # bias generator + reference buffers + clock level shifter (each exits
 # nonzero if its acceptance gate fails)
 support-blocks:
+  extends: .push
   stage: layout
   script:
     - make xcheck
@@ -137,4 +155,41 @@ pages:
   artifacts:
     paths: [public]
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------- nightly
+# Scheduled pipeline only. Assembly is a full from-source regression of
+# the top level: reroute, repaint, fresh-process DRC, LVS, then the TT
+# frame build + GDS/LEF export. Catches any drift between the committed
+# mag/ state and what the generators produce.
+assembly-verify:
+  stage: layout
+  timeout: 2h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - set -o pipefail
+    - python3 tools/asm_route.py
+    - python3 tools/asm_top.py | tee asm.log
+    - 'grep -Fq "DRC errors (fresh reload): 0" asm.log'
+    - 'grep -Fq "sd_top: LVS match" asm.log'
+    - make tt | tee tt.log
+    - grep -Fq "DRCCOUNT 0" tt.log
+    - grep -Fq "EXPORT DONE" tt.log
+
+# Extracted-top acceptance at the slow and fast process corners (the
+# push pipeline's numbers are tt/27C only). Each corner is a ~25 min
+# transistor-level transient; results land as top_pex_<corner>.json
+# artifacts, not on the site.
+top-corners:
+  stage: layout
+  timeout: 3h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - python3 tools/pex_top.py
+    - python3 sim/top_tb.py --corner ss
+    - python3 sim/top_tb.py --corner ff
+  artifacts:
+    paths: [reports/results/]
+    expire_in: 30 days

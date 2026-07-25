@@ -981,3 +981,37 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   -- linear, no sampling kickback, <= +-12.5 uA DC at the range
   extremes. The passive virtual-ground input network suffices; no
   input buffer needed for v1 or v2.
+
+- **2026-07-25: nightly CI tier.** Push pipelines now run only what
+  feeds the generated manual; a scheduled nightly pipeline (GitLab
+  schedule 4359193, 03:00 America/Denver) runs the heavy verification
+  that does not: (a) assembly-verify -- full from-source top-level
+  regression (asm_route + asm_top + make tt, grep-gated on DRC 0 /
+  LVS match / frame DRCCOUNT 0 / EXPORT DONE), closing the gap where
+  sd_top had no CI protection at all; (b) top-corners -- the 512-bit
+  extracted acceptance at ss and ff (push CI numbers are tt/27C only).
+  sim/top_tb.py grew --corner/--tag for this.
+
+- **2026-07-25: on-die supply decap REJECTED for v1 (no room that
+  matters).** Free-pocket analysis of the assembled top (cell bboxes
+  + painted m3/m4 + capm halos on a 1 um raster): largest pockets
+  28x22, 13x48, 9x86 um. The PDK MiM gencell carries ~15 um of
+  terminal/guard overhead per cell (measured: an 8x40 um cap needs
+  22.8x43; 12x18 needs 26.8x31), so the largest cap that fits ANY
+  pocket is ~0.25 pF -- negligible against ~3 pF of extracted rail
+  wiring capacitance and the existing 2 pF cflt pair on VDPWR.
+  Reopen if: a custom low-overhead MiM drawing is written, or a
+  future reshuffle frees a >30x30 pocket.
+
+- **2026-07-25: decision-path-noise A/B diagnostics -- 512-bit
+  windows are too noisy to conclude anything.** Two force-source
+  diagnostics on the extracted top (sim/top_tb.py --idealclk33 /
+  --idealrefs, overpowering internal nets by their extracted names):
+  ideal 3.3 V fast-edge clk33 gave 35.4 dB, ideal DC references gave
+  30.8 dB, against baselines of 33.7 and 36.2 dB for the SAME
+  hardware -- i.e. the single-window spread (+-3 dB, chaotic
+  modulator, 10 in-band FFT bins) exceeds the 3-4 dB effect under
+  test. Neither hypothesis is confirmed OR excluded yet. In flight:
+  2048-bit A/B batch (baseline / idealclk33 / idealrefs, sigbin 13)
+  for 4x the resolution. Lesson recorded: size the window so the
+  estimator's own scatter is well under the effect you are chasing.
