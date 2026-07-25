@@ -54,4 +54,51 @@ noise (a ~25 dB SNDR penalty was measured when violated).
 **Area reality check.** A TinyTapeout 1×2 analog tile is 160×225 µm. The
 budget puts the full first-order chip at ~18,000 µm² ≈ 50% of one 1×2
 tile pair — comfortable; the second-order upgrade would push ~75%, arguing
-for a 2×2 purchase if that's the ambition.
+for a 2×2 purchase if that's the ambition. *(As built: the routed
+assembly spreads to ~314 µm width — corridor and clearance rules, not
+device area, set the floorplan — so the submitted chip occupies the 2×2
+frame.)*
+
+## Pins and the TinyTapeout boundary
+
+The chip uses **two analog pins**, and neither the clock nor the data is
+one of them:
+
+| Signal | TT pin | Type |
+|---|---|---|
+| VIN — analog input, 0.4–1.4 V about the 0.9 V common mode | `ua[0]` | analog |
+| INT — integrator output monitor | `ua[1]` | analog (debug only; the ADC runs without it) |
+| Clock in, 50 MHz | `clk` | digital, 1.8 V (level-shifted to 3.3 V on-chip) |
+| Bitstream Q | `uo[0]` | digital, 1.8 V |
+| Bitstream Q̄ | `uo[1]` | digital, 1.8 V |
+
+plus the three supplies (VDPWR 1.8 V, VAPWR 3.3 V, VGND). Analog pins
+are scarce on TinyTapeout (six maximum); VIN genuinely needs one, and
+the second buys silicon-debug visibility into the integrator.
+
+**Why IO edge asymmetry doesn't threaten this loop.** A fair question
+from the community: TinyTapeout's IO paths don't guarantee equal
+rise/fall propagation delays, which is a classic hazard for sigma-delta
+*DACs* — there, the analog value *is* the pin waveform's time-average,
+so duty-cycle distortion is direct signal distortion. This ADC crosses
+the TT boundary with three signals, and each is immune for a different
+reason:
+
+- **The feedback DAC never leaves the chip.** The only waveform whose
+  shape carries analog information is the internal RZ feedback pulse,
+  and RZ was chosen (by the four-corner experiment above) precisely so
+  that edge errors are pattern-*independent* — a static gain term, not
+  distortion. No TT pin is in that path.
+- **The clock path's asymmetry is a static duty shift.** RZ pulse width
+  is set by the clock phases, so duty distortion changes loop gain — the
+  benign error class. The on-chip level shifter was gated at ≤ 3% added
+  duty distortion (measured 2.42% worst-case); only edge *noise*
+  (jitter) would be an SNDR term, and the clean external clock retires
+  it.
+- **The bitstream is symbols, not a waveform.** The FPGA captures one
+  bit per clock period synchronously and decimates numerically; pin edge
+  positions never enter the signal path (the retiming DFF guarantees
+  zero mid-cycle transitions, and the Q/Q̄ pair allows differential
+  capture). Edge asymmetry would only matter if the output were
+  reconstructed analog-style — RC-filtering the pin like a DAC — which
+  is not how an ADC's bitstream is used.
