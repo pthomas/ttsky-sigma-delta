@@ -50,12 +50,19 @@ what's actually on disk.
 ## The geometry itself
 
 What tapes out is **GDSII** — the stacked 2D polygons, layer by layer,
-that become lithography masks. Below is this build's actual OTA geometry,
-extruded through the sky130 process stack (diffusion and poly at the
-bottom; local interconnect; then met1–met3 with their vias). Drag to
-orbit, scroll to zoom, toggle layers; the z axis is exaggerated (the full
-stack is ~3.6 µm tall on a ~200 µm die footprint).
+that become lithography masks. Below is this build's actual geometry of
+the **complete modulator** (`sd_top`, the cell submitted to TinyTapeout),
+extruded through the sky130 process stack: diffusion and poly at the
+bottom, local interconnect, met1–met4 with their vias, and the MiM
+capacitor plates between met3 and met4. Drag to orbit, scroll to zoom,
+toggle layers; the z axis is exaggerated (the full stack is ~4.9 µm tall
+on a ~319 × 226 µm die).
 
 {{viewer3d}}
+
+Each block also has its own sub-page — measured results, the generated
+schematic, and its own 3D view:
+
+{{block_links}}
 
 {{gds_link}}

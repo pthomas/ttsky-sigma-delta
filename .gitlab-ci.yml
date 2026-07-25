@@ -132,6 +132,7 @@ pages:
     - job: support-blocks
       artifacts: true
   script:
+    - python3 tools/block_report.py
     - python3 tools/gen_docs.py
   artifacts:
     paths: [public]

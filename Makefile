@@ -48,6 +48,9 @@ layout-report:
 site:
 	python3 tools/gen_docs.py
 
+blockreports:
+	python3 tools/block_report.py
+
 # rebuild the TinyTapeout submission frame (gds/ + lef/) from mag/
 tt: export PDK_ROOT ?= /home/nvme/pdk
 tt:
@@ -113,4 +116,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept snr view clean
+.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept blockreports snr view clean

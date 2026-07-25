@@ -169,10 +169,23 @@ def gds_link():
             f'magic and poke around.</p>')
 
 
+def viewer_html(json_href, aria):
+    return (VIEWER_HTML
+            .replace("__GEOM_JSON__", json_href)
+            .replace("__ARIA__", aria))
+
+
 def viewer3d():
-    if not os.path.exists(f"{RESULTS}/ota_geom.json"):
-        return missing("3D geometry")
-    return VIEWER_HTML
+    # combined top-level geometry if the assembly artifacts exist,
+    # else fall back to the OTA-only view
+    if os.path.exists(f"{RESULTS}/top_geom.json"):
+        return viewer_html("top_geom.json",
+                           "Interactive 3D view of the full modulator "
+                           "mask geometry")
+    if os.path.exists(f"{RESULTS}/ota_geom.json"):
+        return viewer_html("ota_geom.json",
+                           "Interactive 3D view of the OTA mask geometry")
+    return missing("3D geometry")
 
 
 def fig(name, caption):
@@ -222,6 +235,106 @@ def dff_line():
     return f"<p>{chip(r['ok'], text)}</p>"
 
 
+
+
+# ------------------------------------------------------------- sub-pages
+
+BLOCK_META = [
+    ("ota", "OTA", "Folded-cascode integrator amplifier",
+     ["ota_pex", "ota_sch"]),
+    ("comp", "Comparator", "StrongARM latch + SR output stage",
+     ["comp", "comp_mc"]),
+    ("dff", "DFF retimer", "Master-slave transmission-gate flip-flop",
+     ["dff"]),
+    ("bias", "Bias generator", "Constant-gm core, cascoded mirrors, "
+     "startup", ["bias"]),
+    ("buf", "Reference buffers", "5T unity-gain followers for "
+     "vrefp / vcm / vrefn", ["buf"]),
+    ("lvl", "Clock level shifter", "Cross-coupled 1.8 V to 3.3 V",
+     ["lvl"]),
+    ("odrv", "Output drivers", "Bitstream pad drivers on the 1.8 V rail",
+     ["odrv"]),
+]
+
+
+def _metric_rows(d, prefix=""):
+    rows = []
+    for k, v in d.items():
+        if k == "ok" or k == "sizes":
+            continue
+        if isinstance(v, dict):
+            rows += _metric_rows(v, prefix=f"{prefix}{k}.")
+        elif isinstance(v, list):
+            rows.append((prefix + k, ", ".join(str(x) for x in v)))
+        else:
+            rows.append((prefix + k, v))
+    return rows
+
+
+def block_page(b, title, subtitle, result_names):
+    """One standalone sub-page: verdict + metrics + schematic + 3D."""
+    parts = [f"<p><a href='../index.html'>&larr; back to the design "
+             f"document</a></p><h1>{title}</h1><p>{subtitle}</p>"]
+    shown = False
+    for rn in result_names:
+        r = load(rn)
+        if not r:
+            continue
+        if not shown and "ok" in r:
+            parts.append("<p>" + chip(r["ok"],
+                         "testbench ACCEPT" if r["ok"]
+                         else "testbench REJECT") + "</p>")
+            shown = True
+        rows = _metric_rows(r)
+        body = "".join(f"<tr><td><code>{k}</code></td><td>{v}</td></tr>"
+                       for k, v in rows)
+        parts.append(f"<h2>Measured (reports/results/{rn}.json)</h2>"
+                     f"<table><thead><tr><th>Metric</th><th>Value</th>"
+                     f"</tr></thead><tbody>{body}</tbody></table>")
+    if os.path.exists(f"{RESULTS}/figs/sch_{b}.svg"):
+        parts.append(f"<h2>Schematic</h2><figure>"
+                     f"<img src='sch_{b}.svg' alt='{title} schematic' "
+                     f"loading='lazy'><figcaption>Generated from the "
+                     f"golden SIZES (the LVS reference).</figcaption>"
+                     f"</figure>")
+    if os.path.exists(f"{RESULTS}/{b}_geom.json"):
+        parts.append("<h2>Layout (3D)</h2>"
+                     + viewer_html(f"{b}_geom.json",
+                                   f"Interactive 3D view of the {title} "
+                                   f"mask geometry"))
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title} — sigma-delta ADC</title>
+<style>{CSS}</style>
+</head>
+<body>
+<div id="layout"><main>{"".join(parts)}</main></div>
+</body>
+</html>
+"""
+
+
+def block_pages():
+    """Write public/blocks/*.html + assets; return the links fragment."""
+    os.makedirs("public/blocks", exist_ok=True)
+    links = []
+    for b, title, subtitle, result_names in BLOCK_META:
+        page = block_page(b, title, subtitle, result_names)
+        open(f"public/blocks/{b}.html", "w").write(page)
+        for src, dst in [(f"{RESULTS}/{b}_geom.json",
+                          f"public/blocks/{b}_geom.json"),
+                         (f"{RESULTS}/figs/sch_{b}.svg",
+                          f"public/blocks/sch_{b}.svg")]:
+            if os.path.exists(src):
+                shutil.copy(src, dst)
+        links.append(f'<a class="report" href="blocks/{b}.html">{title}'
+                     f'</a>')
+    return "<p>" + " ".join(links) + "</p>"
+
+
 # ------------------------------------------------------------------- page
 
 VIEWER_HTML = """
@@ -232,7 +345,7 @@ VIEWER_HTML = """
       <input id="v3d-zex" type="range" min="1" max="20" value="8">
     </label>
   </div>
-  <div id="v3d" aria-label="Interactive 3D view of the OTA mask geometry">
+  <div id="v3d" aria-label="__ARIA__">
     <p id="v3d-fallback">Loading 3D viewer (needs WebGL and CDN access)…</p>
   </div>
 </div>
@@ -248,7 +361,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const el = document.getElementById('v3d');
 const fallback = el.querySelector('#v3d-fallback');
-const data = await (await fetch('ota_geom.json')).json();
+const data = await (await fetch('__GEOM_JSON__')).json();
 
 const scene = new THREE.Scene();
 const W = el.clientWidth, H = el.clientHeight;
@@ -429,6 +542,7 @@ def main():
         "layout_status": layout_status(),
         "gds_link": gds_link(),
         "viewer3d": viewer3d(),
+        "block_links": block_pages(),
         "comp_table": comp_table(),
         "dff_line": dff_line(),
         "fig_tier1_waves": fig(
@@ -515,7 +629,8 @@ CI-verified.">
     for f in glob.glob("reports/*.html"):
         shutil.copy(f, "public/reports/")
     for src, dst in [("reports/ota_layout.gds", "public/ota_layout.gds"),
-                     (f"{RESULTS}/ota_geom.json", "public/ota_geom.json")]:
+                     (f"{RESULTS}/ota_geom.json", "public/ota_geom.json"),
+                     (f"{RESULTS}/top_geom.json", "public/top_geom.json")]:
         if os.path.exists(src):
             shutil.copy(src, dst)
     if os.path.isdir(f"{RESULTS}/figs"):
