@@ -168,13 +168,16 @@ context a fresh session needs:
    attack the decision path in v2. USER SIGNED OFF 2026-07-21 (both
    the 34.7 dB v1 accept and the 2x2/4-tile purchase). make pextop
    && make topaccept reproduces (sim/top_tb.py --bits/--sigbin).
-6. **Report sub-pages**: public/blocks/<name>.html per component
-   (schematic SVG + its own 3D geometry json + metrics from its
-   reports/results/<b>.json); main page: ONE combined top-level 3D
-   (replace the OTA-only viewer), links to sub-pages. layout_report.py's
-   geometry() generalizes (flatten per block cell); the three.js viewer
-   JS is reusable (parametrize the json path). User explicitly wants:
-   sub-page = schematic + 3D per component; combined geometry once.
+6. **Report sub-pages -- DONE 2026-07-24.** tools/block_report.py
+   (generalized geometry flattener, magscale-aware, full stack incl
+   met4/MiM/poly-res) + gen_docs.py block_pages(): seven sub-pages at
+   public/blocks/<b>.html (verdict chip + measured table + generated
+   schematic SVG + own 3D view); main-page viewer shows the COMPLETE
+   sd_top (64k rects) with links to the sub-pages. CI pages job runs
+   block_report before gen_docs; `make blockreports` locally.
+   Pipeline #41 green, site deployed -- but Pages is still
+   members-only (redirects to sign-in): the standing user-side action
+   is Settings > General > Visibility > Pages = Everyone.
 7. **TT final -- READY 2026-07-21.** `make tt` builds the frame
    (tt_frame/build_frame.tcl: sd_top at origin in the 2x2 template,
    def-pin hookups by coordinate, three full-height power stripes with
