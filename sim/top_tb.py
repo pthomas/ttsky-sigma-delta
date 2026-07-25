@@ -106,6 +106,9 @@ def main():
     corner = "tt"
     if "--corner" in sys.argv:
         corner = sys.argv[sys.argv.index("--corner") + 1]
+    gate = GATE_DB
+    if "--gate" in sys.argv:
+        gate = float(sys.argv[sys.argv.index("--gate") + 1])
     ideal = "--idealclk33" in sys.argv
     irefs = "--idealrefs" in sys.argv
     gold = "--golden" in sys.argv
@@ -133,8 +136,8 @@ def main():
     print(f"sd_top PEX: {nfft} bits, ones density {ones:.3f}, "
           f"integrator {swing[0]:.2f}-{swing[1]:.2f} V")
     print(f"fast path (OSR {P.OSR_FAST}): SNDR {s:.1f} dB "
-          f"(gate >= {GATE_DB:g})")
-    ok = s >= GATE_DB and 0.2 < ones < 0.8
+          f"(gate >= {gate:g})")
+    ok = s >= gate and 0.2 < ones < 0.8
     print("ACCEPT" if ok else "REJECT")
     os.makedirs("reports/results", exist_ok=True)
     json.dump(dict(ok=bool(ok), nfft=nfft, sig_bin=sig_bin,

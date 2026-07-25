@@ -1053,3 +1053,13 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   reference) read <20 dB and are still caught. Lesson (repeat of the
   same-day A/B lesson): a gate is only as good as its estimator's
   variance.
+
+- **2026-07-25: first extracted corner characterization (nightly CI
+  catch): ss reads 29.9 dB fast-path vs 34.0 at tt.** Loop healthy
+  (ones 0.490, integrator swing normal) -- the deficit is the same
+  decision-path physics, amplified: slower comparator regeneration
+  and clk33 edges at the slow corner. Corner gates set to measured
+  minus 1 dB (ss 29, ff 30 provisional). Silicon lottery
+  implication: an ss-ish die would deliver ~4.7 ENOB on the fast
+  path. The block-intrinsic investigation (open) is expected to lift
+  corners with it.
