@@ -193,12 +193,12 @@ top-corners:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     - python3 tools/pex_top.py
-    # corner gates sit ~1 dB under first-characterization values
-    # (2026-07-25: ss measured 29.9 vs 34.0 at tt -- slower
-    # comparator regeneration and clk33 edges at the slow corner);
-    # ff provisional until first green run
-    - python3 sim/top_tb.py --corner ss --gate 29
-    - python3 sim/top_tb.py --corner ff --gate 30
+    # corner gates sit ~1 dB under characterized values for the
+    # rephased loop (2026-07-25: ss 33.4 / ff 35.3, vs 30.1 / 31.9
+    # before the rephase -- the excess-loop-delay fix lifted corners
+    # by the same ~3.4 dB as typical)
+    - python3 sim/top_tb.py --corner ss --gate 32
+    - python3 sim/top_tb.py --corner ff --gate 34
   artifacts:
     paths: [reports/results/]
     expire_in: 30 days
