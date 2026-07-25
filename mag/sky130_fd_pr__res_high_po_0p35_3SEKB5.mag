@@ -1,0 +1,73 @@
+magic
+tech sky130A
+magscale 1 2
+timestamp 1784985325
+<< checkpaint >>
+rect -1876 2960 1876 3126
+rect -1876 -2960 2125 2960
+rect -1876 -3126 1876 -2960
+<< pwell >>
+rect -616 -1866 616 1866
+<< psubdiff >>
+rect -580 1796 -484 1830
+rect 484 1796 580 1830
+rect -580 1734 -546 1796
+rect 546 1734 580 1796
+rect -580 -1796 -546 -1734
+rect 546 -1796 580 -1734
+rect -580 -1830 -484 -1796
+rect 484 -1830 580 -1796
+<< psubdiffcont >>
+rect -484 1796 484 1830
+rect -580 -1734 -546 1734
+rect 546 -1734 580 1734
+rect -484 -1830 484 -1796
+<< xpolycontact >>
+rect -450 -1700 -380 -1268
+rect 380 -1700 450 -1268
+<< ppolyres >>
+rect -450 1630 -214 1700
+rect -450 -1268 -380 1630
+rect -284 -1630 -214 1630
+rect -118 1630 118 1700
+rect -118 -1630 -48 1630
+rect -284 -1700 -48 -1630
+rect 48 -1630 118 1630
+rect 214 1630 450 1700
+rect 214 -1630 284 1630
+rect 48 -1700 284 -1630
+rect 380 -1268 450 1630
+<< locali >>
+rect -580 1796 -484 1830
+rect 484 1796 580 1830
+rect -580 1734 -546 1796
+rect 546 1734 580 1796
+rect -580 -1796 -546 -1734
+rect 546 -1796 580 -1734
+rect -580 -1830 -484 -1796
+rect 484 -1830 580 -1796
+<< viali >>
+rect -434 -1682 -396 -1285
+rect 396 -1682 434 -1285
+<< metal1 >>
+rect -440 -1285 -390 -1273
+rect -440 -1682 -434 -1285
+rect -396 -1682 -390 -1285
+rect -440 -1694 -390 -1682
+rect 390 -1285 440 -1273
+rect 390 -1682 396 -1285
+rect 434 -1682 440 -1285
+rect 390 -1694 440 -1682
+<< labels >>
+rlabel psubdiffcont 0 -1813 0 -1813 0 B
+port 1 nsew
+rlabel xpolycontact -415 -1665 -415 -1665 0 R1
+port 2 nsew
+rlabel xpolycontact 415 -1665 415 -1665 0 R2
+port 3 nsew
+<< properties >>
+string FIXED_BBOX -563 -1813 563 1813
+string gencell sky130_fd_pr__res_high_po_0p35
+string library sky130
+string parameters w 0.35 l 17.0 m 1 nx 6 wmin 0.350 lmin 0.50 class resistor rho 319.8 val 95.911k dummy 0 dw 0.0 term 194.82 sterm 0.0 caplen 0 guard 1 glc 1 grc 1 gtc 1 gbc 1 compatible {sky130_fd_pr__res_high_po_0p35  sky130_fd_pr__res_high_po_0p69 sky130_fd_pr__res_high_po_1p41  sky130_fd_pr__res_high_po_2p85 sky130_fd_pr__res_high_po_5p73} snake 1 full_metal 1 wmax 0.350 vias 1 n_guard 0 hv_guard 0 viagb 0 viagt 0 viagl 0 viagr 0 doports 1
+<< end >>

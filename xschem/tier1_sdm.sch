@@ -74,7 +74,7 @@ C {devices/vsource.sym} -1650 100 0 0 {name=VCLK value="PULSE(0 3.3 0 \{TR\} \{T
 N -1650 40 -1650 70 {lab=clk}
 C {devices/lab_pin.sym} -1650 40 1 0 {name=p19 lab=clk}
 C {devices/gnd.sym} -1650 130 0 0 {name=g2 lab=GND}
-C {devices/vsource.sym} -1450 100 0 0 {name=VIN value="SIN(\{VCM\} \{AMP\} \{FIN\})"}
+C {devices/vsource.sym} -1450 100 0 0 {name=VIN value="SIN(\{VIN_MID\} \{AMP\} \{FIN\})"}
 N -1450 40 -1450 70 {lab=vin}
 C {devices/lab_pin.sym} -1450 40 1 0 {name=p20 lab=vin}
 C {devices/gnd.sym} -1450 130 0 0 {name=g3 lab=GND}
@@ -180,3 +180,6 @@ descr="LOAD WAVES (Ctrl-click)"
 tclcommand="xschem raw_read $netlist_dir/[file tail [file rootname [xschem get current_name]]].raw tran"
 }
 T {to add a trace: double-click a graph (dialog opens), then click a net in the schematic and press k - it drops into the node list} -1780 1120 0 0 0.3 0.3 {}
+C {devices/res.sym} -1520 100 0 0 {name=R_OFF value=\{ROFF\}}
+C {devices/lab_pin.sym} -1520 70 1 0 {name=pOF1 lab=sum}
+C {devices/gnd.sym} -1520 130 0 0 {name=gOF1}

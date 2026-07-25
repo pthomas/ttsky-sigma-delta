@@ -383,7 +383,7 @@ class Router:
 # ---------------------------------------------------------------------
 
 NETS = {
- "sum": ["rin.R2", "rdac.R2", "cint.C2", "ota.INM"],
+ "sum": ["rin.R2", "roff.R1", "rdac.R2", "cint.C2", "ota.INM"],
  "vcm": ["ota.INP", "comp.INM", "sm.S", "bufc.OUT", "cdec1.C1"],
  "UA1": ["ota.OUT", "cint.C1", "comp.INP"],
  "clk33": ["comp.CLK", "dff.CLK", "sm.G", "lvl.CLK33"],
@@ -406,7 +406,8 @@ NETS = {
  "VGND": ["ota.VSS", "comp.VSS", "cdec2.C2", "lvl.VSS", "dff.VSS",
           "bias.VSS", "bufn.VSS", "bufc.VSS", "bufp.VSS", "odrvq.VSS",
           "odrvb.VSS", "rin.B", "rdac.B", "rlt.B", "rlp.B", "rlc.B",
-          "rlb.B", "rlb.R2", "sm.B", "st1.B", "st2.B", "sb1.B", "sb2.B",
+          "rlb.B", "rlb.R2", "roff.R2", "roff.B",
+          "sm.B", "st1.B", "st2.B", "sb1.B", "sb2.B",
           "cdec1.C2", "cdec3.C2", "cflt1.C2", "cflt2.C2"],
  "VAPWR": ["ota.VDD", "lvl.VDD33", "comp.VDD", "dff.VDD", "bias.VDD",
            "bufn.VDD", "bufc.VDD", "bufp.VDD", "rlt.R1"],

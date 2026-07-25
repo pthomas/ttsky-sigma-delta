@@ -43,19 +43,36 @@ quit -noprompt
     return open(f"mag/{name}.spice").read()
 
 
-def res_cell(name, target, nx, l0):
-    """Two-pass serpentine resistor: calibrate l against extraction."""
-    dev = "sky130_fd_pr__res_high_po_1p41"
-    txt = gen_cell(name, dev, dict(w=WRES, l=l0, nx=nx, snake=1))
-    leff = float(re.search(r"res_high_po_1p41 l=([0-9.]+)", txt).group(1))
-    r1 = RHO * leff / WRES
+def res_cell_any(name, target, nx, l0, dev, w, rho_um):
+    """Two-pass serpentine resistor: calibrate l against extraction.
+    `rho_um` is ohms per um of length at width `w` (sheet rho / w)."""
+    short = dev.split("__")[1]
+    txt = gen_cell(name, dev, dict(w=w, l=l0, nx=nx, snake=1))
+    leff = float(re.search(rf"{short} l=([0-9.]+)", txt).group(1))
+    r1 = rho_um * leff
     l1 = round(l0 * target / r1, 2)
-    txt = gen_cell(name, dev, dict(w=WRES, l=l1, nx=nx, snake=1))
-    leff = float(re.search(r"res_high_po_1p41 l=([0-9.]+)", txt).group(1))
-    r2 = RHO * leff / WRES
+    txt = gen_cell(name, dev, dict(w=w, l=l1, nx=nx, snake=1))
+    leff = float(re.search(rf"{short} l=([0-9.]+)", txt).group(1))
+    r2 = rho_um * leff
     print(f"{name}: target {target/1e3:.0f}k -> {r2/1e3:.2f}k "
           f"(nx={nx}, l={l1} um, err {100*(r2-target)/target:+.1f}%)")
     return abs(r2 - target) / target < 0.02
+
+
+def res_cell(name, target, nx, l0):
+    return res_cell_any(name, target, nx, l0,
+                        "sky130_fd_pr__res_high_po_1p41", WRES, RHO / WRES * WRES)
+
+
+def res_cell_thin(name, target, nx, l0):
+    """Gain-setting resistors on the 0.35um-wide high-poly bin: same
+    sheet material as the 1.41 bin at 4x the ohms-per-um, so the big
+    input-network values (RIN 132k, ROFF 158.4k after the 0-3.3 V
+    range change) stay compact. Width-bias mismatch vs the 1.41 RDAC
+    is a few-percent GAIN error -- the benign class."""
+    rho_um = RHO * WRES / 0.35   # same sheet rho, narrower width
+    return res_cell_any(name, target, nx, l0,
+                        "sky130_fd_pr__res_high_po_0p35", 0.35, rho_um)
 
 
 def cap_cell(name, target_pf, w, l, nx):
@@ -111,7 +128,8 @@ def res_cell_model(name, target, nx_force=None):
 def main():
     os.makedirs("mag", exist_ok=True)
     ok = True
-    ok &= res_cell("rin", 40e3, nx=12, l0=14.7)
+    ok &= res_cell_thin("rin", 132e3, nx=6, l0=17.0)
+    ok &= res_cell_thin("roff", 158.4e3, nx=6, l0=20.5)
     ok &= res_cell("rdac", 20e3, nx=6, l0=14.7)
     ok &= cap_cell("cint", 2.0, w=25, l=20, nx=2)
     ok &= fet_cell("sw_nmos", 10, 0.5)

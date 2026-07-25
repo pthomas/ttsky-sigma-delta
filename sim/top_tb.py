@@ -49,7 +49,7 @@ VAP vapwr 0 3.3
 VDP vdpwr 0 1.8
 VGN vgnd 0 0
 VCLK clk 0 PULSE(0 1.8 0 0.2n 0.2n {P.TS/2*1e9:.1f}n {P.TS*1e9:.1f}n)
-VIN ua0 0 SIN({P.VCM:g} {P.AMP:g} {fin:g})
+VIN ua0 0 SIN({P.VIN_MID:g} {P.AMP:g} {fin:g})
 * pad-ish loads on the bitstream outputs
 CU0 uo0 0 1p
 CU1 uo1 0 1p

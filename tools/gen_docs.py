@@ -17,6 +17,8 @@ import os
 import re
 import shutil
 import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
 import time
 
 import markdown
@@ -235,6 +237,76 @@ def dff_line():
     return f"<p>{chip(r['ok'], text)}</p>"
 
 
+
+
+
+
+# ----------------------------------------------------------- datasheet
+
+def ds_conditions():
+    import params as P
+    rows = [
+        ("Analog supply, VAPWR", "", "3.3", "", "V"),
+        ("Digital supply, VDPWR", "", "1.8", "", "V"),
+        ("Clock frequency", "", f"{P.FS/1e6:.0f}", "", "MHz"),
+        ("Clock duty cycle distortion", "", "", "3", "%"),
+        ("Input voltage, VIN", "0", f"{P.VIN_MID:g}", "3.3", "V"),
+        ("Ambient temperature (simulated)", "", "27", "", "&deg;C"),
+    ]
+    body = "".join(
+        f"<tr><td>{p}</td><td>{mn}</td><td>{nom}</td><td>{mx}</td>"
+        f"<td>{u}</td></tr>" for p, mn, nom, mx, u in rows)
+    return ("<table><thead><tr><th>Parameter</th><th>Min</th><th>Nom"
+            "</th><th>Max</th><th>Unit</th></tr></thead>"
+            f"<tbody>{body}</tbody></table>")
+
+
+def ds_electrical():
+    import params as P
+    snr = load("snr") or {}
+    top = load("top_pex") or {}
+    rows = [
+        ("Resolution", "1-bit modulator; ENOB set by decimation", "1",
+         "bit"),
+        ("Input full-scale range", "ratiometric to VAPWR",
+         f"0 to 3.3 (&plusmn;{P.FS_IN:g} about {P.VIN_MID:g})", "V"),
+        ("Input resistance", "VIN to virtual ground",
+         f"{P.RIN/1e3:.0f}", "k&Omega;"),
+    ]
+    paths = snr.get("paths", {})
+    if "fast" in paths:
+        f = paths["fast"]
+        rows.append(("SNDR, fast path",
+                     f"tier-1 sim, OSR {f['osr']}, "
+                     f"BW {f['bw_hz']/1e3:.0f} kHz, &minus;4.4 dBFS",
+                     f"{f['sndr_db']} ({f['enob']} ENOB)", "dB"))
+    if "precision" in paths:
+        p = paths["precision"]
+        rows.append(("SNDR, precision path",
+                     f"tier-1 sim, OSR {p['osr']}, "
+                     f"BW {p['bw_hz']/1e3:.0f} kHz "
+                     "(per-window pattern-noise scatter &plusmn;5 dB)",
+                     f"{p['sndr_db']} ({p['enob']} ENOB)", "dB"))
+    if top.get("sndr_fast_db"):
+        rows.append(("SNDR, fast path, extracted",
+                     f"transistor-level PEX sim, {top.get('nfft')} bits"
+                     " (decision-path noise gap under study, see the "
+                     "decision log)",
+                     f"{top['sndr_fast_db']}", "dB"))
+    rows += [
+        ("Reference buffer output impedance", "each of vrefp/vcm/vrefn",
+         "~0.75", "k&Omega;"),
+        ("Analog power, VAPWR",
+         "OTA + comparator + bias + references", "~9", "mW"),
+        ("Digital power, VDPWR", "level shifter + output drivers",
+         "~0.5", "mW"),
+    ]
+    body = "".join(
+        f"<tr><td>{p}</td><td class='fineprint'>{c}</td><td>{v}</td>"
+        f"<td>{u}</td></tr>" for p, c, v, u in rows)
+    return ("<table><thead><tr><th>Parameter</th><th>Test conditions"
+            "</th><th>Typ</th><th>Unit</th></tr></thead>"
+            f"<tbody>{body}</tbody></table>")
 
 
 # ------------------------------------------------------------- sub-pages
@@ -543,6 +615,11 @@ def main():
         "gds_link": gds_link(),
         "viewer3d": viewer3d(),
         "block_links": block_pages(),
+        "block_links_inline": ", ".join(
+            f'<a href="blocks/{b}.html">{title}</a>'
+            for b, title, _, _ in BLOCK_META),
+        "ds_conditions": ds_conditions(),
+        "ds_electrical": ds_electrical(),
         "comp_table": comp_table(),
         "dff_line": dff_line(),
         "fig_tier1_waves": fig(

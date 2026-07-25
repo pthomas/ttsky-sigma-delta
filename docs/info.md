@@ -17,7 +17,7 @@ design document:
 - Living design document (CI-generated): see the GitLab Pages site of the
   design repo
 
-**v0 wiring (evolves as blocks land):** ua[0] and ua[1] are wired to the OTA's input and output (extraction-verified), making v0 a probe-able OTA test structure while the remaining blocks land. Final plan: ua[0] = VIN (0.4-1.4 V), ua[1] = analog monitor, uo[0]/uo[1] = Q/QB bitstream, clk = 50 MHz.
+**Pinout:** ua[0] = VIN (0-3.3 V about the 1.65 V mid-scale, through the on-chip 132k input resistor), ua[1] = integrator monitor (debug, high-impedance), uo[0]/uo[1] = Q/QB bitstream (1.8 V, capture synchronously), clk = 50 MHz.
 
 **Status: work in progress toward the shuttle deadline.** The current GDS
 contains the verified OTA macro (DRC-clean, LVS-clean, parasitic-
@@ -26,7 +26,7 @@ top-level routing land next, from the same generated-and-verified flow.
 
 ## How to test
 
-Drive VIN (ua[0]) with a signal in the 0.4-1.4 V range, clock at 50 MHz,
+Drive VIN (ua[0]) with a signal in the 0-3.3 V range, clock at 50 MHz,
 and decimate the Q/QB bitstream (uo[0]/uo[1]) with a sinc or CIC filter
 (an FPGA with a differential-capable input is the reference receiver).
 

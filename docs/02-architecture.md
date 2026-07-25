@@ -66,7 +66,7 @@ one of them:
 
 | Signal | TT pin | Type |
 |---|---|---|
-| VIN — analog input, 0.4–1.4 V about the 0.9 V common mode | `ua[0]` | analog |
+| VIN — analog input, 0–3.3 V about the 1.65 V mid-scale | `ua[0]` | analog |
 | INT — integrator output monitor | `ua[1]` | analog (debug only; the ADC runs without it) |
 | Clock in, 50 MHz | `clk` | digital, 1.8 V (level-shifted to 3.3 V on-chip) |
 | Bitstream Q | `uo[0]` | digital, 1.8 V |

@@ -1,0 +1,10 @@
+* NGSPICE file created from roff.ext - technology: sky130A
+
+.subckt sky130_fd_pr__res_high_po_0p35_ZRBJ5W B R1 R2
+X0 R2 R1 B sky130_fd_pr__res_high_po_0p35 l=123.03
+.ends
+
+.subckt roff
+XX0 VSUBS X0/R1 X0/R2 sky130_fd_pr__res_high_po_0p35_ZRBJ5W
+.ends
+

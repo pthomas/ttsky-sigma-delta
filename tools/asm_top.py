@@ -54,6 +54,7 @@ PLACE.update({
     "rlc":   ("rl_cm", 300, 78),
     "rlb":   ("rl_bot", 285, 130),
     "rin":   ("rin", 12, 104),
+    "roff":  ("roff", 24, 102),
     "rdac":  ("rdac", 42, 104),
     "sm":    ("sw_nmos", 59, 104),
     "st1":   ("sw_nmos", 66, 104),
@@ -91,7 +92,7 @@ BPORTS = {
     "odrvb": ["IN33", "OUT18", "VDD18", "VSS"],
 }
 CAPS = {"cint", "cdec1", "cdec2", "cdec3", "cflt1", "cflt2"}
-RESC = {"rlt", "rlp", "rlc", "rlb", "rin", "rdac"}
+RESC = {"rlt", "rlp", "rlc", "rlb", "rin", "rdac", "roff"}
 SWS = {"sm", "st1", "st2", "sb1", "sb2"}
 
 # WIRES: net -> list of polylines; points are (x, y) or ("T", inst,
@@ -240,8 +241,10 @@ def main():
             vx = round((ctx + (vb[0] + vb[2]) / 2) * U) / U + ox
             vy = round((cty + (vb[1] + vb[3]) / 2) * U) / U + oy
             cur[0] = term_to_net.get(f"{inst}.{port}", f"{inst}.{port}")
+            # m1 pad included: the 0.35um-wide res bin's end-m1 is too
+            # narrow for the via.4a enclosure on its own
             paint(vx - VIA / 2, vy - VIA / 2, vx + VIA / 2,
-                  vy + VIA / 2, ["via1"], pads=["m2"])
+                  vy + VIA / 2, ["via1"], pads=["m1", "m2"])
             paint(vx - VIA / 2, vy - VIA / 2, vx + VIA / 2,
                   vy + VIA / 2, ["via2"], pads=["m2", "m3"])
             terms[f"{inst}.{port}"] = (vx, vy, "m3")

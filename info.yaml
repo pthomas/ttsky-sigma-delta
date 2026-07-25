@@ -55,7 +55,7 @@ pinout:
   uio[7]: ""
 
   # Analog pins - make sure to also set "analog_pins" above, else the pins won't be connected
-  ua[0]: "VIN - analog input, 0.4-1.4 V around the 0.9 V common mode (through the 40k input resistor)"
+  ua[0]: "VIN - analog input, 0-3.3 V around the 1.65 V mid-scale (through the on-chip 132k input resistor)"
   ua[1]: "INT - integrator output monitor (OTA output, high impedance)"
   ua[2]: ""
   ua[3]: ""

@@ -32,6 +32,9 @@ BLOCKS = ["ota", "comp", "dff", "bias", "buf", "lvl", "odrv"]
 # passive instances: (instname, cell, portmap)
 PASSIVES = [
     ("RIN", "rin", {"R1": "UA0", "R2": "sum", "B": "VGND"}),
+    # 0-3.3 V input range (2026-07-25): offset leg nulling the
+    # (VIN_MID - VCM)/RIN standing current at the virtual ground
+    ("ROFF", "roff", {"R1": "sum", "R2": "VGND", "B": "VGND"}),
     ("RDAC", "rdac", {"R1": "dac", "R2": "sum", "B": "VGND"}),
     ("RLT", "rl_top", {"R1": "VAPWR", "R2": "lad_p", "B": "VGND"}),
     ("RLP", "rl_pc", {"R1": "lad_p", "R2": "lad_c", "B": "VGND"}),

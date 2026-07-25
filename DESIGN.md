@@ -951,3 +951,25 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   local clk33 buffering at the comparator, comparator decision-time
   margin, DAC switch edge shaping). Decision needs user sign-off
   since the fast-path ENOB target is grazed.
+
+- **2026-07-25: input range 0-3.3 V (was 0.4-1.4).** Community-driven
+  and cheap: the input is a current summed into the virtual ground, so
+  range is pure resistor scaling. RIN 40k -> 132k maps +-1.65 V about
+  VIN_MID = 1.65 V (= VAPWR/2, ratiometric) to the same +-12.5 uA full
+  scale; a new ROFF = 158.4k from sum to VGND nulls the standing
+  (VIN_MID - VCM)/RIN = 5.68 uA offset current. Loop, DAC, references,
+  and k are untouched (k is RDAC/CINT). Both new resistors are on the
+  0.35 um-wide high-poly bin (same sheet as the 1.41 bin at 4x the
+  ohms/um) so 290 um of resistance fits in two ~7x20 um cells beside
+  the old rin slot -- width-bias mismatch against the 1.41 RDAC is a
+  few-percent GAIN error, the benign class. The 0.35 bin's narrow
+  end-m1 cannot enclose the tap via alone (via.4a, 32 DRC boxes), so
+  the R1/R2 taps now paint their own m1 pad. Tier-1 re-verified: fast
+  37.5-38.5 dB, precision 55.8-60.5 dB over three tone placements --
+  inside the documented pattern-noise scatter, and the linearity
+  argument says the network CANNOT change pattern noise in the ideal
+  limit (tier-0 never sees it). sd_top DRC 0 + LVS match, frame DRC 0,
+  PEX acceptance rerun pending. Noise: 132k at 100 kHz is ~15 uV rms
+  vs 1.17 V rms FS (~98 dB) -- still far under budget. Input
+  impedance rises to 132k: open item 7 (source impedance) gets MORE
+  relevant, buffer externally if the source is weak.
