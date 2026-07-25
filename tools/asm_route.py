@@ -386,11 +386,15 @@ NETS = {
  "sum": ["rin.R2", "roff.R1", "rdac.R2", "cint.C2", "ota.INM"],
  "vcm": ["ota.INP", "comp.INM", "sm.S", "bufc.OUT", "cdec1.C1"],
  "UA1": ["ota.OUT", "cint.C1", "comp.INP"],
- "clk33": ["comp.CLK", "dff.CLK", "sm.G", "lvl.CLK33"],
- "clkb33": ["lvl.CLKB33", "st2.G", "sb2.G"],
- "cq": ["comp.QB", "dff.D"],
- "q33": ["dff.Q", "odrvq.IN33", "st1.G"],
- "qb33": ["dff.QB", "odrvb.IN33", "sb1.G"],
+ # 2026-07-25 loop rephase: comp clocks on clkb33 (senses at the
+ # clk33 rise, the tier-1 instant) and its SR outputs drive the DAC
+ # data switches directly; the DFF only retimes the output pins.
+ "clk33": ["dff.CLK", "sm.G", "lvl.CLK33"],
+ "clkb33": ["lvl.CLKB33", "st2.G", "sb2.G", "comp.CLK"],
+ "cq": ["comp.QB", "dff.D", "sb1.G"],
+ "cqq": ["comp.Q", "st1.G"],
+ "q33": ["dff.Q", "odrvq.IN33"],
+ "qb33": ["dff.QB", "odrvb.IN33"],
  "dac": ["rdac.R1", "sm.D", "st2.S", "sb2.S"],
  "xt": ["st1.S", "st2.D"],
  "xb": ["sb1.S", "sb2.D"],
@@ -423,7 +427,7 @@ NETS = {
 # cdec2/cdec3, etc). This order was tuned empirically -- see DESIGN.md
 # 2026-07-20 for which reorderings fixed which failures.
 ORDER = ["xt", "xb", "dac", "clk33", "VDPWR", "clkb33", "UA1", "vcm",
-         "cq", "VGND", "VAPWR", "q33", "qb33",
+         "cq", "cqq", "VGND", "VAPWR", "q33", "qb33",
          "irefp", "irefn", "vbnc", "vbpc", "sum",
          "vrefp", "vrefn", "lad_p", "lad_c", "lad_n"]
 

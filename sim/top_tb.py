@@ -35,13 +35,12 @@ PDK_LIB = os.environ.get(
 
 NSETTLE = 64
 # Gate rationale (2026-07-25): 512-bit windows scatter +-3 dB
-# run-to-run (measured: 31.0-36.2 dB across draws of healthy
-# netlists), so the acceptance runs a 2048-bit window (41 in-band
-# bins), where tier-1 reads 36.4 dB and the extracted top 34.0 dB.
-# The gate at 33 is 1 dB under the measured extracted value and far
-# above what any catastrophic failure reads (<20 dB) -- it still
-# catches a broken loop, wrong DAC polarity, or a dead reference.
-GATE_DB = 33.0
+# run-to-run, so the acceptance runs a 2048-bit window (41 in-band
+# bins). After the loop rephase the extracted top measures
+# 38.3-40.7 dB across three tone placements (tier-1 band 36.4-38.0);
+# the gate at 36 sits 2 dB under the measured minimum and far above
+# any catastrophic-failure signature (<20 dB).
+GATE_DB = 36.0
 
 
 def deck(nfft, sig_bin, corner="tt", idealclk33=False,

@@ -290,10 +290,9 @@ def ds_electrical():
     if top.get("sndr_fast_db"):
         rows.append(("SNDR, fast path, extracted",
                      f"transistor-level PEX sim, {top.get('nfft')} bits"
-                     " (within 0.2 dB of the zero-parasitic netlist "
-                     "after the 2026-07-25 clk33 edge fix; the "
-                     "remaining ~2 dB to tier-1 is block-intrinsic, "
-                     "see the decision log)",
+                     " (exceeds the tier-1 reference band after the "
+                     "2026-07-25 clk33 edge fix and loop rephase, see "
+                     "the decision log)",
                      f"{top['sndr_fast_db']}", "dB"))
     rows += [
         ("Reference buffer output impedance", "each of vrefp/vcm/vrefn",

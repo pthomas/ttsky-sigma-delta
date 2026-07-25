@@ -1063,3 +1063,32 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   implication: an ss-ish die would deliver ~4.7 ENOB on the fast
   path. The block-intrinsic investigation (open) is expected to lift
   corners with it.
+
+- **2026-07-25: loop rephase -- the "block-intrinsic" gap was
+  half-cycle excess loop delay; extracted fast SNDR 34.0 -> 38.3-40.7
+  dB (three windows), now ABOVE the tier-1 band.** The golden A/B
+  ladder that got there: ideal switches 31 (not it, and the S-model
+  is its own artifact); ideal tanh comparator 37.8/36.8 (comp is the
+  whole gap); ideal comp + output kickback caps (no change -- not
+  output kickback); REAL comp behind an ideal input buffer (no
+  recovery -- not input kickback either); ideal comp SAMPLED AT THE
+  FALLING clk33 edge 34.5/31.4 = reproduces the real comp exactly.
+  Mechanism: a StrongARM samples its input when its tail activates
+  (its clock's falling edge). Clocked on clk33 it sensed at t=10 ns,
+  half a cycle before the t=20 ns rise that tier-0/1 model -- pure
+  excess loop delay, no comparator noise involved. FIX (zero new
+  devices): comp clocks on clkb33 (senses at the clk33 rise), and
+  its SR latch -- which holds through precharge -- drives st1/sb1
+  directly (nets cq/cqq); the DFF now only retimes the output pins
+  (uo edge cleanliness unchanged). Data edges settle ~8 ns before
+  clkb33 opens the RZ window: no race, window edges remain
+  clock-defined. Bonus: comparator evaluation now happens during the
+  DAC-off half. comp_layout already exposed Q, so the change is
+  golden wiring + NETS only; router took it with zero conflicts.
+  Verified: sd_top DRC 0 / LVS match / frame DRC 0 / PEX acceptance
+  40.4, 40.7, 38.3 dB (bins 13/11/15; gate raised 33 -> 36).
+  Lesson for the reopen list: "modeled from day one" is not
+  "verified end to end" -- the sensing INSTANT of a clocked
+  comparator is part of the loop timing contract, and only the
+  netlist-ladder A/B (tier-1 vs golden vs extracted, same window)
+  made the half cycle visible.

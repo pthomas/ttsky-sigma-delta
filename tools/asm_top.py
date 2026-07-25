@@ -81,7 +81,7 @@ BLOCKS = {"ota", "bias", "bufn", "bufc", "bufp", "odrvq", "odrvb",
 BPORTS = {
     "ota": ["INP", "INM", "OUT", "VDD", "VSS", "IREFP", "IREFN",
             "VBNC", "VBPC"],
-    "comp": ["INP", "INM", "CLK", "QB", "VDD", "VSS"],
+    "comp": ["INP", "INM", "CLK", "Q", "QB", "VDD", "VSS"],
     "dff": ["D", "CLK", "Q", "QB", "VDD", "VSS"],
     "bias": ["IREFP", "IREFN", "VBNC", "VBPC", "VDD", "VSS"],
     "bufn": ["IN", "OUT", "IREFP", "VDD", "VSS"],

@@ -8,7 +8,14 @@ cells, whose device cards are lifted from their magic extractions
 
 Connectivity contract (tier-1 truth, STATUS step 4):
   UA0 -RIN- sum; OTA(INP=vcm, INM=sum, OUT=int); CINT int<->sum;
-  comp(INP=int, INM=vcm, CLK=clk33) -> cq -> DFF(clk33) -> q33/qb33;
+  comp(INP=int, INM=vcm, CLK=clkb33) -> cq/cqb drive the DAC data
+  switches DIRECTLY (the comp SR latch holds all cycle and its data
+  edges settle ~8 ns before the RZ window opens); the DFF retimes
+  cqb -> q33/qb33 for the OUTPUT pins only. Clocking the comparator
+  on clkb33 makes it sense the integrator at the clk33 RISING edge --
+  the instant tier-0/tier-1 assume. On clk33 it sensed at the FALL,
+  half a cycle early, and that excess loop delay cost ~4 dB
+  (2026-07-25 golden-netlist A/B ladder).
   DAC: S_MID dac<->vcm gated clk33 (return phase, clk high);
        S_TOP vrefp-xt-dac gated q33 & clkb33 (series pair);
        S_BOT vrefn-xb-dac gated qb33 & clkb33; RDAC dac-sum;
@@ -48,11 +55,11 @@ PASSIVES = [
     ("CBP", "cflt", {"C1": "vbpc", "C2": "VGND"}),
     ("SM", "sw_nmos", {"D": "dac", "G": "clk33", "S": "vcm",
                        "B": "VGND"}),
-    ("ST1", "sw_nmos", {"D": "vrefp", "G": "q33", "S": "xt",
+    ("ST1", "sw_nmos", {"D": "vrefp", "G": "cq", "S": "xt",
                         "B": "VGND"}),
     ("ST2", "sw_nmos", {"D": "xt", "G": "clkb33", "S": "dac",
                         "B": "VGND"}),
-    ("SB1", "sw_nmos", {"D": "vrefn", "G": "qb33", "S": "xb",
+    ("SB1", "sw_nmos", {"D": "vrefn", "G": "cqb", "S": "xb",
                         "B": "VGND"}),
     ("SB2", "sw_nmos", {"D": "xb", "G": "clkb33", "S": "dac",
                         "B": "VGND"}),
@@ -66,7 +73,7 @@ PASSIVES = [
 # Feeding D from cqb restores q33 = comparator decision.
 INSTANCES = [
     "XOTA vcm sum UA1 VAPWR VGND irefp irefn vbnc vbpc ota",
-    "XCOMP UA1 vcm clk33 cq cqb con1 con2 VAPWR VGND comp",
+    "XCOMP UA1 vcm clkb33 cq cqb con1 con2 VAPWR VGND comp",
     "XDFF cqb clk33 q33 qb33 VAPWR VGND dff",
     "XBIAS irefp irefn vbnc vbpc VAPWR VGND bias",
     "XBUFP lad_p vrefp irefp VAPWR VGND buf",
