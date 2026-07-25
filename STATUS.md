@@ -197,7 +197,12 @@ today's 15+ entries (magic gotchas, race-sim methodology, PM/RREF/SR
 knees, IO decisions — READ IT before re-deriving anything).
 ## Open questions for the user
 
-- Source impedance/range/bandwidth of the real input signal (open item 7 —
-  decides whether the passive virtual-ground network suffices).
-- 2 vs 4 tiles purchase (area budget in DESIGN.md says: 2 works for 1st
+- ~~Source impedance (open item 7)~~ CLOSED 2026-07-25: the user's
+  system context is ADS131A04-class inputs (~130 kohm switched-cap
+  effective impedance), so our continuous 132 kohm resistive input is
+  equal-or-easier to drive (no sampling kickback). Passive
+  virtual-ground network confirmed sufficient.
+- ~~2 vs 4 tiles~~ CLOSED 2026-07-21: 2x2 (4 tiles) signed off (the
+  routed floorplan requires it). Original note: area budget said 2
+  works for 1st
   order, buy 4 if 2nd order/differential is the ambition).

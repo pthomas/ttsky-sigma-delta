@@ -973,3 +973,11 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   vs 1.17 V rms FS (~98 dB) -- still far under budget. Input
   impedance rises to 132k: open item 7 (source impedance) gets MORE
   relevant, buffer externally if the source is weak.
+
+- **2026-07-25: open item 7 (source impedance) closed.** The intended
+  signal sources are ADS131A04-class (TI specs ~130 kohm effective
+  input impedance, switched-capacitor), so the 132 kohm continuous
+  resistive input of the 0-3.3 V network is an equal-or-lighter load
+  -- linear, no sampling kickback, <= +-12.5 uA DC at the range
+  extremes. The passive virtual-ground input network suffices; no
+  input buffer needed for v1 or v2.
