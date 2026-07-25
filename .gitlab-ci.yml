@@ -170,7 +170,10 @@ assembly-verify:
   script:
     - set -o pipefail
     - python3 tools/asm_route.py
-    # the LVS reference is a build product, not a committed file
+    # the LVS reference chain is all build products: OTA xschem
+    # netlist (make xcheck), block goldens, then the top golden
+    - make xcheck
+    - python3 tools/gen_golden.py
     - python3 tools/gen_top_golden.py
     - python3 tools/asm_top.py | tee asm.log
     - 'grep -Fq "DRC errors (fresh reload): 0" asm.log'
