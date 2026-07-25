@@ -1,8 +1,8 @@
 magic
 tech sky130A
-timestamp 1784985444
+timestamp 1784994958
 << checkpaint >>
-rect -260 -660 32083 23160
+rect -60 -660 32083 23160
 << metal3 >>
 rect 21910 21017 22260 21030
 rect 21910 20983 22183 21017
@@ -85,9 +85,9 @@ rect 9753 0 9843 100
 rect 11685 0 11775 100
 rect 13617 0 13707 100
 use sd_top  sd_top_0 /home/nvme/sigma-delta/mag
-timestamp 1784985427
+timestamp 1784994945
 transform 1 0 0 0 1 0
-box 370 -30 31453 22530
+box 570 -30 31453 22530
 << labels >>
 flabel metal4 s 12819 22476 12849 22576 0 FreeSans 240 90 0 0 clk
 port 0 nsew signal input

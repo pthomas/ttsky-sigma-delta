@@ -409,7 +409,11 @@ NETS = {
           "rlb.B", "rlb.R2", "roff.R2", "roff.B",
           "sm.B", "st1.B", "st2.B", "sb1.B", "sb2.B",
           "cdec1.C2", "cdec3.C2", "cflt1.C2", "cflt2.C2"],
- "VAPWR": ["ota.VDD", "lvl.VDD33", "comp.VDD", "dff.VDD", "bias.VDD",
+ # lvl.VDD33 comes AFTER bias.VDD: it is a SKIP_OK member whose hand
+ # patch hangs off bias.VDD, and a skipped member may only serve as a
+ # route source once its patch partner is placed (else the net splits
+ # into a patch-cycle island -- bit us on 2026-07-25)
+ "VAPWR": ["ota.VDD", "comp.VDD", "dff.VDD", "bias.VDD", "lvl.VDD33",
            "bufn.VDD", "bufc.VDD", "bufp.VDD", "rlt.R1"],
  "VDPWR": ["lvl.VDD18", "odrvq.VDD18", "odrvb.VDD18"],
 }
@@ -441,7 +445,8 @@ PASSTHRU = {"UA0": "rin.R1", "UO0": "odrvq.OUT18", "UO1": "odrvb.OUT18",
 # a handful of legs the auto-router can't currently thread through
 # (see the module docstring); routed by hand instead and skipped here
 SKIP_OK = {("VAPWR", "lvl.VDD33"), ("vcm", "cdec1.C1"),
-           ("VGND", "bias.VSS"), ("VGND", "lvl.VSS")}
+           ("VGND", "bias.VSS"), ("VGND", "lvl.VSS"),
+           ("VGND", "dff.VSS"), ("cq", "dff.D")}
 
 # the hand routes for the SKIP_OK legs, in asm_wires polyline form.
 # These are pre-committed into the router grid before any auto routing
@@ -474,8 +479,15 @@ SKIP_OK = {("VAPWR", "lvl.VDD33"), ("vcm", "cdec1.C1"),
 # x=82 street, down to the port's own y, and a short m3 entry stub
 # east into lvl -- legitimate, it's reaching lvl's own VSS port.
 HAND_PATCHES = {
+    # comp.QB -> dff.D: keep the pre-2026-07-25 corridor (north at
+    # x=75, east along y=218). After the lvl rebuild the maze chose a
+    # y=186 run hugging lvl's top edge, 0.28um from its port-riser
+    # tips (audit margin is 0.2995).
+    "cq": [[("T", "comp", "QB"), (55.9, 187), (75, 187), (75, 218),
+            (149, 218), (149, 173), (148.9, 173), ("T", "dff", "D")]],
+
     "VAPWR": [[("T", "bias", "VDD"), (149.9, 172), (127, 172),
-               (127, 187), (103.9, 187), ("T", "lvl", "VDD33")]],
+               (127, 187), (105.4, 187), ("T", "lvl", "VDD33")]],
     # vcm -> cdec1.C1: the capm.11 halo killed the old y=151 approach
     # (unrelated m3 must keep 1.34um from the cap top plates). The C1
     # bus is met4, so approach on met4 instead: east under the caps at
@@ -484,7 +496,11 @@ HAND_PATCHES = {
     # straight THROUGH lvl (blocks carry no m4) onto the bus.
     "vcm": [[("T", "sm", "S"), (61.345, 126), (138, 126), (138, 188),
              (117.19, 188), ("T", "cdec1", "C1")]],
-    "VGND": [# comp.VSS -> lvl.VSS: enter through the comp/lvl street
+    "VGND": [# cdec2.C2 -> dff.VSS: the maze's y=219 route, displaced
+             # by the cq patch's ownership width; pin it
+             [("T", "cdec2", "C2"), (74, 191.4), (74, 219), (146, 219),
+              (146, 173), (146.4, 173), ("T", "dff", "VSS")],
+             # comp.VSS -> lvl.VSS: enter through the comp/lvl street
              # (the port sits 1.4um inside lvl; the m3 entry stub is
              # reaching lvl's own VSS port)
              [("T", "comp", "VSS"), (29.4, 189), (82, 189),
@@ -523,6 +539,9 @@ def plan(rt, terms, cap_seeds):
             cur = terms[m]
             if (name, m) in SKIP_OK:
                 print(f"--- {name}: skipping {m}{cur} (hand-patched)")
+                # the hand patch connects it, so later members may
+                # still route from here
+                placed.append((m, cur))
                 continue
             path = None
             frm = None

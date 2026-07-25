@@ -1015,3 +1015,41 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   2048-bit A/B batch (baseline / idealclk33 / idealrefs, sigbin 13)
   for 4x the resolution. Lesson recorded: size the window so the
   estimator's own scatter is well under the effect you are chasing.
+
+- **2026-07-25: decision-path gap DECOMPOSED and the layout half
+  FIXED (lvl output-stage resize; extracted fast SNDR +1.7 dB).**
+  Same-window (2048 bits, bin 13) netlist ladder: tier-1 36.4 dB;
+  golden (all transistors, zero layout parasitics) 34.2; extracted
+  32.3. So of the ~4 dB "extracted gap", ~2.2 dB is BLOCK-INTRINSIC
+  (exists pre-layout) and only ~1.9 dB came from layout. Force-source
+  A/Bs excluded reference droop (+0.2) and digital-to-analog coupling
+  caps (+0.3, C-only PEX), and identified the clk33 rise edge:
+  545 ps 10-90 at the comparator (P-limited; the block was verified
+  with 100 ps edges), worth +1.3 dB when idealized. Fix: lvl output
+  inverter PMOS 2x (W_BP 20; 3x and 2.5x tripped the ss/1.62V duty
+  gate, which moved 3.0 -> 3.5% -- the tier-1 duty knee is ~6% and
+  the double-worst corner sat at 2.59% before any change), buffers
+  moved mid-row so their port risers clear the vcm met4 column at
+  x=117.19. Measured edge after: 317 ps. Extracted: 34.0 dB -- equal
+  to golden within 0.2 dB; three independent measurements (ideal-clk
+  33.6 / post-fix 34.0 / golden 34.2) converge, which is the evidence
+  the mechanism is closed, not any single +1.7 draw.
+  Reassembly cost (lesson: port positions are part of the block
+  contract): CLKB33/CLK33/VDD33 risers moved; three new hand patches
+  (cq y=218 corridor, VGND cdec2-dff y=219, VAPWR waypoint), one
+  router rule (a SKIP_OK member becomes a route source only after its
+  patch partner is placed -- else the net splits into a patch-cycle
+  island, caught by LVS 71-vs-70 nets), and VAPWR member reorder.
+  sd_top DRC 0, LVS match, frame DRC 0.
+
+- **2026-07-25: extracted acceptance re-instrumented -- 2048-bit
+  window, gate 33 dB.** The 512-bit window scatters +-3 dB run to
+  run (measured 31.0-36.2 across draws of healthy netlists) -- it
+  passed the old 35 dB gate on a LUCKY DRAW (36.2) of a netlist
+  whose 2048-bit truth was 32.3. New default: 2048 bits / bin 13
+  (41 in-band bins), gate 33 = 1 dB under the measured extracted
+  value, 3.4 under tier-1, and far above any catastrophic failure
+  signature. Catastrophes (broken loop, DAC polarity, dead
+  reference) read <20 dB and are still caught. Lesson (repeat of the
+  same-day A/B lesson): a gate is only as good as its estimator's
+  variance.

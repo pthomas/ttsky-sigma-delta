@@ -46,8 +46,11 @@ ROWS = {
         ["TB"],
     ],
     "lvl": [
-        ["IN", "N1", "N2", "B1N", "B2N"],
-        ["IP", "P1", "P2", "B1P", "B2P"],
+        # buffers mid-row, not at the east end: their CLK33/CLKB33
+        # port risers must stay clear of the vcm patch's met4 column
+        # through the block at x=117.19 (2026-07-25 W_BP resize)
+        ["IN", "B1N", "B2N", "N1", "N2"],
+        ["IP", "B1P", "B2P", "P1", "P2"],
     ],
     # single row: two odrv instances must fit side by side in a
     # ~64 um column at assembly

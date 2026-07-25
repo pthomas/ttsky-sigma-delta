@@ -1,7 +1,7 @@
 magic
 tech sky130A
 magscale 1 2
-timestamp 1784510879
+timestamp 1784994584
 << nwell >>
 rect -387 -797 387 797
 << mvpmos >>
@@ -126,13 +126,13 @@ rect -125 -587 -33 -581
 rect 33 -587 125 -581
 << labels >>
 rlabel mvnsubdiffcont 0 -702 0 -702 0 B
-port 1 nsew
+port 5 nsew
 rlabel mvpdiffc -158 0 -158 0 0 D0
-port 2 nsew
+port 6 nsew
 rlabel polycont -79 564 -79 564 0 G
 port 3 nsew
 rlabel mvpdiffc 0 0 0 0 0 S1
-port 4 nsew
+port 7 nsew
 rlabel polycont 79 564 79 564 0 G
 port 3 nsew
 << properties >>
