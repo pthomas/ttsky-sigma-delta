@@ -49,6 +49,9 @@ snr:
     - make snr | tee snr.log
     # loose floor only: fast path is stable, 35 dB is far below nominal ~39
     - awk '/fast/ { if ($4 < 35) { print "FAIL fast-path SNDR " $4; exit 1 } }' snr.log
+    # clock-jitter susceptibility (tier 0) + OTA 1/f noise budget (tier 2)
+    - python3 sim/jitter_tb.py --quick
+    - python3 sim/noise_tb.py
     - python3 tools/gen_doc_figs.py tier1
   artifacts:
     paths: [reports/results/]
@@ -119,6 +122,7 @@ layout-verify:
     - python3 sim/ota_tb.py
     - python3 tools/pex_ota.py
     - python3 sim/ota_tb.py --pex
+    - python3 sim/noise_tb.py --pex
     - python3 tools/layout_report.py
     - python3 tools/gen_doc_figs.py ota
   artifacts:

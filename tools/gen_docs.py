@@ -294,6 +294,25 @@ def ds_electrical():
                      "2026-07-25 clk33 edge fix and loop rephase, see "
                      "the decision log)",
                      f"{top['sndr_fast_db']}", "dB"))
+    noise = load("noise_pex")
+    noise_src = "extracted OTA"
+    if not noise:
+        noise, noise_src = load("noise_sch"), "schematic OTA"
+    if noise and noise.get("in_ref_total_uv"):
+        rows.append(("Input-referred noise",
+                     f"ngspice .noise, {noise_src} + input-network "
+                     "thermal, 10 Hz&ndash;100 kHz; OTA 1/f corner "
+                     f"{noise['fc_1f_hz']/1e3:.0f} kHz "
+                     "(flicker-dominated band)",
+                     f"{noise['in_ref_total_uv']:.0f}", "&micro;V RMS"))
+    jit = (load("jitter") or {}).get("gate", {}).get("checks", {})
+    if "precision" in jit and "fast" in jit:
+        rows.append(("Clock jitter knee, per-edge",
+                     "tier-0 susceptibility sweep, RZ DAC; sigma where "
+                     "jitter noise equals the quantization floor "
+                     "(precision / fast path)",
+                     f"{jit['precision']['knee_ps']} / "
+                     f"{jit['fast']['knee_ps']}", "ps RMS"))
     rows += [
         ("Reference buffer output impedance", "each of vrefp/vcm/vrefn",
          "~0.75", "k&Omega;"),
