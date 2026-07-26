@@ -96,7 +96,9 @@ def main():
     fc = float(above.max()) if above.size else 0.0
 
     band = (f >= F_LO) & (f <= F_HI)
-    trapezoid = getattr(np, "trapezoid", np.trapz)   # numpy <2.0 dev machine
+    # numpy 2.x has only trapezoid, <2.0 only trapz; the default argument
+    # of getattr is evaluated eagerly, so it cannot reference np.trapz
+    trapezoid = getattr(np, "trapezoid", None) or np.trapz
     en2 = trapezoid(en[band] ** 2, f[band])     # OTA, at its own input [V^2]
     gn = 1 + P.RIN / P.RDAC + P.RIN / P.ROFF
     v_ota = np.sqrt(en2) * gn
