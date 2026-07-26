@@ -15,6 +15,43 @@ remaining" saga was this artifact). The only trustworthy number is a fresh
 process on the saved files with expand; route_ota.py now prints exactly
 that ("DRC errors (fresh reload of saved files)").
 
+## Snapshot 2026-07-26 (current — read this first)
+
+**The chip is submission-ready and materially better than the 07-25
+morning version.** Full story in DESIGN.md (all dated 07-25/07-26);
+one-paragraph version: the 0–3.3 V input range landed (RIN 132k +
+ROFF 158.4k offset leg, thin-poly); the extracted-vs-tier-1 SNDR gap
+was decomposed by a netlist-ladder A/B and turned out to be (a) slow
+clk33 rise — fixed by lvl W_BP=20 + mid-row buffers — and (b) a
+half-cycle excess loop delay from the StrongARM sensing on its
+clock's FALL — fixed by clocking the comparator on clkb33 and driving
+the DAC switches from its SR latch (DFF now retimes outputs only).
+Extracted fast-path SNDR: **38.3–40.7 dB** (above the tier-1 band
+36.4–38.0), corners ss 33.4 / ff 35.3. Acceptance re-instrumented:
+2048-bit window, gate 36 (512-bit windows scatter ±3 dB). Three new
+analog pins: ua[2]=VOFF (offset-leg reference: grounded=stock,
+driven=window slide, verified 0.732 vs 0.727 predicted),
+ua[3]/ua[4]=vcm/vrefp monitors via 100k riso cells. info.yaml
+analog_pins=5 (TT bills per analog pin — flagged to Paul).
+**Precheck green** on all of it.
+
+| Area | State |
+|---|---|
+| Nightly CI | scheduled 03:00 MT (GitLab schedule 4359193): assembly-verify (full from-source top regression) + top-corners (ss gate 32 / ff gate 34). Green. Push pipelines unchanged. |
+| Site | 14 chapters incl. datasheet (CI-injected electrical tables) and silicon test plan (docs/09b, 4 phases, measured-vs-CI correlation table is the deliverable) |
+| Commercial | **local-only branch `commercial`** (never push; no upstream set). COMMERCIAL.md: thesis, cost model, decisions (power-conversion socket, differential required → v2 = fully-differential + 2nd-order in ONE architecture pass), open questions for Paul (channels, funding, license, name, PGA) |
+| Fabric RTL | **drafted, not yet run — awaiting Paul's review of rtl/PLAN.md**: sdm_rx.v (AXI4-Lite + dual sinc³), cocotb TB (cocotbext-axi) incl. the mixed-signal test (committed ngspice PEX bitstream → RTL → registers), tools/gen_rtl_vectors.py. Simulator not installed: `sudo apt install iverilog; pip install cocotb cocotbext-axi` (Paul runs) |
+| Bench plan | PolarFire SoC Icicle; DAC = AD5541A (kernel ad5446 driver; MikroE DAC 8 Click on mikroBUS, or Pmod DA3) |
+| Open (user-side) | TT shuttle-page submission; Pages visibility toggle; analog-pin billing OK?; rtl/PLAN.md review |
+
+**Next actions (fresh context starts here):** (1) Paul reviews
+rtl/PLAN.md → iterate; (2) install sim tools → first cocotb run of
+rtl/tb (expect small RTL/TB fixes — never run yet); (3) module 2
+sdm_cap (raw-bit capture, needed for Phase-2 silicon SNDR); (4)
+commercial-branch paper items (k-tolerance sweep has existing tier-1
+machinery). Reminder: `git push` on main pushes BOTH remotes; the
+commercial branch must never gain an upstream.
+
 ## Where we are
 
 **Shuttle: TTSKY26c (sky130A), deadline 2026-09-07.** Repo pushed to

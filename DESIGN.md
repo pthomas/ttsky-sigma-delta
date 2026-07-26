@@ -1111,3 +1111,13 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   LVS match (subckt now 11 ports), frame DRC 0. Test plan chapter
   (docs/09b): 4 phases, every row correlates measured vs
   CI-predicted; the Phase-3 correlation table is the deliverable.
+
+- **2026-07-26: fabric-side RTL started (rtl/) -- plan for review at
+  rtl/PLAN.md.** Verilog + cocotb/cocotbext-axi (AXI4-Lite BFM);
+  sdm_rx v1 drafted (dual sinc3, register map in the file header);
+  mixed-signal validation = committed ngspice PEX bitstream
+  (rtl/tb/vectors/pex_bits.txt, 2048 bits from the 38.7 dB
+  acceptance run) streamed through the RTL and checked via AXI reads
+  against a bit-exact golden model + the acceptance ones-density.
+  NOT YET SIMULATED (no iverilog on the bench). Bench DAC decision:
+  AD5541A (kernel ad5446 driver; DAC 8 Click / Pmod DA3).
