@@ -1,9 +1,10 @@
 # Project status & session handoff
 
-Snapshot 2026-07-19 (OTA layout DRC clean + LVS clean). DESIGN.md holds
-requirements, decisions and their rationale (append-only log); this file
-holds *where things stand and how to drive them*. Update both at the end of
-significant work sessions.
+DESIGN.md is the append-only **decision log** (restructured 2026-07-26:
+goals live in README.md, architecture/method/measured specs in docs/ —
+the CI-generated manual — and toolchain + drive instructions here); this
+file holds *where things stand and how to drive them*. Update both at the
+end of significant work sessions.
 
 **Trust note:** two magic gotchas have burned this project's DRC numbers in
 both directions (see DESIGN.md 2026-07-19 decision log entries): (1) fresh
@@ -129,6 +130,8 @@ runs gear integration and the precision baseline reads 64.8 dB (the old
 From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
 
 - `make` / `make snr` — tier-1 sim + SNDR table (~10 s)
+- `make jitter` — tier-0 clock-jitter susceptibility sweep (~30 s)
+- `make noise` — OTA 1/f + thermal noise budget, `sim/noise_tb.py --pex` for extracted (~5 s)
 - `make report` — NRZ/RZ comparison → reports/dac_compare.html (~70 s)
 - `make char` — device curves → reports/fet_char.html (~15 s)
 - `make specs` — OTA requirement sweeps → reports/ota_specs.html (~6 min)

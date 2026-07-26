@@ -20,6 +20,22 @@ layout, tiered verification, and a continuously rebuilt design document.
 Primary home: https://gitlab.com/pthomas1/sigma-delta — mirrored to
 GitHub for the TinyTapeout toolchain.
 
+## Goals
+
+One modulator, one 50 MHz bitstream; the companion FPGA (PolarFire SoC)
+runs two concurrent decimation paths on it:
+
+| Path | Bandwidth | Target resolution | Use |
+|---|---|---|---|
+| Fast | ~1 MHz | ≥ 6 ENOB | protection / trip |
+| Precision | ~100 kHz | 10–12 ENOB | measurement |
+
+Platform: TinyTapeout 2x2 analog tiles (TTSKY26c shuttle, sky130A),
+3.3 V analog + 1.8 V digital supplies, clean external clock, 0–3.3 V
+input range. Measured results live on the
+[generated design document](https://pthomas1.gitlab.io/sigma-delta/) —
+this README stays number-free so it can't go stale.
+
 ## Reproduce
 
 Toolchain: ngspice, xschem, magic + netgen (source-built), sky130A PDK

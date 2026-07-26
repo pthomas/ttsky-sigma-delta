@@ -1,275 +1,48 @@
-# Continuous-Time Sigma-Delta ADC for Tiny Tapeout
+# Continuous-Time Sigma-Delta ADC — decision log
 
-Living design document. The **decision log** at the bottom is append-only: decisions
-are superseded by new dated entries, never rewritten. Exact numeric values live in
-`params.py` (single source of truth, imported by every simulation tier) once created.
+This file is the project's **decision log**: append-only, dated entries;
+decisions are superseded by newer entries, never rewritten. The prose design
+chapters that used to sit above the log were retired on 2026-07-26 (git
+history keeps them — see that day's restructure entry); their content lives
+where it stays true:
 
-## Requirements
-
-One modulator, one bitstream, two concurrent use modes selected by decimation
-filters in the companion FPGA (PolarFire SoC):
-
-| Path | Bandwidth | Target resolution | Use |
-|---|---|---|---|
-| Fast | ~1 MHz | ≥ 6–7 ENOB | protection / trip |
-| Precision | ~100 kHz | 10–12 ENOB | measurement |
-
-Platform: Tiny Tapeout analog tile(s), sky130A, 3.3 V analog supply.
-Companion system provides a clean low-jitter clock and receives the bitstream
-(LVDS-capable I/O on the FPGA side).
-
-## Architecture (current)
-
-- **1st-order, 1-bit, continuous-time** modulator: active-RC integrator
-  (single-ended OTA), clocked comparator, DFF retimer, resistive feedback DAC.
-  2nd order is the planned upgrade once the flow is proven end-to-end — it adds
-  one integrator and reuses every block.
-- **fs target ≈ 50 MHz** (pending verification of TT mux clock and output
-  toggle limits — open item 1). Loop coefficient k = Ts/(R·C) ≈ 0.5 →
-  RC ≈ 40 ns, e.g. ~40 kΩ high-res poly + ~1 pF MiM. Both small on-chip.
-- **Feedback DAC: RZ presumed default, NRZ kept as a parameter.** Pulse shape
-  is a knob in the behavioral model at every tier; the four-corner sim matrix
-  ({NRZ, RZ} × {edge asymmetry, jitter}) confirms or overturns the presumption
-  (see decision log).
-- The loop model includes **one full clock cycle of feedback (DAC) delay**
-  from day one — at 50 MHz, excess loop delay is a first-order effect, not a
-  refinement.
-- **Output:** complementary bitstream (Q / Q̄) on two digital outputs into a
-  terminated differential receiver on the FPGA ("pseudo-LVDS"). A true
-  current-mode LVDS driver is a stretch goal, not on the critical path.
-
-## Performance budget — 1st order @ fs = 50 MHz
-
-Ideal 1-bit SQNR: 6.02 + 1.76 − 10·log10(π²/3) + 30·log10(OSR) dB.
-
-| Bandwidth | OSR | Ideal SQNR | Expected (measured, tiers 0+1) |
-|---|---|---|---|
-| 1 MHz | 25 | 44.6 dB | ~6 ENOB (confirmed: 38–39 dB SNDR) |
-| 100 kHz | 250 | 74.5 dB | ~10 ENOB long-run; ±1 ENOB per-window scatter |
-
-The linear-model formula is ~8 dB optimistic on the precision path: 1st-order
-in-band noise is pattern tones, not white shaped noise (tier-0 long-run
-converges to ~66 dB SNDR at −4.4 dBFS; 16k-bit windows scatter 54–67 dB with
-dither seed). This is the strongest quantitative argument yet for the
-2nd-order upgrade if the 12-bit target is firm.
-
-Non-idealities ranked by expected impact (clean external clock retires jitter
-from the top of the usual list):
-
-1. Feedback DAC ISI / edge asymmetry (single-ended, NRZ) — threatens the
-   precision path; motivates the RZ option.
-2. Excess loop delay (comparator + DFF + DAC settling within 20 ns).
-3. OTA finite gain and GBW (needs ~40 dB gain, GBW a few × fs).
-4. Thermal noise (input R ~40 kΩ: comfortably below 12-bit level at 100 kHz).
-5. Clock jitter (retired by PolarFire clock; returns ×2 if RZ is chosen —
-   budget exists).
-
-## Block requirements (measured, tier-1 sweeps 2026-07-18)
-
-From `make specs` (reports/ota_specs.html): one OTA parameter swept at a
-time, knees read against the plateau (precision values carry ±1–2 dB
-pattern-noise scatter).
-
-| OTA parameter | measured knee | spec (margin) | design target |
-|---|---|---|---|
-| DC gain AOL | degraded at 30, recovered by 100–300 | ≥ 300 (50 dB) | 1000 (60 dB) |
-| GBW | **no knee down to 25 MHz** (see note) | ≥ 50 MHz | 150–200 MHz |
-| Slew rate | broken at 3, degraded at 6 V/µs (2026-07-19, CINT=2p; the older "broken at 12.5" was at CINT=1p — knee scales with k) | ≥ 100 V/µs | 200 V/µs |
-| Phase margin (2nd pole) | **no knee down to PM 28°** (FP2 sweep 50 MHz–2 GHz, 2026-07-19) | none needed; 46° extracted accepted | — |
-
-GBW note: the loop is insensitive to single-pole bandwidth because finite-GBW
-settling errors are *linear* — the same every cycle per bit value — so they
-appear as gain error, not noise/distortion, and delayed-RZ leaves a half
-period for residual settling. Caveat: a real multi-pole OTA adds phase (ELD)
-the single-pole model doesn't capture, hence the 150–200 MHz target rather
-than 50. Slew errors are the nonlinear ones, and the SR knee (~2× the naive
-pulse-edge estimate) is the binding constraint.
-
-Other blocks (from earlier findings): comparator+DFF must fully regenerate
-within the 10 ns half-period (soft decisions leak through the DAC as
-unshaped noise, ~25 dB penalty observed); DAC switches per open item 6
-(ron flat 229–441 Ω at W=10 µm across the low window); VCM buffer must
-absorb ~25 µA RZ return pulses at 50 MHz.
-
-First-cut OTA feasibility against the gm/Id data: gm ≈ 1.9 mA/V into ~1.5 pF
-gives 200 MHz; at gm/Id ≈ 15 that's ~250 µA tail → folded cascode at
-~1.7 mW, slew ~170 V/µs — all targets reachable with room.
-
-**OTA v1 sized (2026-07-18, sim/ota_tb.py, tt corner):** folded cascode,
-PMOS input pair at CM 0.9 V, cascoded PMOS mirror load, tail/sink from 1:1
-mirrors (cascode gate biases still ideal sources — bias generator pending).
-Achieved: **A0 65 dB, GBW 209 MHz, PM 58°, slew +197/−253 V/µs, output
-range 0.31–2.28 V, 4.5 mW** (power driven by the slew target: 380 µA tail).
-**Corners (2026-07-18):** tt/ss/ff/sf/fs all within A0 64.6–65.4 dB,
-GBW 199–220 MHz, PM 56–59°, SR+ 190–204 V/µs, 4.5 mW — sizes frozen for
-layout. Caveats: cascode gate biases and reference currents are still ideal
-sources (real bias gen will add spread), temperature not yet swept, PM
-consistently ~2–4° under the 60° bar (accepted for v1, revisit with PEX). Sizing lessons (they cost iterations, don't relearn them):
-- sky130 5 V fets are **width-binned** — arbitrary W is rejected; tile
-  parallel unit fingers (WUNIT = 5 µm) with `m=`.
-- Thick-oxide devices have **soft saturation**: a cascode at normal current
-  density burns 0.5 V of overdrive and sits in triode at Vds ≈ 0.35 V. Run
-  cascodes at ~1 µA/µm *and* L = 1 µm (gds at short L is poor even in
-  saturation; measured 17× boost at L=0.5 vs ~40× at L=1 low-density).
-- The single-ended **mirror pole** (two PMOS gates on the diode node) set
-  the phase margin; small/short mirror devices bought back ~6°.
-- Diagnose with `@m.x...msky130_...[gm]/[gds]/[vdsat]` op saves, not theory.
-
-**New coupling for open item 6:** the cascoded output floor is ~0.55 V
-(sink Vdsat + cascode Vdsat + margin), so the integrator swing cannot reach
-the 0.4 V window edge. Fix **confirmed in tier 1 (2026-07-18)**: CINT
-1 pF → 2 pF halves the feedback step (k = 0.125); measured integrator swing
-VCM ± 0.22 V (→ 0.68–1.12 V at the 0.9 V CM), SNDR unchanged on both paths,
-and — important — **input full scale is untouched** (±0.5 V, set by
-RIN/RDAC and the reference span, independent of the internal swing).
-
-## Area budget (vs TTSKY26c tiles)
-
-1x2 analog tile = 160×225 µm = 36,000 µm²; 2x2 = 334×225 µm = 75,150 µm².
-Estimate for the 1st-order chip (placed area ≈ 3–4× gate area for actives):
-
-| Block | est. placed area |
-|---|---|
-| OTA (≈2,000 µm² gate) | ~8,000 µm² |
-| C_INT 2 pF MiM (2 fF/µm², M3–M4 — M5 ban doesn't bite) | 1,000 µm² |
-| R_IN + R_DAC (high-res poly, wide for matching) | <1,000 µm² |
-| comparator + DFF + level shifter + output drivers | ~2,000 µm² |
-| VCM + reference buffers | ~4,000 µm² |
-| bias, DAC switches, misc | ~1,500 µm² |
-| **total** | **~18,000 µm² ≈ 50% of 1x2** |
-
-So the 1st-order design fits a **1x2 (two tiles) with ~50% margin** (rest
-becomes decap, which VCM/refs want anyway). The 2nd-order upgrade adds
-roughly +10,000 µm² (second OTA + cap) → ~75% of a 1x2: possible but tight.
-**If the 2nd order (or differential) is the ambition, buy 2x2 (four
-tiles);** a pure 1st-order chip is comfortable in two.
-
-## Layout notes (tier 3, learned on the OTA cell)
-
-- OTA layout is fully generated: `tools/gen_ota_layout.py` (placement from
-  SIZES, bbox-measured rows) + `tools/route_ota.py` (straps/routing derived
-  from the golden xschem netlist; extraction-verified 13/13 devices matched).
-- sky130 gencells with `full_metal` come with every contact column already
-  strapped in met1 full-height — group columns on **met2** (via1 down), run
-  risers on **met3**, tracks met1 above the array. Any met1 painted across a
-  device shorts everything.
-- Unit zoo: parent .mag transforms and runtime `box values` are 200/µm;
-  subcell .mag rects 100/µm; .ext port coords 200/µm. Layout gencell `w` is
-  per-finger (schematic W is total).
-- The router self-audits: same-layer overlaps between different-net paint
-  boxes are reported before painting. Jogs must anchor at the tap point,
-  not the slot-search range edge.
-- Status: connectivity done; ~4k DRC violations (min width/space of painted
-  routing) to clean, then netgen LVS (install pending) and PEX.
-
-## Toolflow
-
-Four tiers, all generated from `params.py` so they cannot drift apart:
-
-0. **Python behavioral model** — discrete-time equivalent difference equations;
-   the only tier where SNR is measured (coherent-FFT SNDR of ≥64k-sample
-   bitstreams, sub-second runs). Non-ideality knobs: RC error, ELD, finite
-   gain/GBW, ISI, jitter, hysteresis.
-1. **Behavioral ngspice** — same topology from ideal elements (B-sources,
-   switches). Validates that the circuit implements the math; thousands of
-   clocks in seconds–minutes.
-2. **Transistor-level ngspice** (sky130, PDK install pending) — block specs
-   only (integrator swing/settling, comparator offset/metastability, DAC
-   symmetry) + short full-loop sanity runs; measured non-idealities are
-   back-annotated into tier 0 to predict SNR.
-3. **magic layout** — LVS vs xschem netlist via netgen, PEX re-runs of tier-2
-   block tests.
-
-Schematics: **xschem** (text format generates reliably, netlists straight to
-ngspice, standard sky130/TT flow, LVS path to magic). KiCad and LTspice were
-tried in past sessions and rejected. lcapy/schemdraw only for documentation
-figures.
-
-xschem authoring notes (learned 2026-07-05, tier-1 build):
-- Literal braces in attribute strings (spice params like `{RIN}`) must be
-  escaped `\{RIN\}` — unescaped they silently truncate the attribute.
-- `vsource_arith.sym` netlists `VOL='expr'` E-source syntax → instance names
-  must start with `E`, not `B`.
-- In symbol `format=` strings, `@@PIN` references need surrounding spaces
-  (`v( @@PLUS )`), otherwise substitution truncates the card.
-- Custom symbols whose .subckt lives in a code block need `type=primitive`
-  (not `subcircuit`, which makes xschem descend looking for a .sch).
-- Headless: `xschem --netlist --spice -q -x`, PNG via `--png --plotfile`
-  (needs a DISPLAY); project `xschemrc` in cwd supplies library paths.
-- Behavioral convergence: keep hard `u()` steps out of feedback paths that
-  drive switch controls — use steep `tanh` instead; give the comparator very
-  high gain (soft comparator output + smoothed DFF = analog-valued feedback
-  pulses, which quietly cost ~25 dB of in-band SNDR).
-
-## Target shuttle (2026-07-18)
-
-**TTSKY26c** (sky130A, via ChipFoundry), submission deadline **2026-09-07**.
-Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
-(tinytapeout.com/specs/, single-die measurements):
-- Clock/inputs: max **66 MHz** in; ~10 ns pad→project insertion delay;
-  demo board RP2040 generates 1 Hz–66.5 MHz (we'll drive clk externally).
-- Outputs: max **33 MHz** toggle — a 50 Mbit/s bitstream needs two-phase
-  demux (open item 1b). Mux round-trip latency ~20 ns, pin-to-pin skew <2 ns.
-- Digital I/O domain is **VDPWR = 1.8 V** → on-chip 1.8→3.3 level shifter
-  needed for clk; bitstream output driven back at 1.8 V.
-- Analog: 6 `ua` pins (use in order), path <500 Ω / <5 pF / 4 mA;
-  40 €/pin (first two), 100 €/pin after; VAPWR 3.3 V available with the
-  analog template; analog projects min 2 tiles high (1x2 = 160×225 µm, 140 €).
-- Input path check: 500 Ω / 5 pF against RIN = 40 kΩ → 1.25 % gain error,
-  64 MHz pole — fine for both bandwidth targets.
+- **Goals & requirements** — README.md
+- **Architecture, method, measured specs, layout** — docs/ → the generated
+  manual (<https://pthomas1.gitlab.io/sigma-delta/>); its numbers are injected
+  by CI from reports/results/, so they cannot go stale
+- **Numeric design values** — params.py (single source of truth, imported by
+  every simulation tier)
+- **Current state, toolchain versions, how to drive the flow** — STATUS.md
+- **Contributor gotchas** (xschem authoring, magic unit zoo, router rules) —
+  docs/09-reproduce.md
 
 ## Open items
 
-1. ~~Verify TT I/O limits~~ — **resolved 2026-07-18**, numbers above.
-   Successor: **1b — output strategy**: keep fs = 50 MHz and demux the
-   bitstream onto two output pins at 25 MHz each (recommended; PolarFire
-   re-interleaves; complementary pairs would use 4 of the 8 outputs), vs.
-   drop fs to ~33 MHz single-pin (costs ~0.5–1 ENOB at 1 MHz BW). Also new:
-   clk level shifter (1.8→3.3 V) joins the block list.
-2. ~~NRZ vs RZ DAC~~ — **resolved 2026-07-11**, RZ confirmed (see decision
-   log); remaining sub-item: quantify RZ's jitter penalty once a realistic
-   clock-jitter number for the PolarFire→TT path exists.
-3. Install sky130 PDK (ciel/volare) + xschem sky130 symbol library for tier 2.
-4. Criteria for revisiting differential: if tier-2 shows ISI or supply/substrate
-   coupling capping the precision path below ~10 ENOB despite RZ.
-5. Prior transistor-level 1st-order blocks live in `backup/` (excluded from
-   git); pull individual files in as needed.
-6. **Choose the exact reference window** (follows from the 2026-07-18
-   all-NMOS DAC decision). **Measured 2026-07-18** (sim/char_fets.py,
-   reports/fet_char.html, tt corner): nfet_g5v0d10v5 Vth(cc) = 0.86 V,
-   pfet 1.10 V; NMOS pass-switch ron (W=10 µm, gate 3.3 V) =
-   229/290/441 Ω at 0.4/0.9/1.4 V — flat — vs **35 kΩ at the old
-   VREFP = 2.15 V** (80× cliff starting ~1.8 V). 0.4/0.9/1.4 V adopted
-   provisionally; remaining sub-questions before locking params.py: OTA
-   input CM at 0.9 V (PMOS pair headroom fine, verify swing), comparator CM,
-   buffer headroom, input mapping. Also confirmed: 1.8 V gate drive is
-   useless even for the low window (1.8 − 0.86 < 1.4) — the clk level
-   shifter is mandatory, not optional. gm/Id sizing curves in the same
-   report (weak-inversion plateau ≈19/V nfet, ≈21/V pfet, |Vds|=1.65 V).
-7. **Input conditioning / scaling.** The virtual-ground input is itself a
-   passive conditioner: any external range maps onto the ±0.5 V full scale
-   with a scaled R_IN (gain <1) plus one offset resistor from a reference
-   into the summing node — linear, low-noise, no new block (e.g. 0–3.3 V
-   external ↦ full scale with R_IN ≈ 132k + shift R). An *active* input
-   op-amp (buffer/PGA) is only warranted if the source can't drive ~40 kΩ
-   or needs gain >1 — it would sit unshaped in the signal path and must
-   out-perform the ADC's noise, i.e. it's another OTA-class design; prefer
-   external conditioning on the PolarFire carrier for v1. Blocking
-   question: what is the actual source (impedance, range, bandwidth)?
-8. **OTA 1/f noise in the precision band** — sky130 flicker corners can reach
-   the 100 kHz band. First response: PMOS input pair, generous device area.
-   If tier-2 noise sims show 1/f still dominating the 10–12 ENOB budget,
-   consider chopping the OTA (distinct from the differential-topology
-   question; see 2026-07-05 terminology entry).
+**None gating v1** — the design is submission-ready (TTSKY26c, deadline
+2026-09-07). v2 threads (2nd order, fully-differential, decision-path noise)
+are tracked in STATUS.md and on the commercial branch.
 
-## Toolchain versions
+Dispositions of the historical items 1–8 (log entries cite this numbering):
 
-- ngspice 42, xschem 3.4.4 (noble packages) — fine.
-- **magic: noble's 8.3.105 is too old for the PDK tech file (requires
-  ≥ 8.3.411) — build from source** (github.com/RTimothyEdwards/magic).
-  Applies to the dev machine AND the CI runner (ci/lxd/cloud-init.yml
-  needs a source-build step before layout jobs can run there).
-- netgen-lvs 1.5.133 (noble) — version vs PDK unverified, check at first LVS.
+1. TT I/O limits — resolved 2026-07-18 (platform specs measured). Successor
+   1b (output strategy) resolved 2026-07-19: demux REJECTED, Q/Q̄ pair at
+   fs = 50 MHz (see the IO-decisions entry).
+2. NRZ vs RZ DAC — resolved 2026-07-11, RZ (reports/dac_compare.html). The
+   jitter sub-item closed 2026-07-26: susceptibility measured instead of
+   waiting for a PolarFire number (see log entry).
+3. sky130 PDK + xschem library install — done (PDK_ROOT via ciel, pinned
+   hash in ci/lxd/cloud-init.yml).
+4. Criteria for revisiting differential — superseded: v1 accepted
+   single-ended 2026-07-21; fully-differential is the v2 architecture pass
+   (commercial branch).
+5. Reuse of prior blocks from backup/ — moot: every block was designed
+   fresh (all six laid out, DRC 0, LVS clean).
+6. Reference window — locked 2026-07-19: 0.4 / 0.9 / 1.4 V in params.py.
+7. Input conditioning / source impedance — closed 2026-07-25:
+   ADS131A04-class source, 132k resistive input, passive virtual-ground
+   network sufficient (commit 8524a40).
+8. OTA 1/f noise in the precision band — closed 2026-07-26: measured with a
+   dedicated .noise bench, budget holds with margin (see log entry).
 
 ## Decision log
 
@@ -1121,3 +894,64 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   against a bit-exact golden model + the acceptance ones-density.
   NOT YET SIMULATED (no iverilog on the bench). Bench DAC decision:
   AD5541A (kernel ad5446 driver; DAC 8 Click / Pmod DA3).
+
+- **2026-07-26: clock-jitter susceptibility measured (open item 2's
+  sub-item closed) -- sim/jitter_tb.py, `make jitter`.** Instead of
+  waiting for a measured PolarFire->TT jitter number, a tier-0 sweep of
+  per-edge Gaussian clock jitter (RZ: pulse-width modulation of the
+  feedback charge = unshaped input-band error; NRZ: only bit
+  transitions jitter). Measured (2^20 bits, median of 3 seeds): RZ
+  jitter-only in-band floor at 10 ps RMS = 73.5 dB precision /
+  63.5 dB fast, sliding 20 dB/decade with sigma; knees (jitter =
+  quantization floor) ~24 ps precision, ~170 ps fast. NRZ measures
+  ~5 dB less noise power -- the "2x jitter cost" the RZ decision
+  (2026-07-11) accepted is confirmed at 2x amplitude. FPGA clock
+  outputs are single-digit-ps class, >=10x under the precision knee:
+  jitter stays retired. Gate-method lesson: the direct baseline-minus-
+  10ps subtraction false-fails on short windows (+-1.5 dB pattern-
+  noise scatter swamps a ~1 dB effect), so the gate extrapolates the
+  jitter-only floor from the 1000 ps point (30 dB above scatter; lands
+  exactly on the analytic 2*sigma^2/(TS/2)^2/OSR prediction). CI: snr
+  smoke job (--quick), gates >= 72 dB precision / >= 45 dB fast at
+  10 ps. Reopen if: Phase-1 bench (docs/09b) measures > ~10 ps RMS at
+  the TT clk pin.
+
+- **2026-07-26: OTA 1/f noise measured (open item 8 closed) --
+  sim/noise_tb.py, `make noise`.** The systemic blind spot first:
+  every acceptance number in CI comes from .tran runs, and transient
+  analysis simulates ZERO device noise -- flicker was invisible to the
+  entire suite by construction; this bench (ngspice .noise on the
+  ota_tb netlist -- same SIZES, same extracted wrapper with --pex,
+  sky130 BSIM4 flicker parameters, unity-buffer config because the
+  integrator has no DC operating point) is the only 1/f coverage.
+  Measured (tt; sch == pex, C-only extraction adds no noise sources):
+  white 6.9 nV/rtHz, 1/f corner 631 kHz -- flicker dominates the
+  ENTIRE 100 kHz precision band, so item 8's worry was justified --
+  14 uV rms at the OTA input over 10 Hz-100 kHz. Referred to the
+  modulator input with the params.py passives (noise gain Gn = 1 +
+  RIN/RDAC + RIN/ROFF = 8.43): OTA 118 uV + resistor thermal 43 uV =
+  126 uV rms vs the 351 uV precision quantization floor = ~0.5 dB
+  SNDR cost, inside the 12-ENOB aspiration (156 uV). No chopping in
+  v1 -- the PMOS pair + 250 um input width already bought the margin.
+  CI gate <= 150 uV (smoke: schematic; layout-verify: --pex). Out of
+  scope, stated in the bench header: reference-buffer noise and the
+  comparator (part of the measured decision-path floor, 2026-07-20
+  night entry). Reopen if: Phase-3 silicon precision noise exceeds
+  the CI-predicted floor.
+
+- **2026-07-26: DESIGN.md restructured to a pure decision log.** The
+  prose chapters (requirements, architecture, performance budget,
+  block requirements, area budget, layout notes, toolflow, shuttle
+  specs, toolchain versions) were written 07-05..07-18 and the work
+  had since superseded them -- the Open-items list was flagged stale
+  today, the toolchain section still said "build magic from source"
+  (done 07-19), the layout notes still said "~4k DRC violations to
+  clean". Static prose copies rot; append-only entries and
+  CI-generated pages cannot. Moved: goals -> README.md; architecture/
+  method/specs/layout -> docs/ (numbers CI-injected); toolchain +
+  drive instructions -> STATUS.md (already there, fresher);
+  contributor gotchas (xschem authoring notes, magic unit zoo,
+  empirical router rules) -> docs/09-reproduce.md; numeric values were
+  already in params.py. Item 1-8 dispositions recorded at the top of
+  this file; log entries keep citing the historical numbering. Git
+  history (this commit's parent) holds the retired prose.
