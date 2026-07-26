@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Emit the top-level golden netlist: spice/golden/top.spice.
 
-.subckt sd_top UA0 UA1 UO0 UO1 CLK VDPWR VAPWR VGND -- the full
+.subckt sd_top UA0 UA1 UA2 UA3 UA4 UO0 UO1 CLK VDPWR VAPWR VGND -- the full
 modulator stitched from the block goldens (inlined) plus the passive
 cells, whose device cards are lifted from their magic extractions
 (mag/<cell>.spice) so golden and layout agree on drawn geometry.
@@ -41,7 +41,15 @@ PASSIVES = [
     ("RIN", "rin", {"R1": "UA0", "R2": "sum", "B": "VGND"}),
     # 0-3.3 V input range (2026-07-25): offset leg nulling the
     # (VIN_MID - VCM)/RIN standing current at the virtual ground
-    ("ROFF", "roff", {"R1": "sum", "R2": "VGND", "B": "VGND"}),
+    # ROFF bottom leg is pin ua[2] (2026-07-26): grounded it is the
+    # stock 158.4k offset leg (mid-scale 1.65 V); driven DC it slides
+    # the input window -- the in-system offset-trim experiment for
+    # the commercial exploration.
+    ("ROFF", "roff", {"R1": "sum", "R2": "UA2", "B": "VGND"}),
+    # vcm / vrefp monitor pins through 100k isolation (silicon-vs-CI
+    # correlation probes)
+    ("RISO1", "riso", {"R1": "vcm", "R2": "UA3", "B": "VGND"}),
+    ("RISO2", "riso", {"R1": "vrefp", "R2": "UA4", "B": "VGND"}),
     ("RDAC", "rdac", {"R1": "dac", "R2": "sum", "B": "VGND"}),
     ("RLT", "rl_top", {"R1": "VAPWR", "R2": "lad_p", "B": "VGND"}),
     ("RLP", "rl_pc", {"R1": "lad_p", "R2": "lad_c", "B": "VGND"}),
@@ -122,7 +130,8 @@ def main():
             txt = open(f"spice/golden/{b}.spice").read()
             out.append(re.search(rf"^\.subckt {b}\b.*?^\.ends", txt,
                                  re.M | re.S).group(0))
-    out.append(".subckt sd_top UA0 UA1 UO0 UO1 CLK VDPWR VAPWR VGND")
+    out.append(".subckt sd_top UA0 UA1 UA2 UA3 UA4 UO0 UO1"
+               " CLK VDPWR VAPWR VGND")
     out += INSTANCES
     # UA1 IS the integrator node (monitor pin = int, no series R)
     for inst, cell, pm in PASSIVES:

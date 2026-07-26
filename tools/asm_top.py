@@ -55,6 +55,14 @@ PLACE.update({
     "rlb":   ("rl_bot", 285, 130),
     "rin":   ("rin", 12, 104),
     "roff":  ("roff", 24, 102),
+    # monitor isolation resistors in the south margin strip, next to
+    # their ua[3]/ua[4] pins (labels drop nearly straight down)
+    # x chosen so each cell's R2 tap sits exactly over its ua[n]
+    # label (78.66 / 59.34): the label leg is then a clean vertical
+    # drop that fully covers the label box (a maze-routed approach
+    # arrived from below y=0 and left the label on empty space)
+    "riso1": ("riso", 70.66, 2),
+    "riso2": ("riso", 51.34, 2),
     "rdac":  ("rdac", 42, 104),
     "sm":    ("sw_nmos", 59, 104),
     "st1":   ("sw_nmos", 66, 104),
@@ -92,7 +100,8 @@ BPORTS = {
     "odrvb": ["IN33", "OUT18", "VDD18", "VSS"],
 }
 CAPS = {"cint", "cdec1", "cdec2", "cdec3", "cflt1", "cflt2"}
-RESC = {"rlt", "rlp", "rlc", "rlb", "rin", "rdac", "roff"}
+RESC = {"rlt", "rlp", "rlc", "rlb", "rin", "rdac", "roff",
+        "riso1", "riso2"}
 SWS = {"sm", "st1", "st2", "sb1", "sb2"}
 
 # WIRES: net -> list of polylines; points are (x, y) or ("T", inst,

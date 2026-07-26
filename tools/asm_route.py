@@ -384,7 +384,8 @@ class Router:
 
 NETS = {
  "sum": ["rin.R2", "roff.R1", "rdac.R2", "cint.C2", "ota.INM"],
- "vcm": ["ota.INP", "comp.INM", "sm.S", "bufc.OUT", "cdec1.C1"],
+ "vcm": ["ota.INP", "comp.INM", "sm.S", "riso1.R1", "bufc.OUT",
+         "cdec1.C1"],
  "UA1": ["ota.OUT", "cint.C1", "comp.INP"],
  # 2026-07-25 loop rephase: comp clocks on clkb33 (senses at the
  # clk33 rise, the tier-1 instant) and its SR outputs drive the DAC
@@ -398,7 +399,7 @@ NETS = {
  "dac": ["rdac.R1", "sm.D", "st2.S", "sb2.S"],
  "xt": ["st1.S", "st2.D"],
  "xb": ["sb1.S", "sb2.D"],
- "vrefp": ["st1.D", "bufp.OUT", "cdec3.C1"],
+ "vrefp": ["st1.D", "riso2.R1", "bufp.OUT", "cdec3.C1"],
  "vrefn": ["sb1.D", "bufn.OUT", "cdec2.C1"],
  "lad_p": ["rlt.R2", "rlp.R1", "bufp.IN"],
  "lad_c": ["rlp.R2", "rlc.R1", "bufc.IN"],
@@ -410,7 +411,7 @@ NETS = {
  "VGND": ["ota.VSS", "comp.VSS", "cdec2.C2", "lvl.VSS", "dff.VSS",
           "bias.VSS", "bufn.VSS", "bufc.VSS", "bufp.VSS", "odrvq.VSS",
           "odrvb.VSS", "rin.B", "rdac.B", "rlt.B", "rlp.B", "rlc.B",
-          "rlb.B", "rlb.R2", "roff.R2", "roff.B",
+          "rlb.B", "rlb.R2", "roff.B", "riso1.B", "riso2.B",
           "sm.B", "st1.B", "st2.B", "sb1.B", "sb2.B",
           "cdec1.C2", "cdec3.C2", "cflt1.C2", "cflt2.C2"],
  # lvl.VDD33 comes AFTER bias.VDD: it is a SKIP_OK member whose hand
@@ -439,12 +440,14 @@ ORDER = ["xt", "xb", "dac", "clk33", "VDPWR", "clkb33", "UA1", "vcm",
 # the frame script connects them to its own full-height met4 stripes.
 LABELS_REQ = {
     "UA0": (136.62, 0.5), "UA1": (117.30, 0.5),
+    "UA2": (97.98, 0.5), "UA3": (78.66, 0.5), "UA4": (59.34, 0.5),
     "UO0": (78.66, 225.26), "UO1": (75.90, 225.26),
     "CLK": (128.34, 225.26), "VGND": (138, 218),
     "VAPWR": (233, 218), "VDPWR": (134, 218),
 }
 PASSTHRU = {"UA0": "rin.R1", "UO0": "odrvq.OUT18", "UO1": "odrvb.OUT18",
-            "CLK": "lvl.CLK18"}
+            "CLK": "lvl.CLK18", "UA2": "roff.R2", "UA3": "riso1.R2",
+            "UA4": "riso2.R2"}
 
 # a handful of legs the auto-router can't currently thread through
 # (see the module docstring); routed by hand instead and skipped here

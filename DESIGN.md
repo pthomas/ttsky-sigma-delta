@@ -1092,3 +1092,22 @@ Template: `TinyTapeout/ttsky-analog-template`. Measured TT platform specs
   comparator is part of the loop timing contract, and only the
   netlist-ladder A/B (tier-1 vs golden vs extracted, same window)
   made the half cycle visible.
+
+- **2026-07-26: three new analog pins (commercial-exploration
+  support) + silicon test plan.** ua[2] = VOFF: the ROFF bottom leg,
+  formerly hardwired to VGND, now a pin -- grounded it is stock
+  (1.65 V mid-scale); driven DC it slides the input window (the
+  in-system offset-trim experiment the commercial part needs data
+  for). ua[3]/ua[4] = vcm/vrefp monitors through new 100k thin-poly
+  isolation cells (riso, nx=12 x 6.7 um, fits the south margin strip
+  at y=2 next to the pins). Differential input CANNOT be retrofitted
+  passively (single virtual ground sums all legs with one sign) --
+  that is the v2 fully-differential pass, recorded on the commercial
+  branch. Placement lesson: label legs must ARRIVE THROUGH the label
+  box, not at its edge -- the first maze route dove below y=0 and
+  came up, leaving the m4 label on empty space (no port, LVS pin
+  missing); fixed by placing the riso cells so R2 sits exactly over
+  the pin x and the leg is a straight vertical drop. sd_top DRC 0 /
+  LVS match (subckt now 11 ports), frame DRC 0. Test plan chapter
+  (docs/09b): 4 phases, every row correlates measured vs
+  CI-predicted; the Phase-3 correlation table is the deliverable.

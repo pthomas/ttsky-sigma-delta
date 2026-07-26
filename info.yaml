@@ -57,9 +57,9 @@ pinout:
   # Analog pins - make sure to also set "analog_pins" above, else the pins won't be connected
   ua[0]: "VIN - analog input, 0-3.3 V around the 1.65 V mid-scale (through the on-chip 132k input resistor)"
   ua[1]: "INT - integrator output monitor (OTA output, high impedance)"
-  ua[2]: ""
-  ua[3]: ""
-  ua[4]: ""
+  ua[2]: "VOFF - offset-leg reference: ground for stock 1.65 V mid-scale, drive DC to slide the input window"
+  ua[3]: "VCMM - vcm monitor via 100k isolation (leave open in normal use)"
+  ua[4]: "VRPM - vrefp monitor via 100k isolation (leave open in normal use)"
   ua[5]: ""
 
 # Do not change!
