@@ -31,10 +31,7 @@ stated. Silicon comes back from the TTSKY26c shuttle later.
 | `VAPWR` | — | power | 3.3 V analog supply. References, input range and mid-scale are ratiometric to it. |
 | `VDPWR` | — | power | 1.8 V digital supply (level-shifter input stage, output drivers). |
 | `VGND` | — | ground | Common ground. |
-| `ua[2]` | VOFF | analog in | Offset-leg reference (bottom of the 158.4 kΩ leg). **Ground it for datasheet behavior** (1.65 V mid-scale). Driving it DC slides the input window (≈1.65 V at 0 V input, down to ≈0.15 V mid-scale at 1.8 V) — in-system offset trim. Left floating, mid-scale drifts toward 0.9 V. |
-| `ua[3]` | VCMM | analog out | vcm reference monitor through 100 kΩ isolation. Observe with ≥1 MΩ; leave open in normal use. |
-| `ua[4]` | VRPM | analog out | vrefp reference monitor through 100 kΩ isolation. Observe with ≥1 MΩ; leave open in normal use. |
-| `ua[5]` | — | — | Unused analog pin (not connected). |
+| `ua[2..5]` | — | — | Unused analog pins (not connected). |
 | `ui_in[7:0]`, `uio[7:0]`, `uo[7:2]`, `rst_n`, `ena` | — | — | Unused digital pins. The design has no reset or enable — it is alive whenever powered and clocked. |
 
 ## Recommended operating conditions

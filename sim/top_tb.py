@@ -44,7 +44,7 @@ GATE_DB = 36.0
 
 
 def deck(nfft, sig_bin, corner="tt", idealclk33=False,
-         idealrefs=False, golden=False, voff=0.0):
+         idealrefs=False, golden=False):
     tstop = (nfft + NSETTLE) * P.TS
     fin = sig_bin * P.FS / nfft
     # Diagnostic (--idealclk33): overpower the level shifter's output
@@ -67,9 +67,8 @@ def deck(nfft, sig_bin, corner="tt", idealclk33=False,
                   f"VRN xdut.buf_layout_0/out 0 {P.VREFN:g}\n")
     netfile = ("golden/top.spice" if golden else "sd_top_pex.spice")
     # the golden and extracted subckts declare different port orders
-    dut = ("XDUT ua0 ua1 ua2 ua3 ua4 uo0 uo1 clk vdpwr vapwr vgnd sd_top"
-           if golden else
-           "XDUT ua0 uo0 uo1 clk ua2 ua3 ua4 vdpwr ua1 vgnd vapwr sd_top")
+    dut = ("XDUT ua0 ua1 uo0 uo1 clk vdpwr vapwr vgnd sd_top" if golden
+           else "XDUT ua0 uo0 uo1 clk vdpwr ua1 vgnd vapwr sd_top")
     return f"""* sd_top PEX acceptance ({corner}, {nfft} bits)
 .lib {PDK_LIB} {corner}
 .include {netfile}
@@ -84,10 +83,6 @@ VIN ua0 0 SIN({P.VIN_MID:g} {P.AMP:g} {fin:g})
 CU0 uo0 0 1p
 CU1 uo1 0 1p
 CA1 ua1 0 50f
-* ua2 = stock 1.65 V mid-scale at 0 V; drive to slide the window
-VOF ua2 0 {voff:g}
-CA3 ua3 0 50f
-CA4 ua4 0 50f
 {dut}
 {force}.tran {P.TSTEP*1e9:g}n {tstop*1e9:.1f}n
 .control
@@ -116,9 +111,6 @@ def main():
     ideal = "--idealclk33" in sys.argv
     irefs = "--idealrefs" in sys.argv
     gold = "--golden" in sys.argv
-    voff = 0.0
-    if "--voff" in sys.argv:
-        voff = float(sys.argv[sys.argv.index("--voff") + 1])
     tag = ""
     if "--tag" in sys.argv:
         tag = "_" + sys.argv[sys.argv.index("--tag") + 1]
@@ -126,7 +118,7 @@ def main():
         tag = "_" + corner
     os.makedirs("spice", exist_ok=True)
     open("spice/top_tb.spice", "w").write(
-        deck(nfft, sig_bin, corner, ideal, irefs, gold, voff))
+        deck(nfft, sig_bin, corner, ideal, irefs, gold))
     r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
                        capture_output=True, text=True)
     if r.returncode or not os.path.exists("spice/top_tb.csv"):

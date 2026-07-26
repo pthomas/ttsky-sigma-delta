@@ -955,3 +955,27 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   already in params.py. Item 1-8 dispositions recorded at the top of
   this file; log entries keep citing the historical numbering. Git
   history (this commit's parent) holds the retired prose.
+
+- **2026-07-26: analog pins 5 -> 2 (VIN + INT); VOFF and both monitors
+  removed (user decision: cost).** TT bills 40 EUR/pin for the first
+  two analog pins and 100 EUR/pin after -- 5 pins = 380 EUR, 2 = 80.
+  Why it's safe: the monitors were DC-only by construction (100k riso
+  against pad/mux/board capacitance = a ~100-300 kHz pole, so the
+  50 MHz per-bit reference residuals were never observable there), and
+  both DC values are inferable from the transfer function once the
+  loop runs -- the mid-scale null gives vcm, the measured full scale
+  gives the vrefp-vcm span through known resistor ratios, and
+  ratiometry is measurable by tracking the null against a VAPWR
+  sweep. Dead-chip debug falls to ua[1] (INT) plus supply currents.
+  VOFF was the commercial window-slide experiment, never a v1
+  validation need; the experiment moves to the v2/commercial part.
+  Mechanically a clean revert of the 07:25 three-pin commit (0ac7ff8;
+  no later commit touched the generators): roff.R2 back to VGND, riso
+  cells deleted, sd_top back to 8 ports, asm_route regenerates
+  asm_wires (28 nets, 8 labels). Re-verified from source: sd_top DRC 0
+  / LVS match, extracted acceptance 40.2 dB (inside the 38.3-40.7
+  band -- the monitor loading had cost nothing and its removal
+  changes nothing), frame DRC 0, GDS/LEF exported. Test plan Phase-1
+  monitor rows replaced by transfer-function inference rows (docs/
+  09b). Reopen if: silicon bring-up shows the loop dead with ua[1]
+  inconclusive -- then reference pins become a v2 line item.

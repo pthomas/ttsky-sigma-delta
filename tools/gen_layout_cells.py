@@ -130,9 +130,6 @@ def main():
     ok = True
     ok &= res_cell_thin("rin", 132e3, nx=6, l0=17.0)
     ok &= res_cell_thin("roff", 158.4e3, nx=6, l0=20.5)
-    # monitor-pin isolation (vcm/vrefp -> ua[3]/ua[4]); wide-and-short
-    # so it fits the south margin strip next to the pins
-    ok &= res_cell_thin("riso", 100e3, nx=12, l0=6.7)
     ok &= res_cell("rdac", 20e3, nx=6, l0=14.7)
     ok &= cap_cell("cint", 2.0, w=25, l=20, nx=2)
     ok &= fet_cell("sw_nmos", 10, 0.5)

@@ -17,7 +17,7 @@ design document:
 - Living design document (CI-generated): see the GitLab Pages site of the
   design repo
 
-**Pinout:** ua[0] = VIN (0-3.3 V about the 1.65 V mid-scale, through the on-chip 132k input resistor), ua[1] = integrator monitor (debug, high-impedance), ua[2] = VOFF (ground for stock behavior; drive DC to slide the input window), ua[3]/ua[4] = vcm/vrefp monitors via 100k isolation (leave open), uo[0]/uo[1] = Q/QB bitstream (1.8 V, capture synchronously), clk = 50 MHz.
+**Pinout:** ua[0] = VIN (0-3.3 V about the 1.65 V mid-scale, through the on-chip 132k input resistor), ua[1] = integrator monitor (debug, high-impedance), uo[0]/uo[1] = Q/QB bitstream (1.8 V, capture synchronously), clk = 50 MHz.
 
 **Status: work in progress toward the shuttle deadline.** The current GDS
 contains the verified OTA macro (DRC-clean, LVS-clean, parasitic-

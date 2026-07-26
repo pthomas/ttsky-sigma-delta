@@ -29,12 +29,14 @@ clock's FALL — fixed by clocking the comparator on clkb33 and driving
 the DAC switches from its SR latch (DFF now retimes outputs only).
 Extracted fast-path SNDR: **38.3–40.7 dB** (above the tier-1 band
 36.4–38.0), corners ss 33.4 / ff 35.3. Acceptance re-instrumented:
-2048-bit window, gate 36 (512-bit windows scatter ±3 dB). Three new
-analog pins: ua[2]=VOFF (offset-leg reference: grounded=stock,
-driven=window slide, verified 0.732 vs 0.727 predicted),
-ua[3]/ua[4]=vcm/vrefp monitors via 100k riso cells. info.yaml
-analog_pins=5 (TT bills per analog pin — flagged to Paul).
-**Precheck green** on all of it.
+2048-bit window, gate 36 (512-bit windows scatter ±3 dB). Analog
+pins: **back to 2 (VIN + INT)** — the 07-26-morning VOFF +
+vcm/vrefp-monitor pins were removed the same day on cost
+(100 €/pin after the first two; 380 → 80 €); references are
+validated through transfer-function inference instead (docs/09b
+Phase 1), and the commercial window-slide experiment moves to v2.
+Rebuilt + re-verified: sd_top DRC 0 / LVS match, extracted 40.2 dB,
+frame DRC 0.
 
 | Area | State |
 |---|---|
@@ -43,7 +45,7 @@ analog_pins=5 (TT bills per analog pin — flagged to Paul).
 | Commercial | **local-only branch `commercial`** (never push; no upstream set). COMMERCIAL.md: thesis, cost model, decisions (power-conversion socket, differential required → v2 = fully-differential + 2nd-order in ONE architecture pass), open questions for Paul (channels, funding, license, name, PGA) |
 | Fabric RTL | **drafted, not yet run — awaiting Paul's review of rtl/PLAN.md**: sdm_rx.v (AXI4-Lite + dual sinc³), cocotb TB (cocotbext-axi) incl. the mixed-signal test (committed ngspice PEX bitstream → RTL → registers), tools/gen_rtl_vectors.py. Simulator not installed: `sudo apt install iverilog; pip install cocotb cocotbext-axi` (Paul runs) |
 | Bench plan | PolarFire SoC Icicle; DAC = AD5541A (kernel ad5446 driver; MikroE DAC 8 Click on mikroBUS, or Pmod DA3) |
-| Open (user-side) | TT shuttle-page submission; Pages visibility toggle; analog-pin billing OK?; rtl/PLAN.md review |
+| Open (user-side) | TT shuttle-page submission; Pages visibility toggle; rtl/PLAN.md review |
 
 **Next actions (fresh context starts here):** (1) Paul reviews
 rtl/PLAN.md → iterate; (2) install sim tools → first cocotb run of

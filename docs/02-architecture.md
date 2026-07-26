@@ -77,8 +77,6 @@ one of them:
 | Signal | TT pin | Type |
 |---|---|---|
 | VIN — analog input, 0–3.3 V about the 1.65 V mid-scale | `ua[0]` | analog |
-| VOFF — offset-leg reference: ground for stock behavior, drive DC to slide the input window | `ua[2]` | analog |
-| VCMM / VRPM — vcm and vrefp monitors through 100 kΩ isolation (silicon-vs-CI correlation) | `ua[3]`, `ua[4]` | analog |
 | INT — integrator output monitor | `ua[1]` | analog (debug only; the ADC runs without it) |
 | Clock in, 50 MHz | `clk` | digital, 1.8 V (level-shifted to 3.3 V on-chip) |
 | Bitstream Q | `uo[0]` | digital, 1.8 V |
