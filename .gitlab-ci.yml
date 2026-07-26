@@ -28,6 +28,13 @@ workflow:
 variables:
   PDK_ROOT: /opt/pdk
 
+# every job's python3 (and, later, cocotb-config) resolves to /opt/eda-venv
+# -- the single CI interpreter; the runner installs no system numpy/
+# matplotlib/markdown (ci/lxd/cloud-init.yml)
+default:
+  before_script:
+    - export PATH=/opt/eda-venv/bin:$PATH
+
 stages:
   - smoke
   - reports
