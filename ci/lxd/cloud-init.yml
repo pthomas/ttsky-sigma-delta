@@ -25,6 +25,11 @@ packages:
   - python3-matplotlib
   - python3-markdown
   - tree
+  # RTL verification (rtl/tb cocotb suite; verilator/yosys for the lint +
+  # synthesis-smoke steps). noble: iverilog 12.0, verilator 5.020, yosys 0.33
+  - iverilog
+  - verilator
+  - yosys
   # build deps for magic / netgen
   - build-essential
   - m4
@@ -56,6 +61,11 @@ runcmd:
   - /opt/eda-venv/bin/pip install ciel
   - mkdir -p /opt/pdk
   - /opt/eda-venv/bin/ciel enable --pdk-family sky130 --pdk-root /opt/pdk f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7
+  # cocotb for rtl/tb, pinned to the dev box's versions; numpy/matplotlib
+  # again because the venv doesn't see the system packages (spectrum gate
+  # and sample plot in test_sdm_rx.py). Run the suite with
+  # PATH=/opt/eda-venv/bin:$PATH so cocotb-config resolves.
+  - /opt/eda-venv/bin/pip install cocotb==2.0.1 cocotbext-axi==0.1.28 numpy matplotlib
   - chown -R gitlab-runner:gitlab-runner /opt/pdk /opt/eda-venv
   # shell-executor jobs run login shells, so profile.d exports reach CI jobs
   - echo 'export PDK_ROOT=/opt/pdk' > /etc/profile.d/pdk.sh

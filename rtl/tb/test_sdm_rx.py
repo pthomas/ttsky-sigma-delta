@@ -15,6 +15,7 @@ Three layers of test:
 Run: make -C rtl/tb   (needs iverilog + cocotb + cocotbext-axi)
 """
 
+import math
 import os
 from pathlib import Path
 
@@ -66,8 +67,22 @@ def sign32(v):
     return v - (1 << 32) if v & 0x80000000 else v
 
 
+def mod2_bits(n, amp, cycles):
+    """Software second-order sigma-delta modulator (Schreier's MOD2,
+    delayed integrators, 2x feedback on the second): a sine of `amp`
+    fractions of full scale, `cycles` periods over n bits."""
+    x1 = x2 = 0.0
+    bits = []
+    for k in range(n):
+        u = amp * math.sin(2 * math.pi * cycles * k / n)
+        v = 1.0 if x2 >= 0 else -1.0
+        x1, x2 = x1 + u - v, x2 + x1 - 2 * v
+        bits.append(1 if v > 0 else 0)
+    return bits
+
+
 async def start(dut):
-    cocotb.start_soon(Clock(dut.aclk, 20, units="ns").start())
+    cocotb.start_soon(Clock(dut.aclk, 20, unit="ns").start())
     axil = AxiLiteMaster(AxiLiteBus.from_prefix(dut, "s_axil"),
                          dut.aclk, dut.aresetn, reset_active_level=False)
     dut.bit_i.value = 0
@@ -118,7 +133,7 @@ async def test_cic_known_patterns(dut):
     ones = [1] * (25 * 8)
     await stream(dut, ones)
     model = sinc3_model(ones, 25)
-    assert await rd(axil, DATA_FAST) == sign32(model[-1] & 0xFFFFFFFF)
+    assert sign32(await rd(axil, DATA_FAST)) == model[-1]
     assert model[-1] == 25 ** 3, "steady-state DC must be OSR^3"
     assert await rd(axil, BITS_TOTAL) == len(ones)
     assert await rd(axil, BITS_ONES) == len(ones)
@@ -127,7 +142,7 @@ async def test_cic_known_patterns(dut):
     alt = [1, 0] * (25 * 4)
     await stream(dut, alt)
     model = sinc3_model(alt, 25)
-    assert await rd(axil, DATA_FAST) == model[-1]
+    assert sign32(await rd(axil, DATA_FAST)) == model[-1]
     st = await rd(axil, STATUS)
     assert st & 1
     await wr(axil, STATUS, 1)           # W1C
@@ -159,8 +174,8 @@ async def test_pex_bitstream(dut):
     mp = sinc3_model(bits, 250)
     assert await rd(axil, COUNT_FAST) == len(mf)
     assert await rd(axil, COUNT_PREC) == len(mp)
-    assert await rd(axil, DATA_FAST) == mf[-1]
-    assert await rd(axil, DATA_PREC) == mp[-1]
+    assert sign32(await rd(axil, DATA_FAST)) == mf[-1]
+    assert sign32(await rd(axil, DATA_PREC)) == mp[-1]
 
     # the tone is visible in the decimated fast path (informative,
     # loose gate: settling samples excluded, window not coherent)
@@ -176,3 +191,80 @@ async def test_pex_bitstream(dut):
         assert spec[peak] > 100 * np.median(spec[1:])
     except ImportError:
         dut._log.warning("numpy missing -- spectrum check skipped")
+
+
+@cocotb.test()
+async def test_sine(dut):
+    """A clean sine through the software modulator at full bit rate.
+    This is the waveform-viewing test: in gtkwave put aclk, bit_i,
+    data_fast and data_prec (signed decimal, analog step) on screen
+    -- 25000 bits, 5 sine periods (10 kHz at the 50 MHz bit clock),
+    0.6 FS amplitude; data_prec gets 20 points per period."""
+    bits = mod2_bits(25000, 0.6, 5)
+    mf = sinc3_model(bits, 25)
+    mp = sinc3_model(bits, 250)
+
+    axil = await start(dut)
+    await wr(axil, CTRL, 0b11)
+    await stream(dut, bits)
+
+    assert await rd(axil, COUNT_FAST) == len(mf)
+    assert await rd(axil, COUNT_PREC) == len(mp)
+    assert sign32(await rd(axil, DATA_FAST)) == mf[-1]
+    assert sign32(await rd(axil, DATA_PREC)) == mp[-1]
+    # stimulus sanity: steady-state precision-path swing ~ 0.6 FS
+    peak = max(abs(v) for v in mp[3:])
+    assert 0.5 * 250 ** 3 < peak < 0.7 * 250 ** 3
+
+
+@cocotb.test()
+async def test_pex_axi_poll(dut):
+    """The SoC usage pattern, live: poll STATUS, read DATA_FAST, W1C
+    -- every fast-path sample crosses the bus while the PEX bitstream
+    streams in.  bit_ce divides the bit rate by 8 so a poll loop
+    (~15 cycles) comfortably services the 200-cycle sample period;
+    at full rate that margin is what module 2 (sdm_cap) is for.
+    Samples are logged to sim_build/axi_fast_samples.csv (and .png if
+    matplotlib is present) -- the analog waveform as seen over AXI."""
+    vec = Path(__file__).parent / "vectors" / "pex_bits.txt"
+    bits = [int(l) for l in vec.read_text().splitlines()[1:]]
+    model = sinc3_model(bits, 25)
+
+    axil = await start(dut)
+    await wr(axil, CTRL, 0b11)
+
+    async def stream_div8():
+        for b in bits:
+            dut.bit_i.value = int(b)
+            dut.bit_ce.value = 1
+            await RisingEdge(dut.aclk)
+            dut.bit_ce.value = 0
+            await ClockCycles(dut.aclk, 7)
+
+    streamer = cocotb.start_soon(stream_div8())
+    got = []
+    idle = 0
+    while len(got) < len(model) and idle < 100:
+        if (await rd(axil, STATUS)) & 1:
+            got.append(sign32(await rd(axil, DATA_FAST)))
+            await wr(axil, STATUS, 1)
+            idle = 0
+        else:
+            idle += 0 if not streamer.done() else 1
+    assert got == model, "polled AXI samples must match golden model"
+
+    out = Path(__file__).parent / "sim_build" / "axi_fast_samples.csv"
+    out.write_text("\n".join(str(v) for v in got) + "\n")
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(figsize=(9, 3.5), layout="tight")
+        ax.step(range(len(got)), got, where="post")
+        ax.set_xlabel("fast-path sample (OSR 25, fs/25)")
+        ax.set_ylabel("DATA_FAST (counts, FS=OSR^3)")
+        ax.set_title("PEX bitstream decimated, every point read over AXI4-Lite")
+        fig.savefig(out.with_suffix(".png"), dpi=120)
+        dut._log.info(f"wrote {out.with_suffix('.png')}")
+    except ImportError:
+        dut._log.info(f"wrote {out} (matplotlib missing, no png)")
