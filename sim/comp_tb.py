@@ -229,7 +229,7 @@ def measure(p, corner="tt", quick=False, subckt=None, write_json=True):
                                      enforced=sign_enforced)
             if cm == 0.90 and dv == 1e-2:
                 cyc = (t >= 20e-9) & (t < 40e-9)
-                pwr = abs(np.trapz(ivdd[cyc], t[cyc]) / 20e-9 * VDD)
+                pwr = abs(np.trapezoid(ivdd[cyc], t[cyc]) / 20e-9 * VDD)
                 # regeneration tau: exponential growth of |on1-on2|
                 don = np.abs(on1 - on2)
                 seg = after & (don > 0.05) & (don < 2.0) & \

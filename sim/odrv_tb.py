@@ -125,7 +125,7 @@ wrdata odrv_tb.csv v(q33) v(uo0) v(uo1) i(V18)
                 td_ns=round(td * 1e9, 3),
                 skew_ps=round(skew * 1e12),
                 duty_pct=round(duty * 100, 1),
-                power_uw=round(abs(np.trapz(i18[w], t[w])
+                power_uw=round(abs(np.trapezoid(i18[w], t[w])
                                    / (t[w][-1] - t[w][0]) * v18) * 1e6))
 
 

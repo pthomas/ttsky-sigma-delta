@@ -175,7 +175,7 @@ def measure_corner(p, corner):
                          isi_mv=round(isi * 1e3, 3))
     cyc = (t > 1e-6) & (t < 2e-6)
     # subtract the TB-context diode branch (belongs to bias/OTA, not buf)
-    ib = abs(np.trapz(ivdd[cyc], t[cyc]) / 1e-6) - OTA_S["IREFP"]
+    ib = abs(np.trapezoid(ivdd[cyc], t[cyc]) / 1e-6) - OTA_S["IREFP"]
     res["power_mw"] = round(ib * 3.3 * 1e3, 2)
     return res
 

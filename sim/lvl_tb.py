@@ -136,7 +136,7 @@ wrdata lvl_tb.csv v(clk18) v(clk33) i(V33)
                 td_rise_ns=round(td_r * 1e9, 3),
                 td_fall_ns=round(td_f * 1e9, 3),
                 duty_err_pct=round((duty_out - duty_in) * 100, 2),
-                power_uw=round(abs(np.trapz(i33[w], t[w])
+                power_uw=round(abs(np.trapezoid(i33[w], t[w])
                                    / (t[w][-1] - t[w][0]) * 3.3) * 1e6))
 
 
