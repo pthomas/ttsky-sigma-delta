@@ -54,6 +54,29 @@ snr:
     paths: [reports/results/]
     expire_in: 30 days
 
+# fabric-side RTL (rtl/): cocotb suite + verilator lint (advisory until
+# the warning set is cleaned, hence -Wno-fatal) + yosys parse smoke.
+# Gated on rtl/ paths -- unrelated pushes don't run it. Artifacts: the
+# full FST wave dump plus the sine-test waveform figure and the
+# AXI-polled sample plot/CSV from test_sdm_rx.py.
+rtl-verify:
+  stage: smoke
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - rtl/**/*
+  script:
+    - make -C rtl/tb WAVES=1
+    - verilator --lint-only -Wno-fatal rtl/sdm_rx.v
+    - yosys -q -p 'read_verilog rtl/sdm_rx.v'
+  artifacts:
+    paths:
+      - rtl/tb/sim_build/sdm_rx.fst
+      - rtl/tb/sim_build/sine_waves.png
+      - rtl/tb/sim_build/axi_fast_samples.png
+      - rtl/tb/sim_build/axi_fast_samples.csv
+    expire_in: 30 days
+
 fet-char:
   extends: .push
   stage: smoke

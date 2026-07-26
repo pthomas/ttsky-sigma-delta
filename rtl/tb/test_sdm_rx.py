@@ -21,7 +21,7 @@ from pathlib import Path
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, ClockCycles
+from cocotb.triggers import ReadOnly, RisingEdge, ClockCycles
 from cocotbext.axi import AxiLiteBus, AxiLiteMaster
 
 ID = 0x00
@@ -206,7 +206,24 @@ async def test_sine(dut):
 
     axil = await start(dut)
     await wr(axil, CTRL, 0b11)
+
+    # record bit_i/data_fast/data_prec every bit clock (values read in
+    # the read-only phase, i.e. post-NBA-update) for the CI waveform
+    # artifact sim_build/sine_waves.png
+    rec = []
+
+    async def record():
+        while True:
+            await RisingEdge(dut.aclk)
+            await ReadOnly()
+            rec.append((int(dut.bit_i.value),
+                        sign32(int(dut.data_fast.value)),
+                        sign32(int(dut.data_prec.value))))
+
+    recorder = cocotb.start_soon(record())
     await stream(dut, bits)
+    recorder.cancel()
+    _sine_waves_png(dut, rec)
 
     assert await rd(axil, COUNT_FAST) == len(mf)
     assert await rd(axil, COUNT_PREC) == len(mp)
@@ -215,6 +232,41 @@ async def test_sine(dut):
     # stimulus sanity: steady-state precision-path swing ~ 0.6 FS
     peak = max(abs(v) for v in mp[3:])
     assert 0.5 * 250 ** 3 < peak < 0.7 * 250 ** 3
+
+
+def _sine_waves_png(dut, rec):
+    """gtkwave-style figure of the sine test: aclk (zoom), bit_i as
+    ones density, and both decimated outputs. Skipped without
+    matplotlib."""
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        dut._log.info("matplotlib missing -- no sine_waves.png")
+        return
+    tck = 0.020                                 # us per bit clock
+    t = [k * tck for k in range(len(rec))]
+    fig, axs = plt.subplots(4, 1, figsize=(10, 7.5), layout="tight",
+                            height_ratios=[1, 1.2, 1.6, 1.6])
+    axs[0].step([k * tck / 2 for k in range(41)],
+                [k % 2 for k in range(41)], where="post")
+    axs[0].set_ylabel("aclk")
+    axs[0].set_xlabel("first 400 ns (50 MHz; full span below is 500 us)")
+    for b in (1, 0):
+        axs[1].plot([x for x, r in zip(t, rec) if r[0] == b],
+                    [b] * sum(1 for r in rec if r[0] == b),
+                    "|", markersize=9, alpha=0.04, color="C0")
+    axs[1].set_ylabel("bit_i")
+    axs[1].set_yticks([0, 1])
+    for ax, idx, lab in ((axs[2], 1, "data_fast"), (axs[3], 2, "data_prec")):
+        ax.step(t, [r[idx] for r in rec], where="post")
+        ax.set_ylabel(lab)
+    axs[3].set_xlabel("us")
+    axs[0].set_title("test_sine: 10 kHz 0.6 FS sine, OSR 25 / 250")
+    out = Path(__file__).parent / "sim_build" / "sine_waves.png"
+    fig.savefig(out, dpi=120)
+    dut._log.info(f"wrote {out}")
 
 
 @cocotb.test()
