@@ -14,10 +14,18 @@ design methodology claims.
   LVCMOS inputs) for all bitstream capture.
 - Clean 50 MHz clock source (FPGA PLL output is fine; avoid RC
   oscillators — RZ feedback doubles jitter sensitivity).
-- Signal source: audio-grade DAC or function generator, ≤−60 dBc THD
-  at 100–400 kHz preferred (the measurement floor should be the
-  chip, not the source). A passive RC divider from a clean supply
-  for DC tests.
+- Signal source: **AD5541A** (kernel `ad5446` driver; MikroE DAC 8
+  Click on the Icicle mikroBUS, or Pmod DA3) for all DC work —
+  **referenced to the same cleaned 3.3 V rail that feeds VAPWR**,
+  not the breakout's onboard 2.5 V ref (lift/bypass it, or put a
+  bare AD5541A on the carrier). Rail-as-reference makes the bench
+  ratiometric end-to-end: DAC code → ADC reading is a pure ratio,
+  independent of rail drift, and full scale covers the whole 0–3.3 V
+  window. VOFF's DC drive can be a trimpot from the same rail (also
+  ratiometric). For AC SNDR tones: audio-grade DAC or generator,
+  ≤−60 dBc THD preferred (the measurement floor should be the chip,
+  not the source); SPI-rate updates cap clean AD5541A tones to
+  roughly the precision band.
 - DMM (6.5-digit preferred) for the DC/monitor-pin tests;
   oscilloscope ≥200 MHz for output-eye and clock checks.
 - Bench supplies: 3.3 V (VAPWR) and 1.8 V (VDPWR), current-limited.
