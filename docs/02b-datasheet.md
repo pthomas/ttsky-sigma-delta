@@ -32,7 +32,8 @@ stated. Silicon comes back from the TTSKY26c shuttle later.
 | `VDPWR` | — | power | 1.8 V digital supply (level-shifter input stage, output drivers). |
 | `VGND` | — | ground | Common ground. |
 | `ua[2..5]` | — | — | Unused analog pins (not connected). |
-| `ui_in[7:0]`, `uio[7:0]`, `uo[7:2]`, `rst_n`, `ena` | — | — | Unused digital pins. The design has no reset or enable — it is alive whenever powered and clocked. |
+| `ui_in[7:0]`, `uio_in[7:0]`, `rst_n`, `ena` | — | — | Unused digital inputs, unconnected. The design has no reset or enable — it is alive whenever powered and clocked. |
+| `uo[7:2]`, `uio_out[7:0]`, `uio_oe[7:0]` | — | — | Unused digital outputs, **tied to VGND in the frame** (TT analog spec: no floating output pins; uio stays in input mode). |
 
 ## Recommended operating conditions
 

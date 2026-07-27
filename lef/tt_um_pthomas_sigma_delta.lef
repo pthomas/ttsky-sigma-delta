@@ -229,6 +229,8 @@ MACRO tt_um_pthomas_sigma_delta
   PIN uio_oe[0]
     DIRECTION OUTPUT ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 260.000000 ;
+    ANTENNADIFFAREA 796.211365 ;
     PORT
       LAYER met4 ;
         RECT 34.350 224.760 34.650 225.760 ;
@@ -293,6 +295,8 @@ MACRO tt_um_pthomas_sigma_delta
   PIN uio_out[0]
     DIRECTION OUTPUT ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 260.000000 ;
+    ANTENNADIFFAREA 796.211365 ;
     PORT
       LAYER met4 ;
         RECT 56.430 224.760 56.730 225.760 ;
@@ -375,6 +379,8 @@ MACRO tt_um_pthomas_sigma_delta
   PIN uo_out[2]
     DIRECTION OUTPUT ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 260.000000 ;
+    ANTENNADIFFAREA 796.211365 ;
     PORT
       LAYER met4 ;
         RECT 72.990 224.760 73.290 225.760 ;

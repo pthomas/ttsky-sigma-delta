@@ -979,3 +979,47 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   monitor rows replaced by transfer-function inference rows (docs/
   09b). Reopen if: silicon bring-up shows the loop dead with ua[1]
   inconclusive -- then reference pins become a v2 line item.
+
+- **2026-07-26: post-submission "dead board" audit -- one real bug
+  found and fixed (floating digital outputs), frame connectivity and
+  cold-start proven.** Premise: a nothing-works outcome lives in the
+  gaps BETWEEN verified domains, where checks share assumptions with
+  the design. Four gaps audited:
+  (1) FRAME CONNECTIVITY -- the acceptance sim stops at sd_top's
+  ports; nothing had ever verified the def-pin hookups electrically.
+  Done now: magic extraction of the framed cell (tt_frame/extq.tcl) +
+  a union-find over the .ext merge/equiv records proves ua[0]->UA0,
+  ua[1]->UA1, uo_out[0/1]->UO0/UO1, clk->CLK, all three power stripes
+  on the right nets, and all live pins mutually isolated. NOTE: .ext
+  connectivity uses BOTH "merge" and "equiv" records -- parsing only
+  merge false-reports floating nodes.
+  (2) FLOATING DIGITAL OUTPUTS -- REAL BUG. The TT analog spec
+  requires "Connect any unused uo_out, uio_out and uio_oe pins to
+  GND"; precheck only checks pin geometry (pin_check.py), so our 22
+  floating output stubs sailed through green. On silicon they feed
+  tristate-buffer inputs in the TT mux: crowbar current always, and
+  undefined uio_oe when selected can randomly drive board pins.
+  Fixed in build_frame.tcl: the 22 pins are one contiguous met4 stub
+  block (x 15.18-73.14, top edge), ganged by a met4 bar
+  (14.9-74.3 x 224.76-225.26) and dropped onto sd_top's own VGND
+  met4 riser at x=74 (met4-only, no new vias, 1.4 um clear of the
+  uo_out[1] leg). Frame DRC 0; extraction re-proves 22/22 tied,
+  live pins intact.
+  (3) COLD START -- every plain .tran starts from ngspice's DC
+  operating point, which hands the bias its good state for free; a
+  startup circuit that never fires on a real ramp is invisible to the
+  entire suite. top_tb grew --ramp {analog-late, digital-late}
+  (late rail 0.2->2.2 us PWL, other rail up in 100 ns, clk + input
+  driving from t=0): BOTH ALIVE on the extracted top -- ones density
+  0.508/0.512, ~155 transitions in the last 256 bits, integrator
+  0.65-1.22 V. Added to nightly top-corners as a permanent
+  regression.
+  (4) The datasheet now records the tied outputs (uio stays in input
+  mode). Remaining known-unverified: top-level behavior at VAPWR
+  corners (3.0/3.6 V) -- block TBs swept VDPWR only; nightly corner
+  runs are process-only. Bench Phase-1 covers it (VAPWR sweep is
+  test 1.4); a sim variant would need buf/bias re-acceptance at
+  rail corners first.
+  USER ACTION: the shuttle submission predates this fix -- re-run /
+  update the TT submission so it picks up the retied GDS before the
+  2026-09-07 deadline.

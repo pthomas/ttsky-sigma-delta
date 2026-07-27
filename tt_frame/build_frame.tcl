@@ -79,6 +79,21 @@ via3_at 257.0 62.0
 spur 286.0 8.7 311.6 9.3
 via3_at 311.0 9.0
 
+# --- unused digital outputs -> VGND ------------------------------------
+# TT analog spec (specs/analog): "Do not leave any floating digital
+# output pins in your design. Connect any unused uo_out, uio_out and
+# uio_oe pins to GND." The 22 unused output pins (uio_oe[7:0]
+# x 15.18-34.50, uio_out[7:0] x 37.26-56.58, uo_out[7:2] x 59.34-73.14)
+# are one contiguous met4 stub block on the top edge, ending 2.6um west
+# of the USED uo_out[1] (x 75.90). One met4 bar gangs them; a met4
+# riser at x=74 (the design's own VGND riser lane, met4-free above
+# y=219) drops onto sd_top's VGND met3 run at y=219 -- met4-only, no
+# new vias, 1.4um clear of the uo_out[1] label leg at x=76.
+box 14.9um 224.76um 74.3um 225.26um
+paint met4
+box 73.7um 218.7um 74.3um 225.26um
+paint met4
+
 # Save; the GDS/LEF export runs in a SECOND magic process (export.tcl):
 # after getcell, magic's notion of the current cell is unreliable and
 # lef write kept exporting the wrong cell

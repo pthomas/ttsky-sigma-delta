@@ -45,7 +45,7 @@ frame DRC 0.
 | Commercial | **local-only branch `commercial`** (never push; no upstream set). COMMERCIAL.md: thesis, cost model, decisions (power-conversion socket, differential required → v2 = fully-differential + 2nd-order in ONE architecture pass), open questions for Paul (channels, funding, license, name, PGA) |
 | Fabric RTL | **drafted, not yet run — awaiting Paul's review of rtl/PLAN.md**: sdm_rx.v (AXI4-Lite + dual sinc³), cocotb TB (cocotbext-axi) incl. the mixed-signal test (committed ngspice PEX bitstream → RTL → registers), tools/gen_rtl_vectors.py. Simulator not installed: `sudo apt install iverilog; pip install cocotb cocotbext-axi` (Paul runs) |
 | Bench plan | PolarFire SoC Icicle; DAC = AD5541A (kernel ad5446 driver; MikroE DAC 8 Click on mikroBUS, or Pmod DA3) |
-| Open (user-side) | TT shuttle-page submission; Pages visibility toggle; rtl/PLAN.md review |
+| Open (user-side) | **re-submit/update the TT shuttle entry (frame fix 2026-07-26: 22 floating outputs now tied — submitted GDS predates it)**; Pages visibility toggle; rtl/PLAN.md review |
 
 **Next actions (fresh context starts here):** (1) Paul reviews
 rtl/PLAN.md → iterate; (2) install sim tools → first cocotb run of

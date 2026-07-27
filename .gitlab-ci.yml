@@ -233,6 +233,10 @@ top-corners:
     # by the same ~3.4 dB as typical)
     - python3 sim/top_tb.py --corner ss --gate 32
     - python3 sim/top_tb.py --corner ff --gate 34
+    # cold-start regression: supplies PWL-ramped from 0 V in both
+    # orders -- plain .tran hides startup failures behind the DC OP
+    - python3 sim/top_tb.py --ramp analog-late
+    - python3 sim/top_tb.py --ramp digital-late
   artifacts:
     paths: [reports/results/]
     expire_in: 30 days

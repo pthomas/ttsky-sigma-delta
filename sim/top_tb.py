@@ -44,7 +44,7 @@ GATE_DB = 36.0
 
 
 def deck(nfft, sig_bin, corner="tt", idealclk33=False,
-         idealrefs=False, golden=False):
+         idealrefs=False, golden=False, ramp=None):
     tstop = (nfft + NSETTLE) * P.TS
     fin = sig_bin * P.FS / nfft
     # Diagnostic (--idealclk33): overpower the level shifter's output
@@ -69,13 +69,30 @@ def deck(nfft, sig_bin, corner="tt", idealclk33=False,
     # the golden and extracted subckts declare different port orders
     dut = ("XDUT ua0 ua1 uo0 uo1 clk vdpwr vapwr vgnd sd_top" if golden
            else "XDUT ua0 uo0 uo1 clk vdpwr ua1 vgnd vapwr sd_top")
-    return f"""* sd_top PEX acceptance ({corner}, {nfft} bits)
+    # --ramp: cold start from 0 V supplies. Every plain .tran starts
+    # from ngspice's DC operating point, which silently assumes the
+    # bias core lands in its good state -- the classic masked failure
+    # is a startup circuit that never fires on a real supply ramp.
+    # Both sequencing orders: the other rail comes up fast (100 ns),
+    # the late rail ramps 0.2 -> 2.2 us; the clock and input drive
+    # from t=0 (bench-realistic: FPGA up before the DUT supplies).
+    if ramp == "analog-late":
+        vap = "VAP vapwr 0 PWL(0 0 200n 0 2200n 3.3)"
+        vdp = "VDP vdpwr 0 PWL(0 0 100n 1.8)"
+    elif ramp == "digital-late":
+        vap = "VAP vapwr 0 PWL(0 0 100n 3.3)"
+        vdp = "VDP vdpwr 0 PWL(0 0 200n 0 2200n 1.8)"
+    else:
+        vap = "VAP vapwr 0 3.3"
+        vdp = "VDP vdpwr 0 1.8"
+    return f"""* sd_top PEX acceptance ({corner}, {nfft} bits{
+        ', ramp ' + ramp if ramp else ''})
 .lib {PDK_LIB} {corner}
 .include {netfile}
 .options method=gear reltol=1e-4 vntol=1e-6 abstol=1e-12
 .temp 27
-VAP vapwr 0 3.3
-VDP vdpwr 0 1.8
+{vap}
+{vdp}
 VGN vgnd 0 0
 VCLK clk 0 PULSE(0 1.8 0 0.2n 0.2n {P.TS/2*1e9:.1f}n {P.TS*1e9:.1f}n)
 VIN ua0 0 SIN({P.VIN_MID:g} {P.AMP:g} {fin:g})
@@ -111,6 +128,11 @@ def main():
     ideal = "--idealclk33" in sys.argv
     irefs = "--idealrefs" in sys.argv
     gold = "--golden" in sys.argv
+    ramp = None
+    if "--ramp" in sys.argv:
+        ramp = sys.argv[sys.argv.index("--ramp") + 1]
+        if "--bits" not in sys.argv:
+            nfft = 512
     tag = ""
     if "--tag" in sys.argv:
         tag = "_" + sys.argv[sys.argv.index("--tag") + 1]
@@ -118,7 +140,7 @@ def main():
         tag = "_" + corner
     os.makedirs("spice", exist_ok=True)
     open("spice/top_tb.spice", "w").write(
-        deck(nfft, sig_bin, corner, ideal, irefs, gold))
+        deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp))
     r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
                        capture_output=True, text=True)
     if r.returncode or not os.path.exists("spice/top_tb.csv"):
@@ -126,6 +148,32 @@ def main():
         sys.exit(1)
     d = np.loadtxt("spice/top_tb.csv")
     t, uo0, ua1 = d[:, 0], d[:, 1], d[:, 5]
+
+    if ramp:
+        # aliveness, not SNDR: after the late rail tops out, the loop
+        # must modulate -- toggling bitstream, sane ones density, and
+        # an integrator inside the rails (a latched-off bias shows a
+        # railed integrator and a frozen bitstream)
+        k = np.arange(nfft - 256, nfft)
+        ts = (k + NSETTLE + 0.5) * P.TS
+        bits = np.where(np.interp(ts, t, uo0) > 0.9, 1.0, -1.0)
+        ones = (bits > 0).mean()
+        trans = int(np.abs(np.diff(bits)).sum() / 2)
+        late = t > (t[-1] - 256 * P.TS)
+        swing = (float(ua1[late].min()), float(ua1[late].max()))
+        ok = (0.2 < ones < 0.8 and trans >= 20
+              and 0.1 < swing[0] and swing[1] < 1.8)
+        print(f"sd_top cold start ({ramp}): last-256-bit ones density "
+              f"{ones:.3f}, {trans} transitions, integrator "
+              f"{swing[0]:.2f}-{swing[1]:.2f} V")
+        print("ALIVE" if ok else "DEAD -- startup failure")
+        os.makedirs("reports/results", exist_ok=True)
+        json.dump(dict(ok=bool(ok), mode=ramp, nfft=nfft,
+                       ones_density=round(ones, 3), transitions=trans,
+                       ua1_swing=[round(v, 3) for v in swing]),
+                  open(f"reports/results/top_ramp_{ramp}.json", "w"),
+                  indent=1)
+        sys.exit(0 if ok else 1)
     k = np.arange(NSETTLE, NSETTLE + nfft)
     ts = (k + 0.5) * P.TS
     bits = np.where(np.interp(ts, t, uo0) > 0.9, 1.0, -1.0)
