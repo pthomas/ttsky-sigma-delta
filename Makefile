@@ -61,6 +61,7 @@ tt:
 	  PDK_ROOT=$(PDK_ROOT) SIGMA_DELTA_MAG=$(CURDIR)/mag magic -dnull -noconsole \
 	  -rcfile $(PDK_ROOT)/sky130A/libs.tech/magic/sky130A.magicrc \
 	  export.tcl
+	python3 tools/gds_datenorm.py gds/tt_um_pthomas_sigma_delta.gds
 
 # netgen LVS: routed OTA layout vs xschem golden netlist
 lvs:
@@ -115,6 +116,16 @@ snr: spice/tier1_out.csv
 framecheck:
 	python3 tools/frame_check.py
 
+# antenna rules: precheck's antenna deck is gf180-only; sky130A gets
+# nothing, so we gate it ourselves (fails on any reported violation)
+antenna: export PDK_ROOT ?= /home/nvme/pdk
+antenna:
+	cd mag && PDK_ROOT=$(PDK_ROOT) magic -dnull -noconsole \
+	  -rcfile $(PDK_ROOT)/sky130A/libs.tech/magic/sky130A.magicrc \
+	  ../tools/antenna.tcl 2>&1 | tee antenna.log
+	grep -q "ANTENNA CHECK DONE" mag/antenna.log
+	! grep -qi "violation" mag/antenna.log
+
 # clock-jitter susceptibility (tier 0) + OTA noise (tier 2, .noise)
 jitter:
 	python3 sim/jitter_tb.py
@@ -128,4 +139,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept blockreports snr jitter noise framecheck view clean
+.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept blockreports snr jitter noise framecheck antenna view clean
