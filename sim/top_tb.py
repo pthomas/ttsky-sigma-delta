@@ -44,7 +44,8 @@ GATE_DB = 36.0
 
 
 def deck(nfft, sig_bin, corner="tt", idealclk33=False,
-         idealrefs=False, golden=False, ramp=None):
+         idealrefs=False, golden=False, ramp=None, vapwr=3.3,
+         temp=27.0):
     tstop = (nfft + NSETTLE) * P.TS
     fin = sig_bin * P.FS / nfft
     # Diagnostic (--idealclk33): overpower the level shifter's output
@@ -83,19 +84,21 @@ def deck(nfft, sig_bin, corner="tt", idealclk33=False,
         vap = "VAP vapwr 0 PWL(0 0 100n 3.3)"
         vdp = "VDP vdpwr 0 PWL(0 0 200n 0 2200n 1.8)"
     else:
-        vap = "VAP vapwr 0 3.3"
+        vap = f"VAP vapwr 0 {vapwr:g}"
         vdp = "VDP vdpwr 0 1.8"
     return f"""* sd_top PEX acceptance ({corner}, {nfft} bits{
         ', ramp ' + ramp if ramp else ''})
 .lib {PDK_LIB} {corner}
 .include {netfile}
 .options method=gear reltol=1e-4 vntol=1e-6 abstol=1e-12
-.temp 27
+.temp {temp:g}
 {vap}
 {vdp}
 VGN vgnd 0 0
 VCLK clk 0 PULSE(0 1.8 0 0.2n 0.2n {P.TS/2*1e9:.1f}n {P.TS*1e9:.1f}n)
-VIN ua0 0 SIN({P.VIN_MID:g} {P.AMP:g} {fin:g})
+* input scales with VAPWR: references are ratiometric to the rail, and
+* so is the bench source (test plan: DAC referenced to the VAPWR rail)
+VIN ua0 0 SIN({P.VIN_MID*vapwr/3.3:g} {P.AMP*vapwr/3.3:g} {fin:g})
 * pad-ish loads on the bitstream outputs
 CU0 uo0 0 1p
 CU1 uo1 0 1p
@@ -133,14 +136,25 @@ def main():
         ramp = sys.argv[sys.argv.index("--ramp") + 1]
         if "--bits" not in sys.argv:
             nfft = 512
+    vapwr = 3.3
+    if "--vapwr" in sys.argv:
+        vapwr = float(sys.argv[sys.argv.index("--vapwr") + 1])
+    temp = 27.0
+    if "--temp" in sys.argv:
+        temp = float(sys.argv[sys.argv.index("--temp") + 1])
     tag = ""
     if "--tag" in sys.argv:
         tag = "_" + sys.argv[sys.argv.index("--tag") + 1]
     elif corner != "tt":
         tag = "_" + corner
+    elif vapwr != 3.3:
+        tag = f"_v{vapwr*10:.0f}"
+    elif temp != 27.0:
+        tag = f"_t{temp:g}"
     os.makedirs("spice", exist_ok=True)
     open("spice/top_tb.spice", "w").write(
-        deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp))
+        deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp, vapwr,
+             temp))
     r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
                        capture_output=True, text=True)
     if r.returncode or not os.path.exists("spice/top_tb.csv"):
@@ -179,7 +193,11 @@ def main():
     bits = np.where(np.interp(ts, t, uo0) > 0.9, 1.0, -1.0)
     ones = (bits > 0).mean()
     s = sndr(bits, P.OSR_FAST, sig_bin)
-    swing = (float(ua1.min()), float(ua1.max()))
+    # swing after the settle window: the first ~15 cycles rail during
+    # startup (benign, discarded from the FFT too) and at cold reached
+    # 3.33 V, which made the raw min/max useless as a health signal
+    settled = t > NSETTLE * P.TS
+    swing = (float(ua1[settled].min()), float(ua1[settled].max()))
     print(f"sd_top PEX: {nfft} bits, ones density {ones:.3f}, "
           f"integrator {swing[0]:.2f}-{swing[1]:.2f} V")
     print(f"fast path (OSR {P.OSR_FAST}): SNDR {s:.1f} dB "

@@ -125,6 +125,11 @@ frame-verify:
   script:
     - make tt
     - make framecheck
+    # staleness gate: the committed gds/lef (what the shuttle ingests)
+    # must match a fresh rebuild from mag/ byte-for-byte (GDS dates are
+    # pinned by tools/gds_datenorm.py, so identical geometry == identical
+    # bytes). Fails when someone edits mag/ and forgets `make tt`.
+    - git diff --stat --exit-code gds/ lef/
   artifacts:
     paths: [gds/, lef/]
     expire_in: 30 days
@@ -226,6 +231,9 @@ assembly-verify:
     - python3 tools/gen_top_golden.py
     - python3 tools/asm_top.py | tee asm.log
     - 'grep -Fq "DRC errors (fresh reload): 0" asm.log'
+    # antenna rules: sky130A gets NO antenna check from TT precheck
+    # (gf180-only deck) -- gate it here
+    - make antenna
     - 'grep -Fq "sd_top: LVS match" asm.log'
     - make tt | tee tt.log
     - grep -Fq "DRCCOUNT 0" tt.log
@@ -252,6 +260,15 @@ top-corners:
     # orders -- plain .tran hides startup failures behind the DC OP
     - python3 sim/top_tb.py --ramp analog-late
     - python3 sim/top_tb.py --ramp digital-late
+    # VAPWR rail corners, ratiometric stimulus (measured 2026-07-27:
+    # 36.2 / 37.9 dB vs 40.2 nominal -- headroom compression at 3.0)
+    - python3 sim/top_tb.py --vapwr 3.0 --gate 35
+    - python3 sim/top_tb.py --vapwr 3.6 --gate 36.5
+    # temperature extremes (measured 2026-07-27: 34.7 dB at 0 C --
+    # startup rails for ~15 cycles then settles, benign -- and
+    # 38.5 dB at 85 C, vs 40.2 at 27 C)
+    - python3 sim/top_tb.py --temp 0 --gate 33.5
+    - python3 sim/top_tb.py --temp 85 --gate 37
   artifacts:
     paths: [reports/results/]
     expire_in: 30 days

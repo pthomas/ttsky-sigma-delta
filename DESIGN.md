@@ -1023,3 +1023,34 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   USER ACTION: the shuttle submission predates this fix -- re-run /
   update the TT submission so it picks up the retied GDS before the
   2026-09-07 deadline.
+
+- **2026-07-26 (late): hardening batch two -- reproducible GDS,
+  antenna gate, rail/temperature corners, bench-expectation notes.**
+  (a) DETERMINISTIC GDS + STALENESS GATE: magic 8.3.676 accepts `gds
+  datestamp` but ignores it on write (61 wall-clock date fields made
+  every export unique); tools/gds_datenorm.py pins the BGNLIB/BGNSTR
+  records post-export, verified byte-identical across rebuilds, and
+  frame-verify now ends with `git diff --exit-code gds/ lef/` -- the
+  committed artifact the shuttle ingests can no longer go stale
+  against mag/. (b) ANTENNA: TT precheck's antenna deck is
+  gf180mcuD-ONLY (verified in tt-support-tools precheck.py); sky130A
+  projects get no antenna check anywhere. magic antennacheck on
+  sd_top: CLEAN. `make antenna`, gated in nightly assembly-verify.
+  (c) VAPWR RAIL CORNERS (top extracted, ratiometric stimulus --
+  input scales with the rail like the bench): 36.2 dB at 3.0 V,
+  37.9 dB at 3.6 V vs 40.2 nominal; headroom compression at the low
+  rail, loop healthy. Nightly gates 35 / 36.5. (d) TEMPERATURE
+  (--temp): 34.7 dB at 0 C, 38.5 dB at 85 C. The cold run's raw
+  integrator max read 3.33 V -- a single startup episode, cycles
+  0-14, inside the discarded settle window; steady-state max 1.24 V,
+  no clipping (top_tb now reports post-settle swing so this can't
+  mislead again). Nightly gates 33.5 / 37. Nightly cost: four ~4 min
+  runs. (e) TEST PLAN: ESD handling procedure added; clock-source
+  jitter expectations added (an RP2040 first-light clock can sit
+  above the 24 ps precision knee -- bad precision SNDR there is
+  predicted, not a dead chip; fast path is the first-light metric).
+  (f) FABRIC RTL: the cocotb suite (incl. both mixed-signal
+  pex-vector tests) runs green locally, 5/5 in ~7 s (~/.venv +
+  iverilog) -- the earlier STATUS "never run" note was stale, CI
+  rtl-verify had it green all along. pex_bits.txt regenerated from
+  the current 2-pin chip's nominal acceptance run.

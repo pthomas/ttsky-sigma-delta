@@ -13,7 +13,14 @@ design methodology claims.
   an FPGA board (iCE40/ECP5/Zynq — anything with a spare PLL and two
   LVCMOS inputs) for all bitstream capture.
 - Clean 50 MHz clock source (FPGA PLL output is fine; avoid RC
-  oscillators — RZ feedback doubles jitter sensitivity).
+  oscillators — RZ feedback doubles jitter sensitivity). **Know your
+  source's jitter before judging SNDR**: the measured susceptibility
+  curve (`make jitter`, reports/results/jitter.json) puts the knees at
+  ~24 ps RMS per edge (precision path) and ~170 ps (fast path), with
+  20 dB/decade degradation above. An RP2040 GPIO clock (first light)
+  or a spread-spectrum source can sit above the precision knee — a
+  "bad" precision SNDR on such a clock is *predicted*, not a dead
+  chip. Fast-path SNDR is the robust first-light metric.
 - Signal source: **AD5541A** (kernel `ad5446` driver; MikroE DAC 8
   Click on the Icicle mikroBUS, or Pmod DA3) for all DC work —
   **referenced to the same cleaned 3.3 V rail that feeds VAPWR**,
@@ -28,6 +35,18 @@ design methodology claims.
 - DMM (6.5-digit preferred) for the DC tests;
   oscilloscope ≥200 MHz for output-eye and clock checks.
 - Bench supplies: 3.3 V (VAPWR) and 1.8 V (VDPWR), current-limited.
+
+**ESD handling.** The TT pads carry ESD cells, but treat the board as
+CMOS-sensitive anyway — a marginal ESD hit degrades rather than kills,
+and a shifted-but-alive chip poisons every correlation row. Rules:
+wrist strap (or touch board ground first) whenever handling the demo
+board or carrier; store spare boards in conductive foam, not loose;
+discharge cables by touching their shield/signal to board ground
+before plugging into any `ua` pin; assemble and solder the carrier
+unpowered, iron grounded. Driving VIN from a powered source while the
+chip is unpowered is safe by design (132 kΩ series limits clamp
+current to ~25 µA — verified in the cold-start sims), but don't extend
+that courtesy to the monitor-free 5 pF-class digital pins.
 
 ## Phase 0 — first light (minutes, RP2040 board is enough)
 
