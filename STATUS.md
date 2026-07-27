@@ -132,6 +132,7 @@ runs gear integration and the precision baseline reads 64.8 dB (the old
 From repo root (xschemrc auto-loads; PDK_ROOT defaults to /home/nvme/pdk):
 
 - `make` / `make snr` — tier-1 sim + SNDR table (~10 s)
+- `make framecheck` — TT requirements precheck misses: frame connectivity, tied outputs, info.yaml consistency, no met5 (after `make tt`)
 - `make jitter` — tier-0 clock-jitter susceptibility sweep (~30 s)
 - `make noise` — OTA 1/f + thermal noise budget, `sim/noise_tb.py --pex` for extracted (~5 s)
 - `make report` — NRZ/RZ comparison → reports/dac_compare.html (~70 s)

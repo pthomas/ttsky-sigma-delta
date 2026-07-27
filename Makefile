@@ -110,6 +110,11 @@ topaccept:
 snr: spice/tier1_out.csv
 	python3 sim/snr.py
 
+# TT requirements the shuttle precheck doesn't verify (frame
+# connectivity, tied outputs, info.yaml consistency, no met5)
+framecheck:
+	python3 tools/frame_check.py
+
 # clock-jitter susceptibility (tier 0) + OTA noise (tier 2, .noise)
 jitter:
 	python3 sim/jitter_tb.py
@@ -123,4 +128,4 @@ view:
 clean:
 	rm -rf spice
 
-.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept blockreports snr jitter noise view clean
+.PHONY: all netlist report specs char layout pex layout-report site tt lvs xcheck compcheck blockcheck asm pextop topaccept blockreports snr jitter noise framecheck view clean

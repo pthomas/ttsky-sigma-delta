@@ -114,6 +114,21 @@ ota-specs:
 #   pex     = parasitic extraction + same TB on the extracted netlist
 #   layout_report = fresh-process DRC (must be 0) + netgen LVS (must match)
 #                   + GDS export + 3D geometry for the pages viewer
+# TT-requirement checks the shuttle precheck does NOT make (DESIGN.md
+# 2026-07-26 dead-board audit): rebuild the frame from mag/, then prove
+# electrically that every info.yaml pin reaches its sd_top port, all
+# unused digital outputs are tied to VGND, unpaid analog pins touch
+# nothing, supplies enter the design, and no metal5 exists anywhere.
+frame-verify:
+  extends: .push
+  stage: layout
+  script:
+    - make tt
+    - make framecheck
+  artifacts:
+    paths: [gds/, lef/]
+    expire_in: 30 days
+
 layout-verify:
   extends: .push
   stage: layout
