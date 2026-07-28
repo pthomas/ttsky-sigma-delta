@@ -45,7 +45,7 @@ GATE_DB = 36.0
 
 def deck(nfft, sig_bin, corner="tt", idealclk33=False,
          idealrefs=False, golden=False, ramp=None, vapwr=3.3,
-         temp=27.0):
+         temp=27.0, relaxed=False):
     tstop = (nfft + NSETTLE) * P.TS
     fin = sig_bin * P.FS / nfft
     # Diagnostic (--idealclk33): overpower the level shifter's output
@@ -90,7 +90,8 @@ def deck(nfft, sig_bin, corner="tt", idealclk33=False,
         ', ramp ' + ramp if ramp else ''})
 .lib {PDK_LIB} {corner}
 .include {netfile}
-.options method=gear reltol=1e-4 vntol=1e-6 abstol=1e-12
+.options method=gear reltol=1e-4 vntol=1e-6 abstol={
+    "1e-10 itl4=200" if relaxed else "1e-12"}
 .temp {temp:g}
 {vap}
 {vdp}
@@ -152,13 +153,33 @@ def main():
     elif temp != 27.0:
         tag = f"_t{temp:g}"
     os.makedirs("spice", exist_ok=True)
-    open("spice/top_tb.spice", "w").write(
-        deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp, vapwr,
-             temp))
-    r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
-                       capture_output=True, text=True)
+
+    def run_deck(relaxed=False):
+        # remove any previous run's output FIRST: an aborted sim must
+        # never be judged on stale data from the prior invocation
+        if os.path.exists("spice/top_tb.csv"):
+            os.remove("spice/top_tb.csv")
+        open("spice/top_tb.spice", "w").write(
+            deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp,
+                 vapwr, temp, relaxed))
+        return subprocess.run(["ngspice", "-b", "top_tb.spice"],
+                              cwd="spice", capture_output=True,
+                              text=True)
+
+    r = run_deck()
     if r.returncode or not os.path.exists("spice/top_tb.csv"):
-        print(r.stderr[-2000:])
+        out = r.stdout + r.stderr
+        if "Timestep too small" in out:
+            # convergence flake, not a design signal: marginal Newton
+            # trajectories differ per machine/thread count (nightly
+            # 2026-07-27: --temp 85 aborted on the runner, passed
+            # locally). One retry with relaxed solver tolerances --
+            # abstol 1e-10 is still 4+ decades under signal currents.
+            print("convergence failure -- retrying with relaxed "
+                  "tolerances (abstol=1e-10, itl4=200)")
+            r = run_deck(relaxed=True)
+    if r.returncode or not os.path.exists("spice/top_tb.csv"):
+        print((r.stdout + r.stderr)[-2000:])
         sys.exit(1)
     d = np.loadtxt("spice/top_tb.csv")
     t, uo0, ua1 = d[:, 0], d[:, 1], d[:, 5]

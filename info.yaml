@@ -13,6 +13,12 @@ project:
   # How many analog pins does your project use?
   analog_pins: 2        # Valid values: 0 to 6
   uses_vapwr: true       # Set to true if your project uses second analog power supply (VAPWR) in addition to 1.8V (VDPWR)
+  # tt-support-tools renamed the key above to uses_3v3 without backward
+  # compat (shuttle PR #143 failed all three prechecks because the new
+  # parser silently defaulted us to non-3v3: wrong template def, VAPWR
+  # port "unsupported", ua pins checked at wrong positions). Carry BOTH
+  # keys: old parsers read uses_vapwr, new ones uses_3v3.
+  uses_3v3: true
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
   top_module:  "tt_um_pthomas_sigma_delta"

@@ -13,7 +13,8 @@ layout, tiered verification, and a continuously rebuilt design document.
   produced by the pipeline that published it.
 - **TinyTapeout submission**: this repo doubles as the TT project
   ([docs/info.md](docs/info.md), `info.yaml`, `gds/`, `lef/`); the frame
-  is rebuilt from `mag/` with `make tt`.
+  is rebuilt from `mag/` with `make tt`. Shuttle entry:
+  <https://app.tinytapeout.com/projects/5413> (TTSKY26c).
 - **Decision log**: [DESIGN.md](DESIGN.md) (append-only, with reopen
   conditions). **Session state**: [STATUS.md](STATUS.md).
 

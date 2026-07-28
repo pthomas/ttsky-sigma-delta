@@ -58,7 +58,9 @@ commercial branch must never gain an upstream.
 ## Where we are
 
 **Shuttle: TTSKY26c (sky130A), deadline 2026-09-07.** Repo pushed to
-git@gitlab.com:pthomas1/sigma-delta.git.
+git@gitlab.com:pthomas1/sigma-delta.git. Shuttle entry:
+https://app.tinytapeout.com/projects/5413 (integration PR:
+TinyTapeout/tinytapeout-sky-26c#143).
 
 | Area | State |
 |---|---|

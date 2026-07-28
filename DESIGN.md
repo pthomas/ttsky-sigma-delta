@@ -1054,3 +1054,27 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   iverilog) -- the earlier STATUS "never run" note was stale, CI
   rtl-verify had it green all along. pex_bits.txt regenerated from
   the current 2-pin chip's nominal acceptance run.
+
+- **2026-07-27: nightly 85C convergence flake + shuttle PR #143
+  failure (TT-side uses_vapwr -> uses_3v3 rename).** (a) The first
+  nightly with the new corners passed 7/8; --temp 85 aborted on the
+  runner with ngspice "Timestep too small" at t=12.1 us -- a
+  convergence flake, not a design signal (identical run passes
+  locally at 38.5 dB; marginal Newton trajectories differ with
+  machine/thread count). top_tb now retries ONCE with relaxed solver
+  tolerances (abstol 1e-10 itl4=200, still 4+ decades under signal
+  currents) and -- the sharper catch -- deletes the previous run's
+  csv before every invocation, so an aborted sim can never be judged
+  ACCEPT on the prior run's stale data. (b) Shuttle integration PR
+  (tinytapeout-sky-26c#143) failed all three prechecks even though
+  our repo-side precheck was green: the shuttle-pinned
+  tt-support-tools reads `uses_3v3` while the published analog
+  template (and our info.yaml) says `uses_vapwr` -- no backward
+  compat, silent default to non-3v3, hence wrong template def
+  (334880-wide non-3v3 vs our correct 319240 3v3 -- the defs
+  themselves are identical to ours), "unsupported extra ports:
+  VAPWR", and ua pins checked at the wrong template's positions.
+  Fix: info.yaml carries BOTH keys. Worth reporting upstream -- this
+  breaks every uses_vapwr submission on the shuttle. USER ACTION:
+  re-trigger the shuttle submission after this push; consider
+  flagging the rename skew on the TT discord/issue tracker.
