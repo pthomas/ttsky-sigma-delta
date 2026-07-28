@@ -1078,3 +1078,24 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   breaks every uses_vapwr submission on the shuttle. USER ACTION:
   re-trigger the shuttle submission after this push; consider
   flagging the rename skew on the TT discord/issue tracker.
+
+- **2026-07-28: CI retry removed -- top_tb made deterministic
+  instead (user directive: no retries in CI).** The retry masked the
+  actual defect classes. Three structural fixes, permanent for every
+  run: (1) `set num_threads=1` -- OpenMP summation order changes
+  rounding per machine, which IS why the 85 C run aborted on the
+  runner while passing locally; single-threaded, one ngspice build
+  walks one trajectory, always (cost measured: 26%). (2) abstol
+  1e-10 + itl4=200 in the deck for all runs -- 1e-12 was over-tight
+  against 85 C leakage floors, and a fallback-only tolerance would
+  mean gates measure two different simulators. (3) 50-ohm series
+  source resistance at VIN -- the failing equation was vin#branch on
+  the ideal source; bench-realistic (DAC + trace), 0.04% of RIN.
+  All nine nightly scenarios re-baselined on the new deck: nominal
+  39.5 / ss 34.5 / ff 38.7 / v3.0 37.5 / v3.6 34.8 / 0C 34.7 /
+  85C 36.7 dB, ramps ALIVE. Values moved +-1-3 dB vs the threaded
+  deck -- the documented 2048-bit window sensitivity, one draw per
+  scenario now instead of one per machine. Gates set at measured
+  minus 2 dB; a trip now means the design or code changed, never
+  the machine. Kept from the retry commit: the pre-run csv delete
+  (an aborted sim must never be scored on the prior run's data).

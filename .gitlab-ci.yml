@@ -250,25 +250,26 @@ top-corners:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     - python3 tools/pex_top.py
-    # corner gates sit ~1 dB under characterized values for the
-    # rephased loop (2026-07-25: ss 33.4 / ff 35.3, vs 30.1 / 31.9
-    # before the rephase -- the excess-loop-delay fix lifted corners
-    # by the same ~3.4 dB as typical)
-    - python3 sim/top_tb.py --corner ss --gate 32
-    - python3 sim/top_tb.py --corner ff --gate 34
+    # All gates sit 2 dB under values measured on the DETERMINISTIC
+    # deck (2026-07-28: num_threads=1, abstol 1e-10, 50-ohm source --
+    # identical trajectory every run, so a gate trip means the design
+    # or code changed, never the machine). Measured: nominal 39.5,
+    # ss 34.5, ff 38.7, v3.0 37.5, v3.6 34.8, 0C 34.7, 85C 36.7 dB.
+    # Numbers shifted +-1-3 dB vs the old threaded deck -- the known
+    # 2048-bit window sensitivity, now frozen per scenario.
+    - python3 sim/top_tb.py --corner ss --gate 32.5
+    - python3 sim/top_tb.py --corner ff --gate 36.5
     # cold-start regression: supplies PWL-ramped from 0 V in both
     # orders -- plain .tran hides startup failures behind the DC OP
     - python3 sim/top_tb.py --ramp analog-late
     - python3 sim/top_tb.py --ramp digital-late
-    # VAPWR rail corners, ratiometric stimulus (measured 2026-07-27:
-    # 36.2 / 37.9 dB vs 40.2 nominal -- headroom compression at 3.0)
-    - python3 sim/top_tb.py --vapwr 3.0 --gate 35
-    - python3 sim/top_tb.py --vapwr 3.6 --gate 36.5
-    # temperature extremes (measured 2026-07-27: 34.7 dB at 0 C --
-    # startup rails for ~15 cycles then settles, benign -- and
-    # 38.5 dB at 85 C, vs 40.2 at 27 C)
-    - python3 sim/top_tb.py --temp 0 --gate 33.5
-    - python3 sim/top_tb.py --temp 85 --gate 37
+    # VAPWR rail corners, ratiometric stimulus
+    - python3 sim/top_tb.py --vapwr 3.0 --gate 35.5
+    - python3 sim/top_tb.py --vapwr 3.6 --gate 33
+    # temperature extremes (0 C startup rails ~15 cycles then
+    # settles -- benign, excluded from the post-settle swing)
+    - python3 sim/top_tb.py --temp 0 --gate 32.5
+    - python3 sim/top_tb.py --temp 85 --gate 34.5
   artifacts:
     paths: [reports/results/]
     expire_in: 30 days

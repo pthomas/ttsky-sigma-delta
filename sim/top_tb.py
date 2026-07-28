@@ -45,7 +45,7 @@ GATE_DB = 36.0
 
 def deck(nfft, sig_bin, corner="tt", idealclk33=False,
          idealrefs=False, golden=False, ramp=None, vapwr=3.3,
-         temp=27.0, relaxed=False):
+         temp=27.0):
     tstop = (nfft + NSETTLE) * P.TS
     fin = sig_bin * P.FS / nfft
     # Diagnostic (--idealclk33): overpower the level shifter's output
@@ -90,16 +90,27 @@ def deck(nfft, sig_bin, corner="tt", idealclk33=False,
         ', ramp ' + ramp if ramp else ''})
 .lib {PDK_LIB} {corner}
 .include {netfile}
-.options method=gear reltol=1e-4 vntol=1e-6 abstol={
-    "1e-10 itl4=200" if relaxed else "1e-12"}
+* Solver conditioning (2026-07-28, replaces a CI retry): abstol 1e-10
+* -- 1e-12 was over-tight once 85 C leakage currents grow, and is
+* still 4+ decades under signal currents; itl4=200 gives Newton room
+* at clock edges. Determinism comes from num_threads=1 in .control:
+* OpenMP summation order changes rounding per machine, which is
+* exactly how the nightly 85 C run aborted on the runner while
+* passing locally.
+.options method=gear reltol=1e-4 vntol=1e-6 abstol=1e-10 itl4=200
 .temp {temp:g}
 {vap}
 {vdp}
 VGN vgnd 0 0
 VCLK clk 0 PULSE(0 1.8 0 0.2n 0.2n {P.TS/2*1e9:.1f}n {P.TS*1e9:.1f}n)
 * input scales with VAPWR: references are ratiometric to the rail, and
-* so is the bench source (test plan: DAC referenced to the VAPWR rail)
-VIN ua0 0 SIN({P.VIN_MID*vapwr/3.3:g} {P.AMP*vapwr/3.3:g} {fin:g})
+* so is the bench source (test plan: DAC referenced to the VAPWR rail).
+* RS = bench-realistic source impedance (DAC + trace); it also
+* conditions the source branch equation -- the 85 C convergence
+* failure was at node vin#branch on the ideal zero-impedance source.
+* 50 ohm against RIN 132k is a 0.04% gain shift, below every gate.
+VIN vsrc 0 SIN({P.VIN_MID*vapwr/3.3:g} {P.AMP*vapwr/3.3:g} {fin:g})
+RS vsrc ua0 50
 * pad-ish loads on the bitstream outputs
 CU0 uo0 0 1p
 CU1 uo1 0 1p
@@ -107,7 +118,7 @@ CA1 ua1 0 50f
 {dut}
 {force}.tran {P.TSTEP*1e9:g}n {tstop*1e9:.1f}n
 .control
-set num_threads=8
+set num_threads=1
 run
 wrdata top_tb.csv v(uo0) v(clk) v(ua1)
 .endc
@@ -153,31 +164,15 @@ def main():
     elif temp != 27.0:
         tag = f"_t{temp:g}"
     os.makedirs("spice", exist_ok=True)
-
-    def run_deck(relaxed=False):
-        # remove any previous run's output FIRST: an aborted sim must
-        # never be judged on stale data from the prior invocation
-        if os.path.exists("spice/top_tb.csv"):
-            os.remove("spice/top_tb.csv")
-        open("spice/top_tb.spice", "w").write(
-            deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp,
-                 vapwr, temp, relaxed))
-        return subprocess.run(["ngspice", "-b", "top_tb.spice"],
-                              cwd="spice", capture_output=True,
-                              text=True)
-
-    r = run_deck()
-    if r.returncode or not os.path.exists("spice/top_tb.csv"):
-        out = r.stdout + r.stderr
-        if "Timestep too small" in out:
-            # convergence flake, not a design signal: marginal Newton
-            # trajectories differ per machine/thread count (nightly
-            # 2026-07-27: --temp 85 aborted on the runner, passed
-            # locally). One retry with relaxed solver tolerances --
-            # abstol 1e-10 is still 4+ decades under signal currents.
-            print("convergence failure -- retrying with relaxed "
-                  "tolerances (abstol=1e-10, itl4=200)")
-            r = run_deck(relaxed=True)
+    # remove any previous run's output FIRST: an aborted sim must
+    # never be judged on stale data from the prior invocation
+    if os.path.exists("spice/top_tb.csv"):
+        os.remove("spice/top_tb.csv")
+    open("spice/top_tb.spice", "w").write(
+        deck(nfft, sig_bin, corner, ideal, irefs, gold, ramp, vapwr,
+             temp))
+    r = subprocess.run(["ngspice", "-b", "top_tb.spice"], cwd="spice",
+                       capture_output=True, text=True)
     if r.returncode or not os.path.exists("spice/top_tb.csv"):
         print((r.stdout + r.stderr)[-2000:])
         sys.exit(1)
