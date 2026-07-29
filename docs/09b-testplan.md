@@ -9,16 +9,17 @@ design methodology claims.
 
 ## Equipment
 
-- The intended bench is a custom carrier interfacing the TT chip
-  directly to the PolarFire SoC Icicle Kit (clock out, Q/Q̄ capture,
-  analog wiring — design TBD; algofoogle/tt06-grab-bag's interposer
-  PCB, KiCad + Gerbers in-repo, is a good reference for a TT analog
-  carrier). The TT demo board (RP2040) remains the *optional*
-  first-light path — tests 0.0–0.4 work on either, but 0.0 (chip-ROM
-  self-test) and the ttboard SDK references apply to the demo board
-  only; on the carrier, the equivalent sanity step is clocking the
-  mux select lines per the TT mux documentation and verifying the
-  factory-test project before ours.
+- TinyTapeout demo board (RP2040) hosts the chip throughout: power,
+  project selection via the ttboard MicroPython SDK, and the Phase-0
+  first-light tests. For capture and precision work, a to-be-designed
+  interface adapts the demo board's pin headers to the PolarFire SoC
+  Icicle Kit: clock from the FPGA to the clk header, Q/Q̄ from the
+  uo headers into LVCMOS inputs, and analog access at the ua headers
+  (design TBD — algofoogle/tt06-grab-bag's adapter PCB on demo-board
+  headers, KiCad + Gerbers in-repo, is a useful precedent). The
+  demo-board passives risk below applies doubly here: every header
+  pin used must be checked against the demo board schematic for
+  populated pulls/dividers.
 - Clean 50 MHz clock source (FPGA PLL output is fine; avoid RC
   oscillators — RZ feedback doubles jitter sensitivity). **Know your
   source's jitter before judging SNDR**: the measured susceptibility
