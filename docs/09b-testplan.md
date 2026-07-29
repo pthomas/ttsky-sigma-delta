@@ -52,6 +52,7 @@ that courtesy to the monitor-free 5 pF-class digital pins.
 
 | # | Test | Procedure | Pass = |
 |---|---|---|---|
+| 0.0 | Board self-test | Before enabling our project: `tt.shuttle.tt_um_chip_rom.enable()`, read the ROM pattern via the ttboard MicroPython SDK | ROM reads back correctly — proves board, mux, and firmware before any measurement can implicate our die (bring-up pattern stolen from htfab/tt07-fprn) |
 | 0.1 | Power | Apply 1.8/3.3 V, no clock | VAPWR current ~3 mA class, VDPWR <1 mA, nothing hot |
 | 0.2 | Alive | 50 MHz clock, VIN grounded | Q/Q̄ toggling, complementary, ones density well below 0.5 |
 | 0.3 | Rails respond | VIN to 3.3 V, then to VGND | ones density near 1, then near 0; recovery immediate |
@@ -113,6 +114,18 @@ first hard evidence for the commercial-exploration thesis.
 - The TT mux and board add series resistance and leakage to analog
   pins; measure the mux path resistance on an unused analog pin
   first and correct 1.2/1.3.
+- **Demo board passives**: at least one TT08 analog project measured
+  a degraded output amplitude because a demo-board pull-down resistor
+  was still populated on the pin. Before interpreting any amplitude,
+  check the demo board schematic for pulls/dividers on `uo[0]`,
+  `uo[1]` and the `ua` pins in use.
+- For the precision-path noise rows, power the board from a battery
+  or linear supply — and still expect the odd unexplained low-kHz
+  spur (a TT08 LDO project measured a clean battery-fed spectrum
+  with one stray 21.3 kHz line). Correlation target from CI:
+  126 µV RMS input-referred (reports/results/noise_pex.json);
+  the same project measured silicon 1/f slightly BELOW the sky130
+  simulation, so treat the CI number as an upper estimate.
 - Thermal drift is uncharacterized (all sims 27 °C): note ambient
   for every row; a hot-air rework station sweep (25–85 °C) is the
   cheap version of a temperature characterization.

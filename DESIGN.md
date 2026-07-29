@@ -1099,3 +1099,40 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   minus 2 dB; a trip now means the design or code changed, never
   the machine. Kept from the retry commit: the pre-run csv delete
   (an aborted sim must never be scored on the prior run's data).
+
+- **2026-07-29: post-silicon survey of all 83 analog projects on
+  tt06-tt09 (the four shuttles with delivered prototypes).** Method:
+  shuttle index JSONs (index.tinytapeout.com) give every project's
+  source repo + submitted commit; harvested every commit made after
+  submission (52/83 repos had any; ~25 with silicon-era content) and
+  read the bring-up/measurement material. Findings applied:
+  (1) htfab/tt07-fprn bring-up scripts start by enabling
+  tt_um_chip_rom and verifying its pattern via the ttboard SDK
+  before touching their own design -- board/mux/firmware proven
+  before the die can be blamed. Adopted as test 0.0.
+  (2) mattvenn/tt08-analog-ring-osc: one oscillator DEAD IN SILICON
+  from a missing via (the exact class our extraction-connectivity
+  gates now catch), and the working one measured low amplitude
+  because a demo-board pull-down was still populated -- demo-board
+  passives check added to the test-plan risks.
+  (3) devstdin/tt08-ldo-bg-ref-osc: exemplary measured-vs-simulated
+  noise correlation (battery-fed board, quadratic-sum prediction,
+  one unexplained 21.3 kHz spur anyway); silicon 1/f came in
+  slightly BELOW sky130 sim -- our 126 uV CI number is an upper
+  estimate. Battery-supply note + CI correlation target added to
+  the precision-noise rows.
+  (4) wulffern/tt06-sar (closest cousin -- an ADC with a
+  measurement notebook): bench captures analyzed by the same
+  coherent odd-bin FFT code as sim. Adopted: sim/snr.py --bits
+  <file> reads a captured bitstream (pex_bits.txt format) so
+  silicon is judged by the byte-identical estimator; verified to
+  reproduce the 40.2 dB acceptance from the committed vector. Also
+  notable: he taped out with RC-extracted sim broken (documented
+  "simulations don't work") -- our extracted-acceptance flow is
+  ahead of the reference standard here.
+  (5) urish charge-pump (3 consecutive shuttles): silicon-measured
+  tables with the meter's input impedance documented per row;
+  clocks to 62-100 MHz proven through the TT clk path on silicon --
+  our 50 MHz plan has field precedent.
+  Raw survey data stayed in the session scratchpad; everything
+  durable is in the test-plan edits and this entry.
