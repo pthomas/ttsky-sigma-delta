@@ -44,7 +44,7 @@ frame DRC 0.
 | Site | 14 chapters incl. datasheet (CI-injected electrical tables) and silicon test plan (docs/09b, 4 phases, measured-vs-CI correlation table is the deliverable) |
 | Commercial | **local-only branch `commercial`** (never push; no upstream set). COMMERCIAL.md: thesis, cost model, decisions (power-conversion socket, differential required → v2 = fully-differential + 2nd-order in ONE architecture pass), open questions for Paul (channels, funding, license, name, PGA) |
 | Fabric RTL | **suite green** (5/5, CI rtl-verify + locally via ~/.venv + iverilog): sdm_rx.v (AXI4-Lite + dual sinc³), cocotb TB incl. both mixed-signal tests (committed PEX bitstream → RTL → registers); pex_bits.txt refreshed from the 2-pin chip's 40.2 dB acceptance run. rtl/PLAN.md review still open |
-| Bench plan | PolarFire SoC Icicle; DAC = AD5541A (kernel ad5446 driver; MikroE DAC 8 Click on mikroBUS, or Pmod DA3) |
+| Bench plan | PolarFire SoC bench board (TT demo board hosts the chip; header adapter TBD); DAC = AD5541A (kernel ad5446 driver; MikroE DAC 8 Click or Pmod DA3 module, or bare on the adapter) |
 | Open (user-side) | **re-submit/update the TT shuttle entry (frame fix 2026-07-26: 22 floating outputs now tied — submitted GDS predates it)**; Pages visibility toggle; rtl/PLAN.md review |
 
 **Next actions (fresh context starts here):** (1) Paul reviews

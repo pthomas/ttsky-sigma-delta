@@ -13,7 +13,7 @@ design methodology claims.
   project selection via the ttboard MicroPython SDK, and the Phase-0
   first-light tests. For capture and precision work, a to-be-designed
   interface adapts the demo board's pin headers to the PolarFire SoC
-  Icicle Kit: clock from the FPGA to the clk header, Q/Q̄ from the
+  bench board: clock from the FPGA to the clk header, Q/Q̄ from the
   uo headers into LVCMOS inputs, and analog access at the ua headers
   (design TBD — algofoogle/tt06-grab-bag's adapter PCB on demo-board
   headers, KiCad + Gerbers in-repo, is a useful precedent). The
@@ -30,7 +30,7 @@ design methodology claims.
   "bad" precision SNDR on such a clock is *predicted*, not a dead
   chip. Fast-path SNDR is the robust first-light metric.
 - Signal source: **AD5541A** (kernel `ad5446` driver; MikroE DAC 8
-  Click on the Icicle mikroBUS, or Pmod DA3) for all DC work —
+  Click or Pmod DA3 module on the bench board) for all DC work —
   **referenced to the same cleaned 3.3 V rail that feeds VAPWR**,
   not the breakout's onboard 2.5 V ref (lift/bypass it, or put a
   bare AD5541A on the carrier). Rail-as-reference makes the bench
