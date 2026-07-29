@@ -9,9 +9,16 @@ design methodology claims.
 
 ## Equipment
 
-- TinyTapeout demo board (RP2040 breakout) for first-light only;
-  an FPGA board (iCE40/ECP5/Zynq — anything with a spare PLL and two
-  LVCMOS inputs) for all bitstream capture.
+- The intended bench is a custom carrier interfacing the TT chip
+  directly to the PolarFire SoC Icicle Kit (clock out, Q/Q̄ capture,
+  analog wiring — design TBD; algofoogle/tt06-grab-bag's interposer
+  PCB, KiCad + Gerbers in-repo, is a good reference for a TT analog
+  carrier). The TT demo board (RP2040) remains the *optional*
+  first-light path — tests 0.0–0.4 work on either, but 0.0 (chip-ROM
+  self-test) and the ttboard SDK references apply to the demo board
+  only; on the carrier, the equivalent sanity step is clocking the
+  mux select lines per the TT mux documentation and verifying the
+  factory-test project before ours.
 - Clean 50 MHz clock source (FPGA PLL output is fine; avoid RC
   oscillators — RZ feedback doubles jitter sensitivity). **Know your
   source's jitter before judging SNDR**: the measured susceptibility
