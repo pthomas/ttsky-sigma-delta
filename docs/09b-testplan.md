@@ -137,3 +137,15 @@ first hard evidence for the commercial-exploration thesis.
 - Thermal drift is uncharacterized (all sims 27 °C): note ambient
   for every row; a hot-air rework station sweep (25–85 °C) is the
   cheap version of a temperature characterization.
+- Provision footprints for input filter caps (~10 pF C0G to ground
+  at VIN, plus an RC slot) on the header adapter: the tt06 SAR
+  silicon showed interference-shaped harmonics on the analog input
+  that input caps historically fixed. Cheap insurance, DNP by
+  default (VIN already sees 132 kΩ, so even 100 pF only makes a
+  12 kHz pole — fine for DC rows, remove for AC SNDR rows).
+- Expect silicon timing toward the slow corner: the tt06 SAR
+  measured its clk-to-done path at ~2× the typical-corner sim. Our
+  speed paths carry 8× margin (comparator worst decision 1.18 ns vs
+  the 10 ns half-period) and the nightly ss corner is gated, but
+  read any marginal timing observation against ss predictions, not
+  tt.
