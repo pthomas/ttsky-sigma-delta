@@ -32,7 +32,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from tools.asm_top import (PLACE, BLOCKS, BPORTS, RESC, SWS, CAPS,
+from tools.asm_top import (MW, PLACE, BLOCKS, BPORTS, RESC, SWS, CAPS,
                            placements, block_ports)
 from tools.lay_lib import (parse_parent, parse_ports, subcell_layer_bbox,
                            cell_layer_rects, U)
@@ -838,6 +838,15 @@ def build_wires(terms, abs_bb, result, rt):
                    if to is not None and len(path) > 1 else RIDE)
             fixed = fixup(path, xyfrom, xyto, rs, re_, jok)
             poly = [tfrom] + fixed[1:-1] + ([tto] if tto else [fixed[-1]])
+            if tto is None:
+                # label legs end on the die edge, and the painter adds
+                # a MW/2 endcap past the endpoint -- a leg ending at
+                # y=0 paints below the project area, which the precheck
+                # boundary check rejects. Stop at MW/2 so the metal
+                # lands flush with the edge.
+                x, y = poly[-1]
+                if y < MW / 2:
+                    poly[-1] = (x, MW / 2)
             polylines.append(poly)
         nets_out[name] = polylines
 

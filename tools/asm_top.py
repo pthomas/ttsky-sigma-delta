@@ -36,6 +36,11 @@ from tools.lay_lib import (magic_run, parse_parent, parse_ports,
 MW = 0.6      # signal wire width
 SW = 2.0      # supply trunk width
 
+# tt_analog_2x2_3v3.def die area (um). Nothing painted at the top level
+# may leave it: the TinyTapeout precheck boundary check fails the whole
+# submission on any shape outside (0,0)-(DIE_W,DIE_H).
+DIE_W, DIE_H = 319.24, 225.76
+
 # cell, bbox-lower-left target (um). Streets >= ~3 um.
 PLACE = {
     "ota":   ("ota_layout", 12, 12),
@@ -189,6 +194,9 @@ def main():
 
     def paint(x1, y1, x2, y2, layers, pads=None):
         x1, y1, x2, y2 = (round(v * U) / U for v in (x1, y1, x2, y2))
+        if x1 < 0 or y1 < 0 or x2 > DIE_W or y2 > DIE_H:
+            sys.exit(f"paint outside project area: ({x1},{y1})-({x2},{y2}) "
+                     f"{layers} net={cur[0]}")
         tcl.append(f"box {x1:.3f}um {y1:.3f}um {x2:.3f}um {y2:.3f}um")
         for l in layers:
             tcl.append(f"paint {l}")
