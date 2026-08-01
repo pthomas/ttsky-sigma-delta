@@ -15,6 +15,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lay_lib import canonicalize_pex
+
 PDK_ROOT = os.environ.get("PDK_ROOT", "/home/nvme/pdk")
 RC = f"{PDK_ROOT}/sky130A/libs.tech/magic/sky130A.magicrc"
 
@@ -32,37 +35,6 @@ quit -noprompt
 """
 
 
-def canonicalize(path):
-    """Make the netlist byte-stable across magic processes: ext2spice
-    emits the parasitic cap lines in per-process hash order (ASLR) with
-    ~0.01 aF accumulation jitter in the last digit, so the same layout
-    produced a differently-ordered deck every run -- different matrix
-    ordering in ngspice, different roundoff, a different transient
-    trajectory (the cause of the 2026-07-31 nightly vapwr-3.0
-    convergence abort). Sort caps by node pair, renumber, and round to
-    1 aF; same rationale as tools/gds_datenorm.py for the GDS. Device
-    lines have been observed order-stable; the nightly netlist drift
-    check will catch it if that ever changes."""
-    cap_re = re.compile(r"^C\d+ (\S+) (\S+) ([0-9.]+)([fpnu]?)$")
-    to_ff = {"f": 1.0, "p": 1e3, "n": 1e6, "u": 1e9, "": 0.0}
-    lines = open(path).read().splitlines()
-    caps, out, slot = [], [], None
-    for ln in lines:
-        m = cap_re.match(ln)
-        if not m:
-            out.append(ln)
-            continue
-        if slot is None:
-            slot = len(out)
-        a, b, v, suf = m.groups()
-        v = round(float(v) * to_ff[suf], 3)
-        caps.append((*sorted((a, b)), v))
-    block = [f"C{i} {a} {b} {v:g}{'f' if v else ''}"
-             for i, (a, b, v) in enumerate(sorted(caps))]
-    out[slot:slot] = block
-    open(path, "w").write("\n".join(out) + "\n")
-
-
 def main():
     os.makedirs("spice", exist_ok=True)
     r = subprocess.run(["magic", "-dnull", "-noconsole", "-rcfile", RC],
@@ -73,7 +45,7 @@ def main():
     if not os.path.exists("spice/sd_top_pex.spice"):
         print(out[-2000:])
         sys.exit(1)
-    canonicalize("spice/sd_top_pex.spice")
+    canonicalize_pex("spice/sd_top_pex.spice")
     txt = open("spice/sd_top_pex.spice").read()
     ndev = len(re.findall(r"^X\d", txt, re.M))
     caps = re.findall(r"^C\d+ \S+ \S+\s+([0-9.]+)f", txt, re.M)

@@ -15,6 +15,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lay_lib import canonicalize_pex
+
 PDK_ROOT = os.environ.get("PDK_ROOT", "/home/nvme/pdk")
 RC = f"{PDK_ROOT}/sky130A/libs.tech/magic/sky130A.magicrc"
 
@@ -42,6 +45,7 @@ def main():
     if not os.path.exists("spice/ota_pex.spice"):
         print(out[-2000:])
         sys.exit(1)
+    canonicalize_pex("spice/ota_pex.spice")
     txt = open("spice/ota_pex.spice").read()
     ndev = len(re.findall(r"^X\d", txt, re.M))
     caps = re.findall(r"^C\d+ \S+ \S+\s+([0-9.]+)f", txt, re.M)

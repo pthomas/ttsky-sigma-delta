@@ -59,6 +59,37 @@ def magic_run(script, timeout=600):
     return r.stdout + r.stderr
 
 
+def canonicalize_pex(path):
+    """Make an ext2spice netlist byte-stable across magic processes:
+    the parasitic cap lines come out in per-process hash order (ASLR)
+    with ~0.01 aF accumulation jitter in the last digit, so the same
+    layout fed ngspice a differently-ordered deck every run --
+    different matrix ordering, different roundoff, a different
+    transient trajectory (the 2026-07-31 nightly vapwr-3.0 convergence
+    abort). Sort caps by node pair, renumber, normalize all suffixes
+    to fF and round to 1 aF; same rationale as tools/gds_datenorm.py
+    for the GDS. Device lines have been observed order-stable; the
+    nightly netlist drift check will catch it if that ever changes."""
+    cap_re = re.compile(r"^C\d+ (\S+) (\S+) ([0-9.]+)([fpnu]?)$")
+    to_ff = {"f": 1.0, "p": 1e3, "n": 1e6, "u": 1e9, "": 0.0}
+    lines = open(path).read().splitlines()
+    caps, out, slot = [], [], None
+    for ln in lines:
+        m = cap_re.match(ln)
+        if not m:
+            out.append(ln)
+            continue
+        if slot is None:
+            slot = len(out)
+        a, b, v, suf = m.groups()
+        v = round(float(v) * to_ff[suf], 3)
+        caps.append((*sorted((a, b)), v))
+    block = [f"C{i} {a} {b} {v:g}{'f' if v else ''}"
+             for i, (a, b, v) in enumerate(sorted(caps))]
+    out[slot:slot] = block
+    open(path, "w").write("\n".join(out) + "\n")
+
+
 def parse_golden(block):
     """(ports, devices) from spice/golden/<block>.spice.
 
