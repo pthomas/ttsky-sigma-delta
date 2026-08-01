@@ -1136,3 +1136,55 @@ Dispositions of the historical items 1–8 (log entries cite this numbering):
   our 50 MHz plan has field precedent.
   Raw survey data stayed in the session scratchpad; everything
   durable is in the test-plan edits and this entry.
+
+- **2026-08-01: upstream precheck rewrite caught a real 0.3 um met4
+  overhang; nightly flake root-caused to ext2spice ordering -- PEX
+  netlist made canonical and committed as the drift golden.** Two
+  independent CI failures, both closed structurally. (1) Boundary:
+  tt-support-tools d869909e (07-28) replaced the old boundary check,
+  which never recursed into cell references and so was vacuous for
+  hierarchical GDS, with a flattened bbox-vs-DEF-die-area check. It
+  immediately caught the UA0/UA1 label legs: they end ON the die
+  edge at y=0 and asm_top's painter extends a MW/2 endcap past every
+  vertical endpoint, leaving two met4 rects at y=-0.3 um. Fix in the
+  generators: asm_route stops bottom-edge label legs at MW/2, and
+  asm_top paint() now hard-fails on any box outside
+  (0,0)-(DIE_W,DIE_H) so this class of bug breaks the local build,
+  not the shuttle precheck. Rebuilt GDS is otherwise identical to
+  the submitted one (104,585 shapes; only the two rects changed).
+  Standing risk to know about: the gds workflow tracks
+  tt-gds-action@ttsky26c (a branch) and precheck checks out
+  tt-support-tools@main -- upstream can flip CI red with zero repo
+  changes, as here. (2) Nightly: the 07-31 top-corners abort
+  (vapwr-3.0, timestep collapse on a g5v0d10v5 body node) was NOT
+  machine flakiness surviving the 07-28 determinization -- the deck
+  itself differed run to run. ext2spice emits parasitic cap lines in
+  per-process hash order (measured: only 69 of 684 node pairs kept
+  their position across two back-to-back extractions) with ~0.01 aF
+  last-digit accumulation jitter, so every nightly handed ngspice a
+  differently-ordered matrix -> different roundoff -> a different
+  trajectory; one draw in N collapses. The 07-28 work proved
+  determinism per netlist instance and never re-extracted, which is
+  why it looked airtight. Fix: lay_lib.canonicalize_pex (caps sorted
+  by node pair, renumbered, all suffixes normalized to fF, rounded
+  to 1 aF -- same move as gds_datenorm for the GDS), applied in both
+  pex_top and pex_ota (layout-verify ran the same lottery on every
+  push). spice/sd_top_pex.spice is now COMMITTED and the nightly
+  regenerates + `git diff --exit-code`s it: extraction stays in the
+  pipeline, the committed copy is the golden that (a) turns
+  "deterministic" into a checked invariant and (b) pins the gate
+  baselines to one exact deck -- version drift (magic/PDK upgrade)
+  fails at the diff line with a reviewable diff, never as a 3 a.m.
+  SNDR mystery; re-baseline is then a deliberate act (rerun the
+  suite, update gates, recommit the netlist). No retries, per the
+  07-28 directive: with a byte-stable deck a convergence abort is
+  reproducible and means the deck needs fixing. All nine scenarios
+  re-measured on the canonical deck (the reorder re-rolled the
+  2048-bit window draw): nominal 39.6 / ss 34.0 / ff 38.7 /
+  v3.0 37.8 / v3.6 34.3 / 0C 34.8 / 85C 36.9 dB, both ramps ALIVE;
+  gates = measured - 2 dB to nearest 0.5. Housekeeping: committed
+  mag/*.ext refreshed (local magic 8.3.676 orders cap nodes
+  differently than the older build that produced them -- .ext diffs
+  without geometry changes are version skew, assembly-verify
+  regenerates rather than byte-compares); stray (UNNAMED).gds
+  (empty magic artifact, accidental commit in 251d7e5) removed.

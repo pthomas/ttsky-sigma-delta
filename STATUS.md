@@ -40,7 +40,7 @@ frame DRC 0.
 
 | Area | State |
 |---|---|
-| Nightly CI | scheduled 03:00 MT (GitLab schedule 4359193): assembly-verify (full from-source top regression) + top-corners (ss gate 32 / ff gate 34). Green. Push pipelines unchanged. |
+| Nightly CI | scheduled 03:00 MT (GitLab schedule 4359193): assembly-verify (full from-source top regression) + top-corners. top-corners first regenerates the PEX and diffs it against the committed golden `spice/sd_top_pex.spice` (see DESIGN.md 2026-08-01) — a diff there means the deck drifted (layout/magic/PDK): review it, rerun the corner suite, update gates (measured − 2 dB to nearest 0.5), recommit the netlist. Never retry. Gates: ss 32 / ff 36.5 / v3.0 36 / v3.6 32.5 / 0C 33 / 85C 35. |
 | Site | 14 chapters incl. datasheet (CI-injected electrical tables) and silicon test plan (docs/09b, 4 phases, measured-vs-CI correlation table is the deliverable) |
 | Commercial | **local-only branch `commercial`** (never push; no upstream set). COMMERCIAL.md: thesis, cost model, decisions (power-conversion socket, differential required → v2 = fully-differential + 2nd-order in ONE architecture pass), open questions for Paul (channels, funding, license, name, PGA) |
 | Fabric RTL | **suite green** (5/5, CI rtl-verify + locally via ~/.venv + iverilog): sdm_rx.v (AXI4-Lite + dual sinc³), cocotb TB incl. both mixed-signal tests (committed PEX bitstream → RTL → registers); pex_bits.txt refreshed from the 2-pin chip's 40.2 dB acceptance run. rtl/PLAN.md review still open |
