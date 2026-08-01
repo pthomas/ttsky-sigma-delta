@@ -1,5 +1,9 @@
 backup/
-spice/
+# spice/ holds sim scratch, but the canonical PEX netlist is tracked:
+# the nightly regenerates it and diffs against this committed copy
+# (spice/* not spice/ -- git cannot re-include under an ignored dir)
+spice/*
+!spice/sd_top_pex.spice
 __pycache__/
 *.raw
 *.log

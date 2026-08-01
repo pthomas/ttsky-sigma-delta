@@ -1,0 +1,821 @@
+* SPICE3 file created from sd_top.ext - technology: sky130A
+
+.subckt sd_top UA0 UO0 UO1 CLK VDPWR UA1 VGND VAPWR
+X0 buf_layout_2/IN VAPWR VGND sky130_fd_pr__res_high_po_1p41 l=824.88
+X1 dff_layout_0/si dff_layout_0/CLK dff_layout_0/mb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X2 dff_layout_0/si dff_layout_0/clkb dff_layout_0/mb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.5
+X3 dff_layout_0/mi dff_layout_0/clkb dff_layout_0/D VGND sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=2.9 ps=21.16 w=5 l=0.5
+X4 dff_layout_0/mi dff_layout_0/CLK dff_layout_0/D VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=4.35 ps=31.74 w=5 l=0.5
+X5 VGND dff_layout_0/QB dff_layout_0/sfb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=149.35001 pd=1.08974k as=2.9 ps=21.16 w=5 l=0.5
+X6 VGND dff_layout_0/si dff_layout_0/QB VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X7 VAPWR dff_layout_0/QB dff_layout_0/sfb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=326.25 pd=2.3805k as=2.9 ps=21.16 w=5 l=0.5
+X8 VAPWR dff_layout_0/si dff_layout_0/QB VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X9 VGND dff_layout_0/QB dff_layout_0/Q VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X10 VGND dff_layout_0/CLK dff_layout_0/clkb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X11 VAPWR dff_layout_0/QB dff_layout_0/Q VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X12 VAPWR dff_layout_0/CLK dff_layout_0/clkb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X13 dff_layout_0/si dff_layout_0/clkb dff_layout_0/sfb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5
+X14 dff_layout_0/si dff_layout_0/CLK dff_layout_0/sfb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5
+X15 VGND dff_layout_0/mb dff_layout_0/mfb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X16 VGND dff_layout_0/mi dff_layout_0/mb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X17 VAPWR dff_layout_0/mb dff_layout_0/mfb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X18 VAPWR dff_layout_0/mi dff_layout_0/mb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X19 dff_layout_0/mi dff_layout_0/CLK dff_layout_0/mfb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X20 dff_layout_0/mi dff_layout_0/clkb dff_layout_0/mfb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X21 VAPWR comp_layout_0/n1b dff_layout_0/D VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X22 comp_layout_0/di1 UA1 comp_layout_0/tail VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+X23 VAPWR comp_layout_0/Q dff_layout_0/D VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X24 comp_layout_0/di1 comp_layout_0/on2 comp_layout_0/on1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=4.35 pd=31.74 as=1.45 ps=10.58 w=5 l=0.5
+X25 comp_layout_0/di2 ota_layout_0/INP comp_layout_0/tail VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=4.35 pd=31.74 as=5.8 ps=42.32 w=5 l=0.5 M=2
+X26 comp_layout_0/di2 comp_layout_0/on1 comp_layout_0/on2 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X27 comp_layout_0/sb comp_layout_0/n1b dff_layout_0/D VGND sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5
+X28 VGND comp_layout_0/Q comp_layout_0/sb VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X29 VGND comp_layout_0/on2 comp_layout_0/on1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X30 VGND comp_layout_0/on1 comp_layout_0/on2 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X31 VAPWR comp_layout_0/n2b comp_layout_0/Q VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X32 VAPWR dff_layout_0/D comp_layout_0/Q VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X33 VGND dff_layout_0/D comp_layout_0/sq VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=2.9 ps=21.16 w=5 l=0.5
+X34 comp_layout_0/sq comp_layout_0/n2b comp_layout_0/Q VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X35 VGND comp_layout_0/CLK comp_layout_0/di1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X36 VGND comp_layout_0/CLK comp_layout_0/di2 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X37 VGND comp_layout_0/CLK comp_layout_0/on1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X38 VGND comp_layout_0/CLK comp_layout_0/on2 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5
+X39 VGND comp_layout_0/on2 comp_layout_0/n2b VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X40 VAPWR comp_layout_0/on2 comp_layout_0/n2b VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X41 VGND comp_layout_0/on1 comp_layout_0/n1b VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X42 VAPWR comp_layout_0/on1 comp_layout_0/n1b VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X43 comp_layout_0/tail comp_layout_0/CLK VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.5 M=2
+X44 VAPWR ota_layout_0/dio ota_layout_0/pc2 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=1.45 ps=10.58 w=5 l=0.7 M=12
+X45 ota_layout_0/tail ota_layout_0/IREFP VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=76
+X46 ota_layout_0/fn1 ota_layout_0/INP ota_layout_0/tail ota_layout_0/tail sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.7 M=50
+X47 ota_layout_0/fn2 ota_layout_0/INM ota_layout_0/tail ota_layout_0/tail sky130_fd_pr__pfet_g5v0d10v5 ad=37.7 pd=275.07999 as=129.05 ps=941.62 w=5 l=0.7 M=50
+X48 VGND ota_layout_0/IREFN ota_layout_0/fn2 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1.2 M=24
+X49 VGND ota_layout_0/IREFN ota_layout_0/fn1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=36.25 ps=264.5 w=5 l=1.2 M=24
+X50 ota_layout_0/dio ota_layout_0/VBNC ota_layout_0/fn1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=24
+X51 UA1 ota_layout_0/VBNC ota_layout_0/fn2 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=18.85 pd=137.53999 as=36.25 ps=264.5 w=5 l=1 M=24
+X52 ota_layout_0/pc1 ota_layout_0/VBPC ota_layout_0/dio VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=18.85 pd=137.53999 as=10.15 ps=74.06 w=5 l=0.7 M=12
+X53 VGND ota_layout_0/IREFN ota_layout_0/IREFN VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=18.85 ps=137.53999 w=5 l=1.2 M=24
+X54 ota_layout_0/IREFP ota_layout_0/IREFP VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=56.55 pd=412.62 as=0 ps=0 w=5 l=1 M=76
+X55 ota_layout_0/pc2 ota_layout_0/VBPC UA1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=18.85 pd=137.53999 as=10.15 ps=74.06 w=5 l=0.7 M=12
+X56 VAPWR ota_layout_0/dio ota_layout_0/pc1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=0.7 M=12
+X57 UA1 ota_layout_0/INM sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X58 UA1 ota_layout_0/INM sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X59 buf_layout_1/IN buf_layout_2/IN VGND sky130_fd_pr__res_high_po_1p41 l=216.23
+X60 VGND buf_layout_0/IN VGND sky130_fd_pr__res_high_po_1p41 l=172.78
+X61 ota_layout_0/VBNC VGND sky130_fd_pr__cap_mim_m3_1 l=22.2 w=22.2
+X62 ota_layout_0/VBPC VGND sky130_fd_pr__cap_mim_m3_1 l=22.2 w=22.2
+X63 buf_layout_0/IN buf_layout_1/IN VGND sky130_fd_pr__res_high_po_1p41 l=216.23
+X64 ota_layout_0/INM UA0 VGND sky130_fd_pr__res_high_po_0p35 l=102.57
+X65 buf_layout_0/tail buf_layout_0/IN buf_layout_0/o1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=1.45 ps=10.58 w=5 l=0.5 M=12
+X66 buf_layout_0/tail buf_layout_0/OUT buf_layout_0/OUT VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=66.7 pd=486.67999 as=10.15 ps=74.06 w=5 l=0.5 M=12
+X67 buf_layout_0/o1 buf_layout_0/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=6
+X68 buf_layout_0/OUT buf_layout_0/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=8.7 pd=62.9 as=0 ps=0 w=5 l=1 M=6
+X69 buf_layout_0/tail ota_layout_0/IREFP VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=64
+X70 buf_layout_1/tail buf_layout_1/IN buf_layout_1/o1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=66.7 pd=486.67999 as=10.15 ps=74.06 w=5 l=0.5 M=12
+X71 buf_layout_1/tail ota_layout_0/INP ota_layout_0/INP VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=10.15 ps=74.06 w=5 l=0.5 M=12
+X72 buf_layout_1/o1 buf_layout_1/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=5.8 pd=42.32 as=0 ps=0 w=5 l=1 M=6
+X73 ota_layout_0/INP buf_layout_1/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=8.7 pd=62.9 as=0 ps=0 w=5 l=1 M=6
+X74 buf_layout_1/tail ota_layout_0/IREFP VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=1 M=64
+X75 VGND ota_layout_0/INM VGND sky130_fd_pr__res_high_po_0p35 l=123.03
+X76 buf_layout_2/tail buf_layout_2/IN buf_layout_2/o1 VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=66.7 pd=486.67999 as=10.15 ps=74.06 w=5 l=0.5 M=12
+X77 buf_layout_2/tail buf_layout_2/OUT buf_layout_2/OUT VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=10.15 ps=74.06 w=5 l=0.5 M=12
+X78 buf_layout_2/o1 buf_layout_2/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=5.8 pd=42.32 as=0 ps=0 w=5 l=1 M=6
+X79 buf_layout_2/OUT buf_layout_2/o1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=8.7 pd=62.9 as=0 ps=0 w=5 l=1 M=6
+X80 buf_layout_2/tail ota_layout_0/IREFP VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=5 l=1 M=64
+X81 comp_layout_0/CLK lvl_layout_0/n2 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=0.5 M=2
+X82 VAPWR lvl_layout_0/n2 comp_layout_0/CLK VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=1.45 ps=10.58 w=5 l=0.5 M=4
+X83 dff_layout_0/CLK lvl_layout_0/n1 VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X84 VAPWR lvl_layout_0/n1 dff_layout_0/CLK VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0 pd=0 as=4.35 ps=31.74 w=5 l=0.5 M=4
+X85 lvl_layout_0/n1 lvl_layout_0/n2 VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X86 VGND CLK lvl_layout_0/nb18 VGND sky130_fd_pr__nfet_01v8 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=0.35
+X87 lvl_layout_0/n2 lvl_layout_0/n1 VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X88 VGND CLK lvl_layout_0/n1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.5 M=8
+X89 VDPWR CLK lvl_layout_0/nb18 VDPWR sky130_fd_pr__pfet_01v8 ad=2.9 pd=20.58 as=2.9 ps=20.58 w=10 l=0.35
+X90 VGND lvl_layout_0/nb18 lvl_layout_0/n2 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=7.25 ps=52.9 w=5 l=0.5 M=8
+X91 bias_layout_0/nb bias_layout_0/pb VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=2
+X92 bias_layout_0/pb bias_layout_0/pb VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=1 M=2
+X93 bias_layout_0/rs VGND VGND sky130_fd_pr__res_high_po_1p41 l=18.88
+X94 VGND bias_layout_0/vbpc_i VGND sky130_fd_pr__res_high_po_1p41 l=105.03
+X95 bias_layout_0/vbnc_i bias_layout_0/pb VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=1 M=2
+X96 VGND bias_layout_0/vbnc_i VGND sky130_fd_pr__res_high_po_1p41 l=314.01001
+X97 bias_layout_0/vbpc_i bias_layout_0/pb VAPWR VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=1 M=2
+X98 bias_layout_0/nst VGND bias_layout_0/nb VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=2
+X99 VAPWR VGND bias_layout_0/nst VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=1.45 pd=10.58 as=1.45 ps=10.58 w=5 l=50
+X100 ota_layout_0/IREFP bias_layout_0/vbnc_i bias_layout_0/ipd VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.5 M=38
+X101 ota_layout_0/IREFN bias_layout_0/vbpc_i bias_layout_0/ind VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=0.5 M=34
+X102 bias_layout_0/nst bias_layout_0/vbnc_i VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X103 bias_layout_0/vbpc_i ota_layout_0/VBPC VGND sky130_fd_pr__res_high_po_1p41 l=3.24
+X104 bias_layout_0/vbnc_i ota_layout_0/VBNC VGND sky130_fd_pr__res_high_po_1p41 l=3.24
+X105 VAPWR bias_layout_0/pb bias_layout_0/ind VAPWR sky130_fd_pr__pfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=34
+X106 VGND bias_layout_0/nb bias_layout_0/ipd VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0.725 pd=5.29 as=0.725 ps=5.29 w=5 l=1 M=38
+X107 bias_layout_0/pb bias_layout_0/nb bias_layout_0/rs VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=8
+X108 bias_layout_0/nb bias_layout_0/nb VGND VGND sky130_fd_pr__nfet_g5v0d10v5 ad=1.45 pd=10.58 as=0.725 ps=5.29 w=5 l=1 M=2
+X109 VGND odrv_layout_0/b UO1 VGND sky130_fd_pr__nfet_01v8 ad=3.48 pd=24.58 as=3.48 ps=24.58 w=12 l=0.35
+X110 VGND odrv_layout_0/a odrv_layout_0/b VGND sky130_fd_pr__nfet_01v8 ad=11.31 pd=80.9 as=1.45 ps=10.58 w=5 l=0.35
+X111 VDPWR odrv_layout_0/b UO1 VDPWR sky130_fd_pr__pfet_01v8 ad=6.96 pd=48.58 as=6.96 ps=48.58 w=24 l=0.35
+X112 VGND dff_layout_0/QB odrv_layout_0/a VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X113 VDPWR odrv_layout_0/a odrv_layout_0/b VDPWR sky130_fd_pr__pfet_01v8 ad=22.62 pd=158.89999 as=2.9 ps=20.58 w=10 l=0.35
+X114 odrv_layout_0/a dff_layout_0/QB VDPWR VDPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=2.9 ps=21.16 w=5 l=0.5 M=2
+X115 VGND odrv_layout_1/b UO0 VGND sky130_fd_pr__nfet_01v8 ad=0 pd=0 as=3.48 ps=24.58 w=12 l=0.35
+X116 VGND odrv_layout_1/a odrv_layout_1/b VGND sky130_fd_pr__nfet_01v8 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.35
+X117 VDPWR odrv_layout_1/b UO0 VDPWR sky130_fd_pr__pfet_01v8 ad=0 pd=0 as=6.96 ps=48.58 w=24 l=0.35
+X118 VGND dff_layout_0/Q odrv_layout_1/a VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=1.45 ps=10.58 w=5 l=0.5
+X119 VDPWR odrv_layout_1/a odrv_layout_1/b VDPWR sky130_fd_pr__pfet_01v8 ad=0 pd=0 as=2.9 ps=20.58 w=10 l=0.35
+X120 odrv_layout_1/a dff_layout_0/Q VDPWR VDPWR sky130_fd_pr__pfet_g5v0d10v5 ad=2.9 pd=21.16 as=0 ps=0 w=5 l=0.5 M=2
+X121 ota_layout_0/INP dff_layout_0/CLK rdac_0/X0/R1 VGND sky130_fd_pr__nfet_g5v0d10v5 ad=2.9 pd=20.58 as=2.9 ps=20.58 w=10 l=0.5
+X122 sw_nmos_2/X0/D comp_layout_0/Q buf_layout_2/OUT VGND sky130_fd_pr__nfet_g5v0d10v5 ad=5.8 pd=41.16 as=0 ps=0 w=10 l=0.5
+X123 ota_layout_0/INP VGND sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X124 ota_layout_0/INP VGND sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X125 rdac_0/X0/R1 comp_layout_0/CLK sw_nmos_2/X0/D VGND sky130_fd_pr__nfet_g5v0d10v5 ad=8.7 pd=61.74 as=0 ps=0 w=10 l=0.5
+X126 ota_layout_0/INM rdac_0/X0/R1 VGND sky130_fd_pr__res_high_po_1p41 l=61.65
+X127 buf_layout_0/OUT VGND sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X128 buf_layout_0/OUT VGND sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X129 sw_nmos_4/X0/D dff_layout_0/D buf_layout_0/OUT VGND sky130_fd_pr__nfet_g5v0d10v5 ad=5.8 pd=41.16 as=0 ps=0 w=10 l=0.5
+X130 buf_layout_2/OUT VGND sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X131 buf_layout_2/OUT VGND sky130_fd_pr__cap_mim_m3_1 l=20 w=25
+X132 rdac_0/X0/R1 comp_layout_0/CLK sw_nmos_4/X0/D VGND sky130_fd_pr__nfet_g5v0d10v5 ad=0 pd=0 as=0 ps=0 w=10 l=0.5
+C0 CLK UO0 0.14f
+C1 CLK UO1 1.03f
+C2 CLK VAPWR 1.386f
+C3 CLK VDPWR 2.43f
+C4 CLK VGND 16.59f
+C5 CLK buf_layout_2/OUT 0.039f
+C6 CLK comp_layout_0/CLK 0.532f
+C7 CLK dff_layout_0/CLK 3.617f
+C8 CLK dff_layout_0/D 0.267f
+C9 CLK dff_layout_0/QB 0.014f
+C10 CLK lvl_layout_0/n1 3.45f
+C11 CLK lvl_layout_0/n2 0.424f
+C12 CLK lvl_layout_0/nb18 0.771f
+C13 CLK odrv_layout_0/a 0.001f
+C14 CLK ota_layout_0/INP 0.577f
+C15 UA0 UA1 0.228f
+C16 UA0 VAPWR 0.175f
+C17 UA0 VGND 11.811f
+C18 UA0 bias_layout_0/ind 0
+C19 UA0 bias_layout_0/ipd 0.001f
+C20 UA0 bias_layout_0/nb 0.001f
+C21 UA0 bias_layout_0/rs 0.014f
+C22 UA0 bias_layout_0/vbnc_i 0.085f
+C23 UA0 buf_layout_0/OUT 2.95f
+C24 UA0 buf_layout_2/OUT 0.51f
+C25 UA0 comp_layout_0/CLK 0.074f
+C26 UA0 comp_layout_0/Q 0.029f
+C27 UA0 dff_layout_0/CLK 0.029f
+C28 UA0 dff_layout_0/D 0.044f
+C29 UA0 ota_layout_0/INM 3.255f
+C30 UA0 ota_layout_0/INP 0.352f
+C31 UA0 ota_layout_0/IREFN 0.221f
+C32 UA0 ota_layout_0/IREFP 0.413f
+C33 UA0 ota_layout_0/VBNC 0.529f
+C34 UA0 ota_layout_0/VBPC 0.13f
+C35 UA0 rdac_0/X0/R1 0.793f
+C36 UA0 sw_nmos_2/X0/D 0.286f
+C37 UA0 sw_nmos_4/X0/D 0.3f
+C38 UA1 VAPWR 5.284f
+C39 UA1 VGND 21.817f
+C40 UA1 buf_layout_0/OUT 1.562f
+C41 UA1 buf_layout_2/OUT 0.653f
+C42 UA1 comp_layout_0/CLK 5.164f
+C43 UA1 comp_layout_0/Q 3.283f
+C44 UA1 comp_layout_0/di1 1.4f
+C45 UA1 comp_layout_0/di2 0.626f
+C46 UA1 comp_layout_0/n1b 0.088f
+C47 UA1 comp_layout_0/n2b 0.149f
+C48 UA1 comp_layout_0/on1 0.221f
+C49 UA1 comp_layout_0/on2 0.971f
+C50 UA1 comp_layout_0/sb 0.028f
+C51 UA1 comp_layout_0/sq 0.045f
+C52 UA1 comp_layout_0/tail 0.995f
+C53 UA1 dff_layout_0/CLK 0
+C54 UA1 dff_layout_0/D 0.046f
+C55 UA1 ota_layout_0/INM 93.731f
+C56 UA1 ota_layout_0/INP 6.475f
+C57 UA1 ota_layout_0/IREFN 6.313f
+C58 UA1 ota_layout_0/IREFP 2.628f
+C59 UA1 ota_layout_0/VBNC 12.199f
+C60 UA1 ota_layout_0/VBPC 4.5f
+C61 UA1 ota_layout_0/dio 0.38f
+C62 UA1 ota_layout_0/fn1 2.874f
+C63 UA1 ota_layout_0/fn2 10.145f
+C64 UA1 ota_layout_0/pc1 0.002f
+C65 UA1 ota_layout_0/pc2 10.221f
+C66 UA1 ota_layout_0/tail 1.006f
+C67 UA1 rdac_0/X0/R1 0.191f
+C68 UO0 UO1 8.178f
+C69 UO0 VAPWR 0.053f
+C70 UO0 VDPWR 8.352f
+C71 UO0 VGND 18.158f
+C72 UO0 buf_layout_2/OUT 0
+C73 UO0 dff_layout_0/D 0
+C74 UO0 odrv_layout_1/a 0.021f
+C75 UO0 odrv_layout_1/b 1.407f
+C76 UO0 ota_layout_0/VBPC 0.15f
+C77 UO1 VAPWR 1.456f
+C78 UO1 VDPWR 8.791f
+C79 UO1 VGND 11.147f
+C80 UO1 buf_layout_2/OUT 0.009f
+C81 UO1 dff_layout_0/D 0
+C82 UO1 dff_layout_0/QB 0
+C83 UO1 dff_layout_0/mi 0
+C84 UO1 odrv_layout_0/a 0.02f
+C85 UO1 odrv_layout_0/b 1.396f
+C86 UO1 ota_layout_0/IREFP 0
+C87 UO1 ota_layout_0/VBNC 0.048f
+C88 UO1 ota_layout_0/VBPC 0.328f
+C89 VAPWR VDPWR 0.386f
+C90 VAPWR VGND 996.78f
+C91 VAPWR bias_layout_0/ind 24.591f
+C92 VAPWR bias_layout_0/ipd 1.072f
+C93 VAPWR bias_layout_0/nb 4.752f
+C94 VAPWR bias_layout_0/nst 2f
+C95 VAPWR bias_layout_0/pb 43.699f
+C96 VAPWR bias_layout_0/rs 0.916f
+C97 VAPWR bias_layout_0/vbnc_i 3.869f
+C98 VAPWR bias_layout_0/vbpc_i 13.115f
+C99 VAPWR buf_layout_0/IN 5.796f
+C100 VAPWR buf_layout_0/OUT 23.027f
+C101 VAPWR buf_layout_0/o1 7.663f
+C102 VAPWR buf_layout_0/tail 40.369f
+C103 VAPWR buf_layout_1/IN 6.282f
+C104 VAPWR buf_layout_1/o1 7.266f
+C105 VAPWR buf_layout_1/tail 40.326f
+C106 VAPWR buf_layout_2/IN 8.877f
+C107 VAPWR buf_layout_2/OUT 25.638f
+C108 VAPWR buf_layout_2/o1 7.144f
+C109 VAPWR buf_layout_2/tail 40.274f
+C110 VAPWR comp_layout_0/CLK 9.627f
+C111 VAPWR comp_layout_0/Q 5.228f
+C112 VAPWR comp_layout_0/di1 3.72f
+C113 VAPWR comp_layout_0/di2 2.103f
+C114 VAPWR comp_layout_0/n1b 3.417f
+C115 VAPWR comp_layout_0/n2b 2.654f
+C116 VAPWR comp_layout_0/on1 2.877f
+C117 VAPWR comp_layout_0/on2 3.856f
+C118 VAPWR comp_layout_0/sb 0.884f
+C119 VAPWR comp_layout_0/sq 0.628f
+C120 VAPWR comp_layout_0/tail 3.06f
+C121 VAPWR dff_layout_0/CLK 12.314f
+C122 VAPWR dff_layout_0/D 10.404f
+C123 VAPWR dff_layout_0/Q 1.837f
+C124 VAPWR dff_layout_0/QB 7.89f
+C125 VAPWR dff_layout_0/clkb 4.175f
+C126 VAPWR dff_layout_0/mb 3.925f
+C127 VAPWR dff_layout_0/mfb 2.219f
+C128 VAPWR dff_layout_0/mi 3.529f
+C129 VAPWR dff_layout_0/sfb 2.326f
+C130 VAPWR dff_layout_0/si 2.875f
+C131 VAPWR lvl_layout_0/n1 7.862f
+C132 VAPWR lvl_layout_0/n2 7.201f
+C133 VAPWR lvl_layout_0/nb18 0.233f
+C134 VAPWR odrv_layout_0/a 0.054f
+C135 VAPWR odrv_layout_0/b 0
+C136 VAPWR ota_layout_0/INM 1.134f
+C137 VAPWR ota_layout_0/INP 20.196f
+C138 VAPWR ota_layout_0/IREFN 10.838f
+C139 VAPWR ota_layout_0/IREFP 352.35f
+C140 VAPWR ota_layout_0/VBNC 13.859f
+C141 VAPWR ota_layout_0/VBPC 15.35f
+C142 VAPWR ota_layout_0/dio 21.62f
+C143 VAPWR ota_layout_0/fn1 4.348f
+C144 VAPWR ota_layout_0/fn2 1.814f
+C145 VAPWR ota_layout_0/pc1 14.108f
+C146 VAPWR ota_layout_0/pc2 17.76f
+C147 VAPWR ota_layout_0/tail 52.125f
+C148 VDPWR VGND 61.075f
+C149 VDPWR buf_layout_2/OUT 6.302f
+C150 VDPWR comp_layout_0/CLK 0.328f
+C151 VDPWR comp_layout_0/Q 0
+C152 VDPWR comp_layout_0/on2 0.169f
+C153 VDPWR dff_layout_0/CLK 0.063f
+C154 VDPWR dff_layout_0/D 5.166f
+C155 VDPWR dff_layout_0/Q 4.988f
+C156 VDPWR dff_layout_0/QB 5.359f
+C157 VDPWR dff_layout_0/mb 0.011f
+C158 VDPWR dff_layout_0/mi 0.019f
+C159 VDPWR lvl_layout_0/n1 0.089f
+C160 VDPWR lvl_layout_0/nb18 2.476f
+C161 VDPWR odrv_layout_0/a 6.857f
+C162 VDPWR odrv_layout_0/b 8.915f
+C163 VDPWR odrv_layout_1/a 6.907f
+C164 VDPWR odrv_layout_1/b 8.74f
+C165 VDPWR ota_layout_0/IREFP 0.009f
+C166 VDPWR ota_layout_0/VBNC 0.499f
+C167 VDPWR ota_layout_0/VBPC 4.612f
+C168 VGND bias_layout_0/ind 4.899f
+C169 VGND bias_layout_0/ipd 22.535f
+C170 VGND bias_layout_0/nb 62.854f
+C171 VGND bias_layout_0/nst 8.975f
+C172 VGND bias_layout_0/pb 12.663f
+C173 VGND bias_layout_0/rs 3.593f
+C174 VGND bias_layout_0/vbnc_i 38.696f
+C175 VGND bias_layout_0/vbpc_i 17.079f
+C176 VGND buf_layout_0/IN 7.248f
+C177 VGND buf_layout_0/OUT 119.47f
+C178 VGND buf_layout_0/o1 18.18f
+C179 VGND buf_layout_0/tail 6.843f
+C180 VGND buf_layout_1/IN 11.671f
+C181 VGND buf_layout_1/o1 18.62f
+C182 VGND buf_layout_1/tail 6.801f
+C183 VGND buf_layout_2/IN 11.6f
+C184 VGND buf_layout_2/OUT 120.42f
+C185 VGND buf_layout_2/o1 18.067f
+C186 VGND buf_layout_2/tail 6.737f
+C187 VGND comp_layout_0/CLK 21.446f
+C188 VGND comp_layout_0/Q 10.727f
+C189 VGND comp_layout_0/di1 3.828f
+C190 VGND comp_layout_0/di2 2.918f
+C191 VGND comp_layout_0/n1b 5.322f
+C192 VGND comp_layout_0/n2b 2.97f
+C193 VGND comp_layout_0/on1 8.346f
+C194 VGND comp_layout_0/on2 9.693f
+C195 VGND comp_layout_0/sb 2.721f
+C196 VGND comp_layout_0/sq 2.572f
+C197 VGND comp_layout_0/tail 2.119f
+C198 VGND dff_layout_0/CLK 14.115f
+C199 VGND dff_layout_0/D 23.552f
+C200 VGND dff_layout_0/Q 10.775f
+C201 VGND dff_layout_0/QB 13.934f
+C202 VGND dff_layout_0/clkb 10.765f
+C203 VGND dff_layout_0/mb 4.946f
+C204 VGND dff_layout_0/mfb 4.093f
+C205 VGND dff_layout_0/mi 7.037f
+C206 VGND dff_layout_0/sfb 2.733f
+C207 VGND dff_layout_0/si 7.165f
+C208 VGND lvl_layout_0/n1 14.371f
+C209 VGND lvl_layout_0/n2 11.101f
+C210 VGND lvl_layout_0/nb18 14.007f
+C211 VGND odrv_layout_0/a 9.366f
+C212 VGND odrv_layout_0/b 7.791f
+C213 VGND odrv_layout_1/a 9.363f
+C214 VGND odrv_layout_1/b 7.805f
+C215 VGND ota_layout_0/INM 34.369f
+C216 VGND ota_layout_0/INP 125.12f
+C217 VGND ota_layout_0/IREFN 104.75f
+C218 VGND ota_layout_0/IREFP 51.939f
+C219 VGND ota_layout_0/VBNC 90.064f
+C220 VGND ota_layout_0/VBPC 89.992f
+C221 VGND ota_layout_0/dio 10.564f
+C222 VGND ota_layout_0/fn1 21.08f
+C223 VGND ota_layout_0/fn2 18.5f
+C224 VGND ota_layout_0/pc1 0.938f
+C225 VGND ota_layout_0/pc2 1.156f
+C226 VGND ota_layout_0/tail 123.24f
+C227 VGND rdac_0/X0/R1 6.016f
+C228 VGND sw_nmos_2/X0/D 2.097f
+C229 VGND sw_nmos_4/X0/D 2.102f
+C230 bias_layout_0/ind bias_layout_0/ipd 2.746f
+C231 bias_layout_0/ind bias_layout_0/nb 1.066f
+C232 bias_layout_0/ind bias_layout_0/nst 0.216f
+C233 bias_layout_0/ind bias_layout_0/pb 13.604f
+C234 bias_layout_0/ind bias_layout_0/rs 0.163f
+C235 bias_layout_0/ind bias_layout_0/vbnc_i 1.932f
+C236 bias_layout_0/ind bias_layout_0/vbpc_i 9.398f
+C237 bias_layout_0/ind ota_layout_0/INP 0.017f
+C238 bias_layout_0/ind ota_layout_0/IREFN 20.668f
+C239 bias_layout_0/ind ota_layout_0/IREFP 0.271f
+C240 bias_layout_0/ind ota_layout_0/VBNC 0.211f
+C241 bias_layout_0/ind ota_layout_0/VBPC 0.217f
+C242 bias_layout_0/ipd bias_layout_0/nb 16.677f
+C243 bias_layout_0/ipd bias_layout_0/nst 0.132f
+C244 bias_layout_0/ipd bias_layout_0/pb 0.47f
+C245 bias_layout_0/ipd bias_layout_0/rs 0.17f
+C246 bias_layout_0/ipd bias_layout_0/vbnc_i 10.575f
+C247 bias_layout_0/ipd bias_layout_0/vbpc_i 3.802f
+C248 bias_layout_0/ipd ota_layout_0/INP 0.022f
+C249 bias_layout_0/ipd ota_layout_0/IREFN 0.258f
+C250 bias_layout_0/ipd ota_layout_0/IREFP 25.106f
+C251 bias_layout_0/ipd ota_layout_0/VBNC 0.217f
+C252 bias_layout_0/ipd ota_layout_0/VBPC 0.21f
+C253 bias_layout_0/nb bias_layout_0/nst 5.026f
+C254 bias_layout_0/nb bias_layout_0/pb 10.353f
+C255 bias_layout_0/nb bias_layout_0/rs 5.516f
+C256 bias_layout_0/nb bias_layout_0/vbnc_i 0.876f
+C257 bias_layout_0/nb bias_layout_0/vbpc_i 5.112f
+C258 bias_layout_0/nb ota_layout_0/INP 0.062f
+C259 bias_layout_0/nb ota_layout_0/IREFN 2.721f
+C260 bias_layout_0/nb ota_layout_0/IREFP 0.004f
+C261 bias_layout_0/nb ota_layout_0/VBNC 0.692f
+C262 bias_layout_0/nb ota_layout_0/VBPC 0.866f
+C263 bias_layout_0/nst bias_layout_0/pb 3.093f
+C264 bias_layout_0/nst bias_layout_0/rs 0.374f
+C265 bias_layout_0/nst bias_layout_0/vbnc_i 0.984f
+C266 bias_layout_0/nst bias_layout_0/vbpc_i 4.076f
+C267 bias_layout_0/nst ota_layout_0/INP 0.042f
+C268 bias_layout_0/nst ota_layout_0/IREFP 0.001f
+C269 bias_layout_0/nst ota_layout_0/VBNC 0.032f
+C270 bias_layout_0/nst ota_layout_0/VBPC 0.036f
+C271 bias_layout_0/pb bias_layout_0/rs 10.281f
+C272 bias_layout_0/pb bias_layout_0/vbnc_i 3.48f
+C273 bias_layout_0/pb bias_layout_0/vbpc_i 2.01f
+C274 bias_layout_0/pb dff_layout_0/CLK 0
+C275 bias_layout_0/pb dff_layout_0/QB 0
+C276 bias_layout_0/pb dff_layout_0/mb 0
+C277 bias_layout_0/pb dff_layout_0/mi 0
+C278 bias_layout_0/pb dff_layout_0/si 0
+C279 bias_layout_0/pb ota_layout_0/INP 0.071f
+C280 bias_layout_0/pb ota_layout_0/IREFN 0.025f
+C281 bias_layout_0/pb ota_layout_0/IREFP 0
+C282 bias_layout_0/pb ota_layout_0/VBNC 2.847f
+C283 bias_layout_0/pb ota_layout_0/VBPC 0.824f
+C284 bias_layout_0/rs bias_layout_0/vbnc_i 6.385f
+C285 bias_layout_0/rs bias_layout_0/vbpc_i 0.238f
+C286 bias_layout_0/rs dff_layout_0/CLK 0
+C287 bias_layout_0/rs dff_layout_0/clkb 0
+C288 bias_layout_0/rs ota_layout_0/INP 0.053f
+C289 bias_layout_0/rs ota_layout_0/IREFP 0.002f
+C290 bias_layout_0/rs ota_layout_0/VBNC 1.662f
+C291 bias_layout_0/rs ota_layout_0/VBPC 0.251f
+C292 bias_layout_0/vbnc_i bias_layout_0/vbpc_i 7.437f
+C293 bias_layout_0/vbnc_i buf_layout_0/OUT 0.001f
+C294 bias_layout_0/vbnc_i buf_layout_1/o1 0
+C295 bias_layout_0/vbnc_i buf_layout_1/tail 0.005f
+C296 bias_layout_0/vbnc_i buf_layout_2/OUT 0.001f
+C297 bias_layout_0/vbnc_i buf_layout_2/o1 0
+C298 bias_layout_0/vbnc_i dff_layout_0/CLK 0.038f
+C299 bias_layout_0/vbnc_i dff_layout_0/D 0.007f
+C300 bias_layout_0/vbnc_i dff_layout_0/QB 0
+C301 bias_layout_0/vbnc_i dff_layout_0/clkb 0.003f
+C302 bias_layout_0/vbnc_i dff_layout_0/mb 0
+C303 bias_layout_0/vbnc_i dff_layout_0/mi 0.004f
+C304 bias_layout_0/vbnc_i dff_layout_0/si 0
+C305 bias_layout_0/vbnc_i ota_layout_0/INP 0.428f
+C306 bias_layout_0/vbnc_i ota_layout_0/IREFN 0.041f
+C307 bias_layout_0/vbnc_i ota_layout_0/IREFP 10.292f
+C308 bias_layout_0/vbnc_i ota_layout_0/VBNC 7.041f
+C309 bias_layout_0/vbnc_i ota_layout_0/VBPC 0.141f
+C310 bias_layout_0/vbpc_i buf_layout_0/OUT 0
+C311 bias_layout_0/vbpc_i buf_layout_2/OUT 0
+C312 bias_layout_0/vbpc_i dff_layout_0/CLK 0.005f
+C313 bias_layout_0/vbpc_i dff_layout_0/Q 0
+C314 bias_layout_0/vbpc_i dff_layout_0/QB 0.006f
+C315 bias_layout_0/vbpc_i dff_layout_0/clkb 0.003f
+C316 bias_layout_0/vbpc_i dff_layout_0/mb 0.004f
+C317 bias_layout_0/vbpc_i dff_layout_0/mfb 0.002f
+C318 bias_layout_0/vbpc_i dff_layout_0/mi 0.002f
+C319 bias_layout_0/vbpc_i dff_layout_0/sfb 0.002f
+C320 bias_layout_0/vbpc_i dff_layout_0/si 0.007f
+C321 bias_layout_0/vbpc_i ota_layout_0/INP 0.515f
+C322 bias_layout_0/vbpc_i ota_layout_0/IREFN 9.076f
+C323 bias_layout_0/vbpc_i ota_layout_0/IREFP 0.359f
+C324 bias_layout_0/vbpc_i ota_layout_0/VBNC 0.398f
+C325 bias_layout_0/vbpc_i ota_layout_0/VBPC 6.918f
+C326 buf_layout_0/IN buf_layout_0/OUT 0.044f
+C327 buf_layout_0/IN buf_layout_0/o1 3.659f
+C328 buf_layout_0/IN buf_layout_0/tail 3.577f
+C329 buf_layout_0/IN buf_layout_1/IN 0.82f
+C330 buf_layout_0/IN buf_layout_1/o1 0.124f
+C331 buf_layout_0/IN buf_layout_1/tail 0.218f
+C332 buf_layout_0/IN buf_layout_2/IN 5.24f
+C333 buf_layout_0/IN buf_layout_2/OUT 1.431f
+C334 buf_layout_0/IN buf_layout_2/o1 0.118f
+C335 buf_layout_0/IN buf_layout_2/tail 0.152f
+C336 buf_layout_0/IN ota_layout_0/INP 0.313f
+C337 buf_layout_0/IN ota_layout_0/IREFP 0.899f
+C338 buf_layout_0/OUT buf_layout_0/o1 9.17f
+C339 buf_layout_0/OUT buf_layout_0/tail 11.218f
+C340 buf_layout_0/OUT buf_layout_1/o1 0.001f
+C341 buf_layout_0/OUT buf_layout_2/OUT 25.615f
+C342 buf_layout_0/OUT comp_layout_0/CLK 0.094f
+C343 buf_layout_0/OUT comp_layout_0/Q 0.415f
+C344 buf_layout_0/OUT comp_layout_0/tail 0.009f
+C345 buf_layout_0/OUT dff_layout_0/CLK 0.077f
+C346 buf_layout_0/OUT dff_layout_0/D 0.407f
+C347 buf_layout_0/OUT ota_layout_0/INM 1.136f
+C348 buf_layout_0/OUT ota_layout_0/INP 0.431f
+C349 buf_layout_0/OUT ota_layout_0/IREFN 0.345f
+C350 buf_layout_0/OUT ota_layout_0/IREFP 6.373f
+C351 buf_layout_0/OUT ota_layout_0/VBNC 0.268f
+C352 buf_layout_0/OUT ota_layout_0/VBPC 0.133f
+C353 buf_layout_0/OUT ota_layout_0/fn2 0.235f
+C354 buf_layout_0/OUT ota_layout_0/tail 0.259f
+C355 buf_layout_0/OUT rdac_0/X0/R1 0.69f
+C356 buf_layout_0/OUT sw_nmos_2/X0/D 0.077f
+C357 buf_layout_0/OUT sw_nmos_4/X0/D 1.011f
+C358 buf_layout_0/o1 buf_layout_0/tail 8.759f
+C359 buf_layout_0/o1 buf_layout_1/o1 0.055f
+C360 buf_layout_0/o1 buf_layout_2/OUT 0.081f
+C361 buf_layout_0/o1 ota_layout_0/INP 0
+C362 buf_layout_0/o1 ota_layout_0/IREFP 0.881f
+C363 buf_layout_0/tail buf_layout_1/o1 0.026f
+C364 buf_layout_0/tail buf_layout_2/OUT 0.116f
+C365 buf_layout_0/tail ota_layout_0/IREFP 25.774f
+C366 buf_layout_1/IN buf_layout_1/o1 3.659f
+C367 buf_layout_1/IN buf_layout_1/tail 3.577f
+C368 buf_layout_1/IN buf_layout_2/IN 1.542f
+C369 buf_layout_1/IN buf_layout_2/OUT 0.802f
+C370 buf_layout_1/IN buf_layout_2/o1 0.219f
+C371 buf_layout_1/IN buf_layout_2/tail 0.087f
+C372 buf_layout_1/IN ota_layout_0/INP 0.603f
+C373 buf_layout_1/IN ota_layout_0/IREFP 0.57f
+C374 buf_layout_1/o1 buf_layout_1/tail 8.759f
+C375 buf_layout_1/o1 buf_layout_2/IN 0.007f
+C376 buf_layout_1/o1 buf_layout_2/OUT 0.155f
+C377 buf_layout_1/o1 buf_layout_2/o1 0.055f
+C378 buf_layout_1/o1 ota_layout_0/INP 8.429f
+C379 buf_layout_1/o1 ota_layout_0/IREFP 0.882f
+C380 buf_layout_1/tail buf_layout_2/IN 0.224f
+C381 buf_layout_1/tail buf_layout_2/OUT 0.127f
+C382 buf_layout_1/tail buf_layout_2/o1 0.026f
+C383 buf_layout_1/tail ota_layout_0/INP 11.241f
+C384 buf_layout_1/tail ota_layout_0/IREFP 25.927f
+C385 buf_layout_2/IN buf_layout_2/OUT 0.446f
+C386 buf_layout_2/IN buf_layout_2/o1 3.776f
+C387 buf_layout_2/IN buf_layout_2/tail 3.803f
+C388 buf_layout_2/IN ota_layout_0/INP 1.123f
+C389 buf_layout_2/IN ota_layout_0/IREFP 1.922f
+C390 buf_layout_2/OUT buf_layout_2/o1 9.2f
+C391 buf_layout_2/OUT buf_layout_2/tail 11.258f
+C392 buf_layout_2/OUT comp_layout_0/CLK 0.024f
+C393 buf_layout_2/OUT comp_layout_0/Q 1.377f
+C394 buf_layout_2/OUT comp_layout_0/di1 0.001f
+C395 buf_layout_2/OUT comp_layout_0/tail 0.004f
+C396 buf_layout_2/OUT dff_layout_0/CLK 0.132f
+C397 buf_layout_2/OUT dff_layout_0/D 4.558f
+C398 buf_layout_2/OUT lvl_layout_0/nb18 0.001f
+C399 buf_layout_2/OUT ota_layout_0/INM 0.718f
+C400 buf_layout_2/OUT ota_layout_0/INP 5.59f
+C401 buf_layout_2/OUT ota_layout_0/IREFN 1.835f
+C402 buf_layout_2/OUT ota_layout_0/IREFP 2.97f
+C403 buf_layout_2/OUT ota_layout_0/VBNC 0.282f
+C404 buf_layout_2/OUT ota_layout_0/VBPC 8.791f
+C405 buf_layout_2/OUT ota_layout_0/fn1 0.047f
+C406 buf_layout_2/OUT ota_layout_0/fn2 0.16f
+C407 buf_layout_2/OUT ota_layout_0/tail 0.236f
+C408 buf_layout_2/OUT rdac_0/X0/R1 0.51f
+C409 buf_layout_2/OUT sw_nmos_2/X0/D 1.01f
+C410 buf_layout_2/o1 buf_layout_2/tail 8.759f
+C411 buf_layout_2/o1 ota_layout_0/INP 0.502f
+C412 buf_layout_2/o1 ota_layout_0/IREFP 0.967f
+C413 buf_layout_2/tail ota_layout_0/INP 0.015f
+C414 buf_layout_2/tail ota_layout_0/IREFP 26.017f
+C415 comp_layout_0/CLK comp_layout_0/Q 1.597f
+C416 comp_layout_0/CLK comp_layout_0/di1 0.688f
+C417 comp_layout_0/CLK comp_layout_0/di2 1.059f
+C418 comp_layout_0/CLK comp_layout_0/n1b 0.308f
+C419 comp_layout_0/CLK comp_layout_0/n2b 0.229f
+C420 comp_layout_0/CLK comp_layout_0/on1 1.508f
+C421 comp_layout_0/CLK comp_layout_0/on2 1.201f
+C422 comp_layout_0/CLK comp_layout_0/sb 0.101f
+C423 comp_layout_0/CLK comp_layout_0/sq 0.162f
+C424 comp_layout_0/CLK comp_layout_0/tail 0.857f
+C425 comp_layout_0/CLK dff_layout_0/CLK 1.736f
+C426 comp_layout_0/CLK dff_layout_0/D 5.762f
+C427 comp_layout_0/CLK lvl_layout_0/n1 0.421f
+C428 comp_layout_0/CLK lvl_layout_0/n2 4.424f
+C429 comp_layout_0/CLK lvl_layout_0/nb18 0.069f
+C430 comp_layout_0/CLK ota_layout_0/INM 0.184f
+C431 comp_layout_0/CLK ota_layout_0/INP 1.126f
+C432 comp_layout_0/CLK ota_layout_0/IREFP 0.139f
+C433 comp_layout_0/CLK ota_layout_0/fn2 0
+C434 comp_layout_0/CLK ota_layout_0/tail 0
+C435 comp_layout_0/CLK rdac_0/X0/R1 1.577f
+C436 comp_layout_0/CLK sw_nmos_2/X0/D 0.416f
+C437 comp_layout_0/CLK sw_nmos_4/X0/D 0.473f
+C438 comp_layout_0/Q comp_layout_0/di1 0.046f
+C439 comp_layout_0/Q comp_layout_0/di2 0.242f
+C440 comp_layout_0/Q comp_layout_0/n1b 1.525f
+C441 comp_layout_0/Q comp_layout_0/n2b 0.867f
+C442 comp_layout_0/Q comp_layout_0/on1 0.724f
+C443 comp_layout_0/Q comp_layout_0/on2 2.565f
+C444 comp_layout_0/Q comp_layout_0/sb 2.444f
+C445 comp_layout_0/Q comp_layout_0/sq 2.371f
+C446 comp_layout_0/Q comp_layout_0/tail 0.118f
+C447 comp_layout_0/Q dff_layout_0/CLK 0.901f
+C448 comp_layout_0/Q dff_layout_0/D 2.98f
+C449 comp_layout_0/Q ota_layout_0/INM 0.788f
+C450 comp_layout_0/Q ota_layout_0/INP 5.573f
+C451 comp_layout_0/Q ota_layout_0/IREFP 1.177f
+C452 comp_layout_0/Q ota_layout_0/fn2 0
+C453 comp_layout_0/Q ota_layout_0/tail 0
+C454 comp_layout_0/Q rdac_0/X0/R1 0.06f
+C455 comp_layout_0/Q sw_nmos_2/X0/D 0.389f
+C456 comp_layout_0/di1 comp_layout_0/di2 2.476f
+C457 comp_layout_0/di1 comp_layout_0/n1b 0.745f
+C458 comp_layout_0/di1 comp_layout_0/n2b 0
+C459 comp_layout_0/di1 comp_layout_0/on1 1.613f
+C460 comp_layout_0/di1 comp_layout_0/on2 0.506f
+C461 comp_layout_0/di1 comp_layout_0/tail 2.511f
+C462 comp_layout_0/di1 ota_layout_0/INM 0
+C463 comp_layout_0/di1 ota_layout_0/INP 0.007f
+C464 comp_layout_0/di2 comp_layout_0/n1b 0.631f
+C465 comp_layout_0/di2 comp_layout_0/n2b 0.79f
+C466 comp_layout_0/di2 comp_layout_0/on1 0.958f
+C467 comp_layout_0/di2 comp_layout_0/on2 2.326f
+C468 comp_layout_0/di2 comp_layout_0/sq 0
+C469 comp_layout_0/di2 comp_layout_0/tail 1.358f
+C470 comp_layout_0/di2 ota_layout_0/INM 0
+C471 comp_layout_0/di2 ota_layout_0/INP 1.151f
+C472 comp_layout_0/n1b comp_layout_0/n2b 1.894f
+C473 comp_layout_0/n1b comp_layout_0/on1 2.66f
+C474 comp_layout_0/n1b comp_layout_0/on2 0.935f
+C475 comp_layout_0/n1b comp_layout_0/sb 1.382f
+C476 comp_layout_0/n1b comp_layout_0/sq 0.243f
+C477 comp_layout_0/n1b dff_layout_0/D 0.801f
+C478 comp_layout_0/n1b ota_layout_0/INM 0.003f
+C479 comp_layout_0/n1b ota_layout_0/INP 0.005f
+C480 comp_layout_0/n2b comp_layout_0/on1 2.464f
+C481 comp_layout_0/n2b comp_layout_0/on2 2.794f
+C482 comp_layout_0/n2b comp_layout_0/sb 0.187f
+C483 comp_layout_0/n2b comp_layout_0/sq 3.17f
+C484 comp_layout_0/n2b dff_layout_0/D 1.035f
+C485 comp_layout_0/n2b ota_layout_0/INM 0.001f
+C486 comp_layout_0/on1 comp_layout_0/on2 10.802f
+C487 comp_layout_0/on1 comp_layout_0/sb 0.188f
+C488 comp_layout_0/on1 comp_layout_0/sq 0.12f
+C489 comp_layout_0/on1 comp_layout_0/tail 1.412f
+C490 comp_layout_0/on1 dff_layout_0/D 0.237f
+C491 comp_layout_0/on1 ota_layout_0/INM 0.013f
+C492 comp_layout_0/on1 ota_layout_0/INP 0.043f
+C493 comp_layout_0/on2 comp_layout_0/sb 0.705f
+C494 comp_layout_0/on2 comp_layout_0/sq 0.533f
+C495 comp_layout_0/on2 comp_layout_0/tail 0.13f
+C496 comp_layout_0/on2 dff_layout_0/D 0.269f
+C497 comp_layout_0/on2 ota_layout_0/INM 0.004f
+C498 comp_layout_0/on2 ota_layout_0/INP 0.116f
+C499 comp_layout_0/sb comp_layout_0/sq 0.028f
+C500 comp_layout_0/sb dff_layout_0/D 2.89f
+C501 comp_layout_0/sb ota_layout_0/INM 0
+C502 comp_layout_0/sq dff_layout_0/D 0.376f
+C503 comp_layout_0/sq ota_layout_0/INM 0
+C504 comp_layout_0/tail ota_layout_0/INP 0.544f
+C505 dff_layout_0/CLK dff_layout_0/D 8.744f
+C506 dff_layout_0/CLK dff_layout_0/Q 0.004f
+C507 dff_layout_0/CLK dff_layout_0/QB 0.55f
+C508 dff_layout_0/CLK dff_layout_0/clkb 2.702f
+C509 dff_layout_0/CLK dff_layout_0/mb 1.032f
+C510 dff_layout_0/CLK dff_layout_0/mfb 0.367f
+C511 dff_layout_0/CLK dff_layout_0/mi 2.054f
+C512 dff_layout_0/CLK dff_layout_0/sfb 0.383f
+C513 dff_layout_0/CLK dff_layout_0/si 1.48f
+C514 dff_layout_0/CLK lvl_layout_0/n1 4.172f
+C515 dff_layout_0/CLK lvl_layout_0/n2 0.005f
+C516 dff_layout_0/CLK lvl_layout_0/nb18 0.219f
+C517 dff_layout_0/CLK ota_layout_0/INM 0.062f
+C518 dff_layout_0/CLK ota_layout_0/INP 2.936f
+C519 dff_layout_0/CLK ota_layout_0/IREFP 1.57f
+C520 dff_layout_0/CLK ota_layout_0/VBNC 0.037f
+C521 dff_layout_0/CLK ota_layout_0/VBPC 0.041f
+C522 dff_layout_0/CLK ota_layout_0/fn2 0
+C523 dff_layout_0/CLK ota_layout_0/tail 0
+C524 dff_layout_0/CLK rdac_0/X0/R1 0.542f
+C525 dff_layout_0/CLK sw_nmos_2/X0/D 0.003f
+C526 dff_layout_0/CLK sw_nmos_4/X0/D 0.003f
+C527 dff_layout_0/D dff_layout_0/QB 2.026f
+C528 dff_layout_0/D dff_layout_0/clkb 0.339f
+C529 dff_layout_0/D dff_layout_0/mb 0.012f
+C530 dff_layout_0/D dff_layout_0/mi 2.497f
+C531 dff_layout_0/D lvl_layout_0/n1 0.224f
+C532 dff_layout_0/D lvl_layout_0/n2 0.343f
+C533 dff_layout_0/D lvl_layout_0/nb18 0.877f
+C534 dff_layout_0/D odrv_layout_0/a 0.319f
+C535 dff_layout_0/D odrv_layout_0/b 1.408f
+C536 dff_layout_0/D ota_layout_0/INM 0.002f
+C537 dff_layout_0/D ota_layout_0/INP 1.437f
+C538 dff_layout_0/D ota_layout_0/IREFP 1.715f
+C539 dff_layout_0/D ota_layout_0/VBNC 0.022f
+C540 dff_layout_0/D ota_layout_0/tail 0
+C541 dff_layout_0/D rdac_0/X0/R1 0.04f
+C542 dff_layout_0/D sw_nmos_4/X0/D 0.389f
+C543 dff_layout_0/Q dff_layout_0/QB 2.331f
+C544 dff_layout_0/Q dff_layout_0/clkb 0.002f
+C545 dff_layout_0/Q dff_layout_0/sfb 0.015f
+C546 dff_layout_0/Q dff_layout_0/si 0.163f
+C547 dff_layout_0/Q odrv_layout_1/a 3.41f
+C548 dff_layout_0/Q odrv_layout_1/b 0.057f
+C549 dff_layout_0/Q ota_layout_0/INP 0
+C550 dff_layout_0/Q ota_layout_0/IREFP 0.232f
+C551 dff_layout_0/Q ota_layout_0/VBNC 0.015f
+C552 dff_layout_0/QB dff_layout_0/clkb 0.14f
+C553 dff_layout_0/QB dff_layout_0/mb 0.028f
+C554 dff_layout_0/QB dff_layout_0/mfb 0
+C555 dff_layout_0/QB dff_layout_0/mi 0.043f
+C556 dff_layout_0/QB dff_layout_0/sfb 1.765f
+C557 dff_layout_0/QB dff_layout_0/si 3.937f
+C558 dff_layout_0/QB odrv_layout_0/a 3.039f
+C559 dff_layout_0/QB odrv_layout_0/b 0.122f
+C560 dff_layout_0/QB ota_layout_0/INP 0.017f
+C561 dff_layout_0/QB ota_layout_0/IREFP 2.847f
+C562 dff_layout_0/QB ota_layout_0/VBNC 2.34f
+C563 dff_layout_0/QB ota_layout_0/VBPC 0.578f
+C564 dff_layout_0/clkb dff_layout_0/mb 3.422f
+C565 dff_layout_0/clkb dff_layout_0/mfb 0.338f
+C566 dff_layout_0/clkb dff_layout_0/mi 3.464f
+C567 dff_layout_0/clkb dff_layout_0/sfb 2.817f
+C568 dff_layout_0/clkb dff_layout_0/si 1.374f
+C569 dff_layout_0/clkb ota_layout_0/INP 0.01f
+C570 dff_layout_0/clkb ota_layout_0/IREFP 0.228f
+C571 dff_layout_0/clkb ota_layout_0/VBNC 1.005f
+C572 dff_layout_0/clkb ota_layout_0/VBPC 0.034f
+C573 dff_layout_0/mb dff_layout_0/mfb 1.844f
+C574 dff_layout_0/mb dff_layout_0/mi 4.012f
+C575 dff_layout_0/mb dff_layout_0/si 2.232f
+C576 dff_layout_0/mb ota_layout_0/INP 0.001f
+C577 dff_layout_0/mb ota_layout_0/IREFP 1.372f
+C578 dff_layout_0/mb ota_layout_0/VBNC 0.08f
+C579 dff_layout_0/mb ota_layout_0/VBPC 0.18f
+C580 dff_layout_0/mfb dff_layout_0/mi 1.471f
+C581 dff_layout_0/mfb ota_layout_0/INP 0.002f
+C582 dff_layout_0/mfb ota_layout_0/IREFP 0.039f
+C583 dff_layout_0/mfb ota_layout_0/VBNC 0
+C584 dff_layout_0/mfb ota_layout_0/VBPC 0.047f
+C585 dff_layout_0/mi dff_layout_0/si 0.063f
+C586 dff_layout_0/mi odrv_layout_0/a 0.002f
+C587 dff_layout_0/mi odrv_layout_0/b 0.002f
+C588 dff_layout_0/mi ota_layout_0/INP 0.011f
+C589 dff_layout_0/mi ota_layout_0/IREFP 0.286f
+C590 dff_layout_0/mi ota_layout_0/VBNC 0.508f
+C591 dff_layout_0/mi ota_layout_0/VBPC 0.295f
+C592 dff_layout_0/sfb dff_layout_0/si 2.335f
+C593 dff_layout_0/sfb ota_layout_0/INP 0
+C594 dff_layout_0/sfb ota_layout_0/IREFP 0.026f
+C595 dff_layout_0/sfb ota_layout_0/VBNC 0.003f
+C596 dff_layout_0/si ota_layout_0/INP 0.001f
+C597 dff_layout_0/si ota_layout_0/IREFP 0.398f
+C598 dff_layout_0/si ota_layout_0/VBNC 0.023f
+C599 lvl_layout_0/n1 lvl_layout_0/n2 5.674f
+C600 lvl_layout_0/n1 lvl_layout_0/nb18 0.635f
+C601 lvl_layout_0/n1 ota_layout_0/INP 0.148f
+C602 lvl_layout_0/n2 lvl_layout_0/nb18 4.26f
+C603 lvl_layout_0/n2 ota_layout_0/INP 0.543f
+C604 lvl_layout_0/nb18 ota_layout_0/INP 0.117f
+C605 odrv_layout_0/a odrv_layout_0/b 4.424f
+C606 odrv_layout_0/a ota_layout_0/INP 0.004f
+C607 odrv_layout_0/a ota_layout_0/IREFP 0
+C608 odrv_layout_0/a ota_layout_0/VBNC 0.021f
+C609 odrv_layout_0/a ota_layout_0/VBPC 0.105f
+C610 odrv_layout_0/b ota_layout_0/IREFP 0
+C611 odrv_layout_0/b ota_layout_0/VBNC 0.06f
+C612 odrv_layout_0/b ota_layout_0/VBPC 0.199f
+C613 odrv_layout_1/a odrv_layout_1/b 4.424f
+C614 odrv_layout_1/a ota_layout_0/VBNC 0
+C615 ota_layout_0/INM ota_layout_0/INP 1.848f
+C616 ota_layout_0/INM ota_layout_0/IREFN 0.623f
+C617 ota_layout_0/INM ota_layout_0/IREFP 3.078f
+C618 ota_layout_0/INM ota_layout_0/dio 0.002f
+C619 ota_layout_0/INM ota_layout_0/fn1 0
+C620 ota_layout_0/INM ota_layout_0/fn2 16.225f
+C621 ota_layout_0/INM ota_layout_0/pc1 0.001f
+C622 ota_layout_0/INM ota_layout_0/tail 34.918f
+C623 ota_layout_0/INM rdac_0/X0/R1 1.213f
+C624 ota_layout_0/INP ota_layout_0/IREFN 0.541f
+C625 ota_layout_0/INP ota_layout_0/IREFP 19.071f
+C626 ota_layout_0/INP ota_layout_0/VBNC 0.75f
+C627 ota_layout_0/INP ota_layout_0/VBPC 0.79f
+C628 ota_layout_0/INP ota_layout_0/dio 2.879f
+C629 ota_layout_0/INP ota_layout_0/fn1 16.32f
+C630 ota_layout_0/INP ota_layout_0/fn2 0.399f
+C631 ota_layout_0/INP ota_layout_0/pc1 0.271f
+C632 ota_layout_0/INP ota_layout_0/pc2 0.281f
+C633 ota_layout_0/INP ota_layout_0/tail 33.888f
+C634 ota_layout_0/INP rdac_0/X0/R1 2.003f
+C635 ota_layout_0/INP sw_nmos_2/X0/D 0
+C636 ota_layout_0/IREFN ota_layout_0/IREFP 6.836f
+C637 ota_layout_0/IREFN ota_layout_0/VBNC 15.035f
+C638 ota_layout_0/IREFN ota_layout_0/VBPC 15.025f
+C639 ota_layout_0/IREFN ota_layout_0/dio 0.38f
+C640 ota_layout_0/IREFN ota_layout_0/fn1 10.741f
+C641 ota_layout_0/IREFN ota_layout_0/fn2 16.272f
+C642 ota_layout_0/IREFN ota_layout_0/pc1 0.083f
+C643 ota_layout_0/IREFN ota_layout_0/pc2 0.069f
+C644 ota_layout_0/IREFN ota_layout_0/tail 2.477f
+C645 ota_layout_0/IREFP ota_layout_0/VBNC 2.533f
+C646 ota_layout_0/IREFP ota_layout_0/VBPC 1.281f
+C647 ota_layout_0/IREFP ota_layout_0/dio 1.816f
+C648 ota_layout_0/IREFP ota_layout_0/fn1 1.421f
+C649 ota_layout_0/IREFP ota_layout_0/fn2 2.021f
+C650 ota_layout_0/IREFP ota_layout_0/pc1 0.864f
+C651 ota_layout_0/IREFP ota_layout_0/pc2 0.918f
+C652 ota_layout_0/IREFP ota_layout_0/tail 33.232f
+C653 ota_layout_0/VBNC ota_layout_0/VBPC 16.785f
+C654 ota_layout_0/VBNC ota_layout_0/dio 10.25f
+C655 ota_layout_0/VBNC ota_layout_0/fn1 10.596f
+C656 ota_layout_0/VBNC ota_layout_0/fn2 9.746f
+C657 ota_layout_0/VBNC ota_layout_0/pc1 0.541f
+C658 ota_layout_0/VBNC ota_layout_0/pc2 0.104f
+C659 ota_layout_0/VBNC ota_layout_0/tail 1.431f
+C660 ota_layout_0/VBPC ota_layout_0/dio 11.589f
+C661 ota_layout_0/VBPC ota_layout_0/fn1 1.013f
+C662 ota_layout_0/VBPC ota_layout_0/fn2 0
+C663 ota_layout_0/VBPC ota_layout_0/pc1 4.244f
+C664 ota_layout_0/VBPC ota_layout_0/pc2 3.946f
+C665 ota_layout_0/VBPC ota_layout_0/tail 0.707f
+C666 ota_layout_0/dio ota_layout_0/fn1 24.246f
+C667 ota_layout_0/dio ota_layout_0/fn2 0
+C668 ota_layout_0/dio ota_layout_0/pc1 14.491f
+C669 ota_layout_0/dio ota_layout_0/pc2 4.175f
+C670 ota_layout_0/dio ota_layout_0/tail 1.247f
+C671 ota_layout_0/fn1 ota_layout_0/fn2 0.425f
+C672 ota_layout_0/fn1 ota_layout_0/pc1 0.667f
+C673 ota_layout_0/fn1 ota_layout_0/pc2 0.663f
+C674 ota_layout_0/fn1 ota_layout_0/tail 30.361f
+C675 ota_layout_0/fn2 ota_layout_0/tail 33.619f
+C676 ota_layout_0/pc1 ota_layout_0/pc2 0.052f
+C677 ota_layout_0/pc1 ota_layout_0/tail 0.69f
+C678 ota_layout_0/pc2 ota_layout_0/tail 4.852f
+C679 ota_layout_0/tail rdac_0/X0/R1 0.017f
+C680 ota_layout_0/tail sw_nmos_2/X0/D 0.004f
+C681 ota_layout_0/tail sw_nmos_4/X0/D 0.004f
+C682 rdac_0/X0/R1 sw_nmos_2/X0/D 1.379f
+C683 rdac_0/X0/R1 sw_nmos_4/X0/D 1.374f
+.ends
